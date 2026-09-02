@@ -2,11 +2,11 @@ import fullLogo from "../../assets/brand/logos/logo 20.svg";
 import aboutPattern from "../../assets/brand/patterns/Pattern_2_transparent_HQ.svg";
 
 const tracks = [
-  "المعرض التاريخي والتجريبي",
+  "المتحف التاريخي",
   "الإعلام",
   "الاقتصاد والاستثمار",
   "ريادة الأعمال",
-  "التجربة التفاعلية",
+  "الركن الترفيهي",
   "المسرح الرئيسي",
 ] as const;
 
@@ -39,7 +39,7 @@ export function AboutKora() {
         </div>
         <div className="about-content">
           <p className="lead">
-            وراء كل مباراة منظومة كاملة من المعرفة والتقنية والإعلام والاستثمار وريادة الأعمال. تأتي KORA لتكشف هذه المنظومة، وتحوّل اهتمام الشباب باللعبة إلى معرفة وتجربة وعمل حقيقي.
+            وراء كل مباراة منظومة كاملة من المعرفة والتقنية والإعلام والاستثمار وريادة الأعمال. تأتي كورة لتكشف هذه المنظومة، وتحوّل اهتمام الشباب باللعبة إلى معرفة وتجربة وعمل حقيقي.
           </p>
           <ol className="tracks-list" aria-label="مسارات الحدث الستة">
             {tracks.map((track, index) => (
