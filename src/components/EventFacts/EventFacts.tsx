@@ -9,7 +9,7 @@ const facts = [
 
 export function EventFacts() {
   return (
-    <section className="facts-section" aria-label="أرقام KORA الأساسية">
+    <section className="facts-section" aria-label="أرقام كورة الأساسية">
       <div className="container facts-grid">
         {facts.map((fact) => (
           <div className="fact" key={fact.label}>
@@ -26,12 +26,13 @@ export function EventFacts() {
         className="facts-pattern"
         src={factsPattern}
         alt=""
-        width="1440"
-        height="88"
+        width="10685"
+        height="2129"
         loading="lazy"
         decoding="async"
         aria-hidden="true"
       />
+      
     </section>
   );
 }

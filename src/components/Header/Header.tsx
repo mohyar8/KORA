@@ -29,13 +29,13 @@ export function Header() {
   return (
     <header className="site-header">
       <div className="container header-inner">
-        <a className="brand-wordmark" href="#top" aria-label="KORA — العودة إلى بداية الصفحة">
+        <a className="brand-wordmark" href="#top" aria-label="كورة — العودة إلى بداية الصفحة">
           <img
             className="brand-logo"
             src={lightLogo}
-            alt="KORA"
-            width="112"
-            height="52"
+            alt="شعار كورة"
+            width="65"
+            height="65"
             decoding="async"
           />
         </a>

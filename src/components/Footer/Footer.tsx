@@ -1,6 +1,7 @@
 import { SiInstagram, SiTiktok, SiX } from "react-icons/si";
 import { siteConfig } from "../../config/site";
 import lightLogo from "../../assets/brand/logos/logo_0_transparent_HQ.svg";
+import { BrandName } from "../BrandName/BrandName";
 
 const socialLinks = [
   { name: "instagram", href: siteConfig.socialLinks.instagram, label: "حساب كورة على إنستغرام", Icon: SiInstagram },
@@ -16,8 +17,8 @@ export function Footer() {
           <img
             className="footer-logo"
             src={lightLogo}
-            alt="KORA"
-            width="132"
+            alt="شعار كورة"
+            width="62"
             height="62"
             loading="lazy"
             decoding="async"
@@ -28,7 +29,7 @@ export function Footer() {
           <span>للتواصل</span>
           <a href={`mailto:${siteConfig.contactEmail}`} dir="ltr">{siteConfig.contactEmail}</a>
         </div>
-        <div className="social-links" aria-label="حسابات KORA الاجتماعية">
+        <div className="social-links" aria-label="حسابات كورة الاجتماعية">
           {socialLinks.map(({ name, href, label, Icon }) => (
             <a key={name} href={href} target="_blank" rel="noopener noreferrer" aria-label={label}>
               <Icon aria-hidden="true" focusable="false" />
@@ -37,7 +38,7 @@ export function Footer() {
         </div>
       </div>
       <div className="container footer-bottom">
-        <span>© 2026 KORA</span>
+        <span>© 2026 <BrandName /></span>
         <span>جامعة الملك فهد للبترول والمعادن</span>
       </div>
     </footer>

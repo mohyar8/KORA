@@ -1,28 +1,31 @@
 import { ApplicationAction } from "../ApplicationAction/ApplicationAction";
+import { BrandName } from "../BrandName/BrandName";
 import { siteConfig } from "../../config/site";
-import heroPattern from "../../assets/brand/patterns/Pattern_7_transparent_HQ.svg";
-import heroAccent from "../../assets/brand/patterns/Pattern_0_transparent_HQ.svg";
+import heroWordmark from "../../assets/brand/logos/KORA_only.svg";
+import heroWatermark from "../../assets/brand/logos/logo_14_transparent_HQ.svg";
 
 export function Hero() {
   return (
     <section className="hero" aria-labelledby="hero-title">
       <img
-        className="hero-pattern"
-        src={heroPattern}
+        className="hero-watermark"
+        src={heroWatermark}
         alt=""
-        width="760"
-        height="760"
+        width="2048"
+        height="2048"
         aria-hidden="true"
       />
       <div className="container hero-grid">
         <div className="hero-copy">
-          <p className="eyebrow eyebrow--light">فتح باب الانضمام إلى فريق KORA</p>
+          <p className="eyebrow eyebrow--light">
+            فتح باب الانضمام إلى فريق <BrandName />
+          </p>
           <h1 id="hero-title">
             لا تكتفِ بمشاهدة اللعبة.
             <span>كن جزءًا مما يصنعها.</span>
           </h1>
           <p className="hero-intro">
-            انضم إلى فريق KORA، وشارك في بناء حدث جامعي يعيد تقديم كرة القدم السعودية كصناعة تجمع الإعلام والتقنية وريادة الأعمال والاستثمار والتجربة.
+            انضم إلى فريق <BrandName />، وشارك في بناء حدث جامعي يعيد تقديم كرة القدم السعودية كصناعة تجمع الإعلام والتقنية وريادة الأعمال والاستثمار والتجربة.
           </p>
           <div className="hero-actions">
             <ApplicationAction />
@@ -32,7 +35,6 @@ export function Hero() {
             </a>
           </div>
           <div className="application-note">
-            <p>سيتم التقديم عبر نموذج Microsoft الرسمي باستخدام الحساب الجامعي.</p>
             <p>
               آخر موعد للتقديم: {" "}
               <time dateTime={siteConfig.applicationDeadlineISO}>
@@ -44,16 +46,13 @@ export function Hero() {
 
         <div className="hero-editorial" aria-label="معلومات الحدث">
           <img
-            className="hero-accent"
-            src={heroAccent}
-            alt=""
-            width="104"
-            height="104"
-            aria-hidden="true"
+            className="hero-wordmark"
+            src={heroWordmark}
+            alt="شعار كورة باللغة الإنجليزية"
+            width="1000"
+            
           />
-          <span className="hero-index">26</span>
           <p>{siteConfig.englishTagline}</p>
-          <strong>{siteConfig.eventName}</strong>
           <div className="hero-location">
             <span>{siteConfig.eventDateArabic}</span>
             <span>{siteConfig.eventLocationArabic}</span>

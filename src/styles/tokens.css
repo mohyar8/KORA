@@ -17,7 +17,7 @@
   --color-text-muted-light: #c5cada;
 
   --container-width: 1180px;
-  --header-height: 72px;
+  --header-height: 96px;
   --radius-small: 4px;
   --focus-ring: 0 0 0 3px var(--color-white), 0 0 0 6px var(--color-coral);
   --focus-ring-light: 0 0 0 3px var(--color-navy-950), 0 0 0 6px var(--color-coral);

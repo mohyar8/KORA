@@ -1,36 +1,151 @@
-import { render, screen } from "@testing-library/react";
+import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it } from "vitest";
 import App from "../App";
 import { ApplicationAction } from "../components/ApplicationAction/ApplicationAction";
 import { siteConfig } from "../config/site";
+import { departments, overallLeadership } from "../data/organization";
 import { teamGroups } from "../data/teams";
 
-describe("KORA recruitment page", () => {
-  it("renders the header and hero heading", () => {
+async function openAllOrganizationContent(user: ReturnType<typeof userEvent.setup>) {
+  for (const department of departments) {
+    await user.click(screen.getByRole("button", { name: new RegExp(department.name) }));
+  }
+  for (const trigger of screen.getAllByRole("button", { name: /الأعضاء/ })) {
+    await user.click(trigger);
+  }
+}
+
+describe("صفحة انضمام كورة", () => {
+  it("renders the enlarged official header logo and hero heading", () => {
     render(<App />);
 
-    expect(screen.getByRole("banner")).toBeInTheDocument();
-    expect(
-      screen.getByRole("heading", { level: 1, name: /لا تكتفِ بمشاهدة اللعبة/ }),
-    ).toBeInTheDocument();
+    const header = screen.getByRole("banner");
+    const headerLogo = within(header).getByRole("img", { name: "شعار كورة" });
+    expect(headerLogo).toHaveAttribute("src", expect.stringContaining("logo_0_transparent_HQ.svg"));
+    expect(screen.getByRole("heading", { level: 1, name: /لا تكتفِ بمشاهدة اللعبة/ })).toBeInTheDocument();
   });
 
-  it("renders every expected team and group in the mobile accordion", () => {
+  it("uses the official hero wordmark and football watermark", () => {
+    const { container } = render(<App />);
+
+    expect(screen.getByRole("img", { name: "شعار كورة باللغة الإنجليزية" })).toHaveAttribute(
+      "src",
+      expect.stringContaining("KORA_only.svg"),
+    );
+    expect(container.querySelector(".hero-watermark")).toHaveAttribute(
+      "src",
+      expect.stringContaining("logo_14_transparent_HQ.svg"),
+    );
+  });
+
+  it("removes the old hero elements", () => {
+    const { container } = render(<App />);
+
+    expect(screen.queryByText("26")).not.toBeInTheDocument();
+    expect(screen.queryByText("سيتم التقديم عبر نموذج Microsoft الرسمي باستخدام الحساب الجامعي.")).not.toBeInTheDocument();
+    expect(container.querySelector(".hero-accent")).not.toBeInTheDocument();
+    expect(container.querySelector(".hero-index")).not.toBeInTheDocument();
+  });
+
+  it("places the social section between hero and event facts", () => {
+    const { container } = render(<App />);
+    const hero = container.querySelector(".hero");
+    const social = container.querySelector(".social-section");
+    const facts = container.querySelector(".facts-section");
+
+    expect(hero?.nextElementSibling).toBe(social);
+    expect(social?.nextElementSibling).toBe(facts);
+    expect(screen.getByRole("heading", { name: /تابع كورة وكن أول من يعرف/ })).toBeInTheDocument();
+  });
+
+  it("uses correct and safe social links", () => {
     render(<App />);
 
-    for (const group of teamGroups) {
-      expect(screen.getByRole("heading", { name: group.name })).toBeInTheDocument();
-      for (const team of group.teams) {
-        expect(screen.getByRole("button", { name: new RegExp(team.name) })).toBeInTheDocument();
+    const expectedLinks = [
+      ["تابع كورة على إنستغرام", siteConfig.socialLinks.instagram],
+      ["تابع كورة على منصة X", siteConfig.socialLinks.x],
+      ["تابع كورة على تيك توك", siteConfig.socialLinks.tiktok],
+    ] as const;
+
+    for (const [name, href] of expectedLinks) {
+      const link = screen.getByRole("link", { name });
+      expect(link).toHaveAttribute("href", href);
+      expect(link).toHaveAttribute("target", "_blank");
+      expect(link).toHaveAttribute("rel", "noopener noreferrer");
+    }
+  });
+
+  it("removes logo 20 from About and expands its supplied pattern", () => {
+    const { container } = render(<App />);
+
+    const aboutImages = Array.from(container.querySelectorAll("#about img"));
+    expect(aboutImages.some((image) => image.getAttribute("src")?.includes("logo 20"))).toBe(false);
+    const about = container.querySelector<HTMLElement>("#about");
+    expect(about?.style.getPropertyValue("--about-pattern-image")).toContain(
+      "Pattern_2_transparent_HQ.svg",
+    );
+  });
+
+  it("renders overall leadership and every department manager", () => {
+    render(<App />);
+
+    for (const person of overallLeadership) {
+      const personName = screen.getByText(person.name);
+      expect(personName).toBeInTheDocument();
+      expect(personName.previousElementSibling).toHaveTextContent(person.role);
+    }
+
+    for (const department of departments) {
+      const trigger = screen.getByRole("button", { name: new RegExp(department.name) });
+      expect(trigger).toHaveTextContent(department.manager.name);
+      expect(trigger).toHaveTextContent(department.manager.role);
+    }
+  });
+
+  it("renders every team, leader, and member exactly once in the correct department", async () => {
+    const user = userEvent.setup();
+    render(<App />);
+    await openAllOrganizationContent(user);
+
+    const expectedTeamNames = teamGroups.flatMap((group) => group.teams.map((team) => team.name));
+    for (const teamName of expectedTeamNames) {
+      expect(screen.getAllByText(new RegExp(teamName.replace(/^فريق /, ""))).length).toBeGreaterThan(0);
+    }
+
+    for (const department of departments) {
+      const trigger = screen.getByRole("button", { name: new RegExp(department.name) });
+      const departmentSection = trigger.closest("section");
+      expect(departmentSection).not.toBeNull();
+
+      for (const subteam of department.subteams) {
+        expect(within(departmentSection!).getByText(subteam.leader.name)).toBeInTheDocument();
+        for (const member of subteam.members ?? []) {
+          expect(within(departmentSection!).getByText(member)).toBeInTheDocument();
+          expect(screen.getAllByText(member)).toHaveLength(1);
+        }
+      }
+
+      for (const member of department.members ?? []) {
+        expect(within(departmentSection!).getByText(member)).toBeInTheDocument();
+        expect(screen.getAllByText(member)).toHaveLength(1);
       }
     }
   });
 
-  it("keeps team ids and names unique", () => {
-    const teams = teamGroups.flatMap((group) => group.teams);
-    expect(new Set(teams.map((team) => team.id)).size).toBe(teams.length);
-    expect(new Set(teams.map((team) => team.name)).size).toBe(teams.length);
+  it("updates department and member accordion ARIA state", async () => {
+    const user = userEvent.setup();
+    render(<App />);
+
+    const department = screen.getByRole("button", { name: /إدارة تصميم المتحف/ });
+    expect(department).toHaveAttribute("aria-expanded", "false");
+    await user.click(department);
+    expect(department).toHaveAttribute("aria-expanded", "true");
+
+    const members = screen.getAllByRole("button", { name: /الأعضاء/ })[0];
+    expect(members).toHaveAttribute("aria-expanded", "false");
+    await user.click(members);
+    expect(members).toHaveAttribute("aria-expanded", "true");
   });
 
   it("does not expose the form while coming soon", () => {
@@ -41,7 +156,7 @@ describe("KORA recruitment page", () => {
     expect(screen.getAllByText("يفتح التقديم قريبًا").length).toBeGreaterThan(0);
   });
 
-  it("uses the exact configured form link when open", () => {
+  it("uses the exact configured form link only when open", () => {
     render(<ApplicationAction status="open" />);
 
     const link = screen.getByRole("link", { name: "ابدأ طلبك" });
@@ -57,35 +172,12 @@ describe("KORA recruitment page", () => {
     expect(screen.queryByRole("link")).not.toBeInTheDocument();
   });
 
-  it("updates accordion aria state", async () => {
-    const user = userEvent.setup();
-    render(<App />);
-
-    const trigger = screen.getByRole("button", { name: /تصميم المعرض/ });
-    expect(trigger).toHaveAttribute("aria-expanded", "false");
-    await user.click(trigger);
-    expect(trigger).toHaveAttribute("aria-expanded", "true");
-    expect(screen.getByText(teamGroups[0].teams[0].description)).toBeVisible();
-  });
-
-  it("uses the configured contact and social links", () => {
+  it("uses the configured email", () => {
     render(<App />);
 
     expect(screen.getByRole("link", { name: siteConfig.contactEmail })).toHaveAttribute(
       "href",
       `mailto:${siteConfig.contactEmail}`,
-    );
-    expect(screen.getByRole("link", { name: "حساب كورة على إنستغرام" })).toHaveAttribute(
-      "href",
-      siteConfig.socialLinks.instagram,
-    );
-    expect(screen.getByRole("link", { name: "حساب كورة على منصة X" })).toHaveAttribute(
-      "href",
-      siteConfig.socialLinks.x,
-    );
-    expect(screen.getByRole("link", { name: "حساب كورة على تيك توك" })).toHaveAttribute(
-      "href",
-      siteConfig.socialLinks.tiktok,
     );
   });
 });

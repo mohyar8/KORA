@@ -1,45 +1,36 @@
-import fullLogo from "../../assets/brand/logos/logo 20.svg";
+import type { CSSProperties } from "react";
 import aboutPattern from "../../assets/brand/patterns/Pattern_2_transparent_HQ.svg";
+import { BrandName } from "../BrandName/BrandName";
 
 const tracks = [
-  "المتحف التاريخي",
+  "المتحف التاريخي ",
   "الإعلام",
   "الاقتصاد والاستثمار",
   "ريادة الأعمال",
-  "الركن الترفيهي",
+  "الركن الترفيهي ",
   "المسرح الرئيسي",
 ] as const;
 
 export function AboutKora() {
+  const patternStyle = {
+    "--about-pattern-image": `url("${aboutPattern}")`,
+  } as CSSProperties;
+
   return (
-    <section id="about" className="section about-section" aria-labelledby="about-title">
-      <img
-        className="about-pattern"
-        src={aboutPattern}
-        alt=""
-        width="720"
-        height="720"
-        loading="lazy"
-        decoding="async"
-        aria-hidden="true"
-      />
+    <section
+      id="about"
+      className="section about-section"
+      aria-labelledby="about-title"
+      style={patternStyle}
+    >
       <div className="container about-grid">
         <div className="section-heading">
-          <p className="eyebrow">عن كورة</p>
+          <p className="eyebrow">عن <BrandName /></p>
           <h2 id="about-title">كرة القدم أبعد من تسعين دقيقة</h2>
-          <img
-            className="about-logo"
-            src={fullLogo}
-            alt="KORA — كورة"
-            width="420"
-            height="118"
-            loading="lazy"
-            decoding="async"
-          />
         </div>
         <div className="about-content">
           <p className="lead">
-            وراء كل مباراة منظومة كاملة من المعرفة والتقنية والإعلام والاستثمار وريادة الأعمال. تأتي كورة لتكشف هذه المنظومة، وتحوّل اهتمام الشباب باللعبة إلى معرفة وتجربة وعمل حقيقي.
+            وراء كل مباراة منظومة كاملة من المعرفة والتقنية والإعلام والاستثمار وريادة الأعمال. تأتي <BrandName /> لتكشف هذه المنظومة، وتحوّل اهتمام الشباب باللعبة إلى معرفة وتجربة وعمل حقيقي.
           </p>
           <ol className="tracks-list" aria-label="مسارات الحدث الستة">
             {tracks.map((track, index) => (

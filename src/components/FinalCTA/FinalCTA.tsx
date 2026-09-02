@@ -1,10 +1,11 @@
 import { ApplicationAction } from "../ApplicationAction/ApplicationAction";
+import { BrandText } from "../BrandName/BrandName";
 import { siteConfig } from "../../config/site";
 import ctaPattern from "../../assets/brand/patterns/Pattern_8_transparent_HQ.svg";
 
 const statusMessages = {
   open: "نموذج التقديم متاح الآن باستخدام الحساب الجامعي.",
-  closed: "انتهت فترة استقبال طلبات الانضمام إلى فرق KORA.",
+  closed: "انتهت فترة استقبال طلبات الانضمام إلى فرق كورة.",
   "coming-soon": "سيتم فتح نموذج التقديم خلال الفترة المعلنة.",
 } as const;
 
@@ -15,8 +16,8 @@ export function FinalCTA() {
         className="final-cta-pattern"
         src={ctaPattern}
         alt=""
-        width="1200"
-        height="120"
+        width="23066"
+        height="4595"
         loading="lazy"
         decoding="async"
         aria-hidden="true"
@@ -30,7 +31,7 @@ export function FinalCTA() {
           <p>تعرّف على الفرق الأقرب إلى مهاراتك واهتماماتك، واستعد لترتيب رغباتك الثلاث عند فتح نموذج التقديم.</p>
           <ApplicationAction />
           <p className="status-message" role="status">
-            {statusMessages[siteConfig.applicationStatus]}
+            <BrandText>{statusMessages[siteConfig.applicationStatus]}</BrandText>
           </p>
           <p className="deadline">
             آخر موعد للتقديم: {" "}

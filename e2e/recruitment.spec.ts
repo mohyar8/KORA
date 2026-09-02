@@ -10,8 +10,14 @@ test.beforeEach(async ({ page }) => {
   expect(consoleErrors).toEqual([]);
 });
 
-test("loads core sections and coming-soon state", async ({ page }) => {
+test("loads the revised sections and coming-soon state", async ({ page }) => {
   await expect(page.getByRole("heading", { level: 1 })).toContainText("لا تكتفِ بمشاهدة اللعبة");
+  await expect(page.locator(".hero-wordmark")).toHaveAttribute("src", /KORA_only/);
+  await expect(page.locator(".hero-watermark")).toHaveAttribute("src", /logo_14_transparent_HQ/);
+  await expect(page.getByText("26", { exact: true })).toHaveCount(0);
+  await expect(page.getByText("سيتم التقديم عبر نموذج Microsoft الرسمي باستخدام الحساب الجامعي.")).toHaveCount(0);
+  await expect(page.locator(".hero")).toHaveCSS("background-color", "rgb(17, 24, 47)");
+  await expect(page.locator(".social-section")).toBeVisible();
   await expect(page.locator("#about")).toBeVisible();
   await expect(page.locator("#benefits")).toBeVisible();
   await expect(page.locator("#teams")).toBeVisible();
@@ -19,17 +25,31 @@ test("loads core sections and coming-soon state", async ({ page }) => {
   await expect(page.getByText("يفتح التقديم قريبًا").first()).toBeVisible();
 });
 
-test("teams anchor reaches the correct section", async ({ page }) => {
+test("places social section directly after hero and uses safe links", async ({ page }) => {
+  await expect(page.locator(".hero + .social-section")).toHaveCount(1);
+  await expect(page.locator(".social-section + .facts-section")).toHaveCount(1);
+
+  const links = [
+    ["تابع كورة على إنستغرام", "https://www.instagram.com/kora_kfupm"],
+    ["تابع كورة على منصة X", "https://x.com/KORA_KFUPM"],
+    ["تابع كورة على تيك توك", "https://www.tiktok.com/@kfupm_kora"],
+  ] as const;
+
+  for (const [name, href] of links) {
+    const link = page.getByRole("link", { name });
+    await expect(link).toHaveAttribute("href", href);
+    await expect(link).toHaveAttribute("target", "_blank");
+    await expect(link).toHaveAttribute("rel", "noopener noreferrer");
+  }
+});
+
+test("teams anchor reaches leadership and teams", async ({ page }) => {
   await page.getByRole("link", { name: "اكتشف فرق العمل" }).click();
   await expect(page).toHaveURL(/#teams$/);
   await expect(page.locator("#teams")).toBeInViewport();
-});
-
-test("social and email destinations are correct", async ({ page }) => {
-  await expect(page.getByRole("link", { name: "حساب كورة على إنستغرام" })).toHaveAttribute("href", "https://www.instagram.com/kora_kfupm");
-  await expect(page.getByRole("link", { name: "حساب كورة على منصة X" })).toHaveAttribute("href", "https://x.com/KORA_KFUPM");
-  await expect(page.getByRole("link", { name: "حساب كورة على تيك توك" })).toHaveAttribute("href", "https://www.tiktok.com/@kfupm_kora");
-  await expect(page.getByRole("link", { name: "kora.kfupm@gmail.com" })).toHaveAttribute("href", "mailto:kora.kfupm@gmail.com");
+  await expect(page.getByRole("heading", { name: "قيادة كورة" })).toBeVisible();
+  await expect(page.getByText("عمر الحربي")).toBeVisible();
+  await expect(page.getByText("خالد الجهني")).toBeVisible();
 });
 
 test("has no horizontal overflow on a 320px viewport", async ({ page }) => {
@@ -41,7 +61,7 @@ test("has no horizontal overflow on a 320px viewport", async ({ page }) => {
   expect(dimensions.scrollWidth).toBeLessThanOrEqual(dimensions.clientWidth);
 });
 
-test("mobile menu and accordion support keyboard interaction", async ({ page }) => {
+test("mobile menu and organizational accordions support keyboard interaction", async ({ page }) => {
   await page.setViewportSize({ width: 375, height: 812 });
   const menuButton = page.getByRole("button", { name: "فتح القائمة" });
   await menuButton.focus();
@@ -52,8 +72,27 @@ test("mobile menu and accordion support keyboard interaction", async ({ page }) 
   await expect(menuButton).toBeFocused();
 
   await page.locator("#teams").scrollIntoViewIfNeeded();
-  const accordion = page.getByRole("button", { name: /تصميم المعرض/ });
-  await accordion.focus();
+  const department = page.getByRole("button", { name: /إدارة تصميم المتحف/ });
+  await department.focus();
   await page.keyboard.press("Enter");
-  await expect(accordion).toHaveAttribute("aria-expanded", "true");
+  await expect(department).toHaveAttribute("aria-expanded", "true");
+  await expect(page.getByText("مهند الرحيلي")).toBeVisible();
+
+  const members = page.getByRole("button", { name: /الأعضاء \(3\)/ });
+  await members.focus();
+  await page.keyboard.press("Enter");
+  await expect(members).toHaveAttribute("aria-expanded", "true");
+  await expect(page.getByText("محمد بكر")).toBeVisible();
+});
+
+test("reduced motion disables meaningful animation duration", async ({ browser }) => {
+  const context = await browser.newContext({ reducedMotion: "reduce" });
+  const page = await context.newPage();
+  await page.goto("/");
+  const durationMs = await page.locator(".hero-copy").evaluate((element) => {
+    const value = getComputedStyle(element).animationDuration;
+    return value.endsWith("ms") ? Number.parseFloat(value) : Number.parseFloat(value) * 1000;
+  });
+  expect(durationMs).toBeLessThanOrEqual(0.01);
+  await context.close();
 });
