@@ -29,7 +29,7 @@ export const siteConfig: SiteConfig = {
   eventDateArabic: "12-14 نوفمبر 2026",
   eventLocationArabic: "جامعة الملك فهد للبترول والمعادن، الظهران",
   applicationStatus: "open",
-  applicationDeadlineArabic: "1 سبتمبر 2026، الساعة 11:59 مساءً بتوقيت السعودية",
+  applicationDeadlineArabic: "10 سبتمبر 2026، الساعة 11:59 مساءً بتوقيت السعودية",
   applicationDeadlineISO: "2026-09-01T23:59:00+03:00",
   microsoftFormUrl: "https://forms.cloud.microsoft/r/QQmb1auxvd",
   contactEmail: "kora.kfupm@gmail.com",
