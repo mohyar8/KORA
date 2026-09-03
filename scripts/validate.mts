@@ -23,7 +23,7 @@ const requiredFiles = [
   "src/data/organization.ts",
   "src/data/teams.ts",
   "src/components/BrandName/BrandName.tsx",
-  "src/components/SocialSection/SocialSection.tsx",
+  "src/components/SocialLinks/SocialLinks.tsx",
   "src/styles/fonts.css",
   "src/styles/tokens.css",
   "src/styles/globals.css",
@@ -155,10 +155,25 @@ assert.match(action, /target="_blank"/);
 assert.match(action, /rel="noopener noreferrer"/);
 assert.match(action, /role="status"/);
 
+const app = read("src/App.tsx");
+assert.doesNotMatch(app, /SocialSection/);
+assert.match(app, /<Hero\s*\/>[\s\S]*?<EventFacts\s*\/>/);
+
+const header = read("src/components/Header/Header.tsx");
+assert.match(header, /<SocialLinks className="header-social-links" location="header"\s*\/>/);
+assert.match(header, /brand-wordmark[\s\S]*?<SocialLinks[\s\S]*?<nav className="desktop-nav"/);
+assert.doesNotMatch(header, /mobile-navigation[\s\S]*?<SocialLinks/);
+
 const footer = read("src/components/Footer/Footer.tsx");
-assert.match(footer, /SiInstagram/);
-assert.match(footer, /SiX/);
-assert.match(footer, /SiTiktok/);
+assert.match(footer, /<SocialLinks\s*\/>/);
+
+const socialLinks = read("src/components/SocialLinks/SocialLinks.tsx");
+assert.match(socialLinks, /SiInstagram/);
+assert.match(socialLinks, /SiX/);
+assert.match(socialLinks, /SiTiktok/);
+assert.match(socialLinks, /target="_blank"/);
+assert.match(socialLinks, /rel="noopener noreferrer"/);
+for (const label of ["Instagram", "X", "TikTok"]) assert.ok(socialLinks.includes(`headerLabel: "${label}"`));
 
 const hero = read("src/components/Hero/Hero.tsx");
 assert.match(hero, /KORA_only\.svg/);
@@ -175,6 +190,8 @@ const styles = read("src/styles/globals.css");
 assert.doesNotMatch(styles, /\.hero::before/);
 assert.match(styles, /\.hero\s*\{[\s\S]*?background: var\(--color-navy-950\)/);
 assert.match(styles, /\.about-section::before[\s\S]*?background-repeat: repeat/);
+assert.doesNotMatch(styles, /\.social-section|\.social-account|\.social-grid/);
+assert.match(styles, /\.header-social-links[\s\S]*?flex-wrap: nowrap/);
 
 for (const path of [
   "src/components/Hero/Hero.tsx",

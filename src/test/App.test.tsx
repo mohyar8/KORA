@@ -48,28 +48,32 @@ describe("صفحة انضمام كورة", () => {
     expect(container.querySelector(".hero-index")).not.toBeInTheDocument();
   });
 
-  it("places the social section between hero and event facts", () => {
+  it("removes the standalone social section and places event facts after the hero", () => {
     const { container } = render(<App />);
     const hero = container.querySelector(".hero");
-    const social = container.querySelector(".social-section");
     const facts = container.querySelector(".facts-section");
 
-    expect(hero?.nextElementSibling).toBe(social);
-    expect(social?.nextElementSibling).toBe(facts);
-    expect(screen.getByRole("heading", { name: /تابع كورة وكن أول من يعرف/ })).toBeInTheDocument();
+    expect(hero?.nextElementSibling).toBe(facts);
+    expect(container.querySelector(".social-section")).not.toBeInTheDocument();
+    expect(screen.queryByRole("heading", { name: /تابع كورة وكن أول من يعرف/ })).not.toBeInTheDocument();
   });
 
-  it("uses correct and safe social links", () => {
+  it("keeps one safe social-link group directly inside the header", () => {
     render(<App />);
 
+    const header = screen.getByRole("banner");
+    const headerSocialLinks = header.querySelector(".header-social-links");
+    expect(headerSocialLinks).not.toBeNull();
+    expect(header.querySelector("#mobile-navigation .social-links")).not.toBeInTheDocument();
+
     const expectedLinks = [
-      ["تابع كورة على إنستغرام", siteConfig.socialLinks.instagram],
-      ["تابع كورة على منصة X", siteConfig.socialLinks.x],
-      ["تابع كورة على تيك توك", siteConfig.socialLinks.tiktok],
+      ["Instagram", siteConfig.socialLinks.instagram],
+      ["X", siteConfig.socialLinks.x],
+      ["TikTok", siteConfig.socialLinks.tiktok],
     ] as const;
 
     for (const [name, href] of expectedLinks) {
-      const link = screen.getByRole("link", { name });
+      const link = within(header).getByRole("link", { name });
       expect(link).toHaveAttribute("href", href);
       expect(link).toHaveAttribute("target", "_blank");
       expect(link).toHaveAttribute("rel", "noopener noreferrer");

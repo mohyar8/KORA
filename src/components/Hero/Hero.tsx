@@ -18,7 +18,7 @@ export function Hero() {
       <div className="container hero-grid">
         <div className="hero-copy">
           <p className="eyebrow eyebrow--light">
-            فتح باب الانضمام إلى فريق <BrandName />
+            فتح باب الانضمام إلى فريق<BrandName />
           </p>
           <h1 id="hero-title">
             لا تكتفِ بمشاهدة اللعبة.
@@ -49,7 +49,7 @@ export function Hero() {
             className="hero-wordmark"
             src={heroWordmark}
             alt="شعار كورة باللغة الإنجليزية"
-            width="1000"
+            width="000"
             
           />
           <p>{siteConfig.englishTagline}</p>

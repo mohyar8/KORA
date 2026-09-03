@@ -5,7 +5,6 @@ import { FinalCTA } from "./components/FinalCTA/FinalCTA";
 import { Footer } from "./components/Footer/Footer";
 import { Header } from "./components/Header/Header";
 import { Hero } from "./components/Hero/Hero";
-import { SocialSection } from "./components/SocialSection/SocialSection";
 import { Teams } from "./components/Teams/Teams";
 
 export default function App() {
@@ -16,7 +15,6 @@ export default function App() {
       <main id="main-content" tabIndex={-1}>
         <div id="top" />
         <Hero />
-        <SocialSection />
         <EventFacts />
         <AboutKora />
         <Benefits />
