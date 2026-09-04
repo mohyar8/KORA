@@ -25,22 +25,23 @@ test("loads the revised sections and coming-soon state", async ({ page }) => {
   await expect(page.getByText("يفتح التقديم قريبًا").first()).toBeVisible();
 });
 
-test("places social icons in the header and event facts directly after the hero", async ({ page }) => {
+test("places the social squares above the hero wordmark with safe links", async ({ page }) => {
   await expect(page.locator(".hero + .facts-section")).toHaveCount(1);
   const header = page.getByRole("banner");
-  const socialLinks = header.locator(".header-social-links");
+  const socialLinks = page.locator(".hero-social-links");
   await expect(socialLinks).toBeVisible();
   await expect(socialLinks.locator("a")).toHaveCount(3);
-  await expect(header.locator("#mobile-navigation .social-links")).toHaveCount(0);
+  await expect(header.locator(".social-links")).toHaveCount(0);
+  await expect(page.locator(".hero-social-label")).toHaveText("تابعنا");
 
   const links = [
-    ["Instagram", "https://www.instagram.com/kora_kfupm"],
-    ["X", "https://x.com/KORA_KFUPM"],
-    ["TikTok", "https://www.tiktok.com/@kfupm_kora"],
+    ["تابع كورة على إنستغرام", "https://www.instagram.com/kora_kfupm"],
+    ["تابع كورة على منصة X", "https://x.com/KORA_KFUPM"],
+    ["تابع كورة على تيك توك", "https://www.tiktok.com/@kfupm_kora"],
   ] as const;
 
   for (const [name, href] of links) {
-    const link = header.getByRole("link", { name });
+    const link = page.getByRole("link", { name });
     await expect(link).toHaveAttribute("href", href);
     await expect(link).toHaveAttribute("target", "_blank");
     await expect(link).toHaveAttribute("rel", "noopener noreferrer");
@@ -56,12 +57,11 @@ test("teams anchor reaches leadership and teams", async ({ page }) => {
   await expect(page.getByText("خالد الجهني")).toBeVisible();
 });
 
-test("keeps header social icons visible and separated across target widths", async ({ page }) => {
-  for (const width of [320, 375, 390, 768, 1440]) {
+test("keeps hero social icons visible and cards responsive across target widths", async ({ page }) => {
+  for (const width of [320, 375, 390, 768, 1024, 1440]) {
     await page.setViewportSize({ width, height: 900 });
 
-    const header = page.getByRole("banner");
-    const socialLinks = header.locator(".header-social-links");
+    const socialLinks = page.locator(".hero-social-links");
     await expect(socialLinks).toBeVisible();
 
     for (const link of await socialLinks.locator("a").all()) {
@@ -71,7 +71,7 @@ test("keeps header social icons visible and separated across target widths", asy
       expect(box!.height).toBeGreaterThanOrEqual(40);
     }
 
-    const layout = await page.evaluate((viewportWidth) => {
+    const layout = await page.evaluate(() => {
       const bounds = (selector: string) => {
         const element = document.querySelector(selector);
         if (!element) return null;
@@ -81,26 +81,41 @@ test("keeps header social icons visible and separated across target widths", asy
       return {
         clientWidth: document.documentElement.clientWidth,
         scrollWidth: document.documentElement.scrollWidth,
-        logo: bounds(".brand-wordmark"),
-        socials: bounds(".header-social-links"),
-        control: bounds(viewportWidth < 900 ? ".menu-button" : ".desktop-nav"),
+        socials: bounds(".hero-social-links"),
+        wordmark: bounds(".hero-wordmark"),
+        trackColumns: getComputedStyle(document.querySelector(".event-tracks-grid")!).gridTemplateColumns.split(" ").length,
       };
-    }, width);
+    });
 
     const overlaps = (
-      first: NonNullable<typeof layout.logo>,
-      second: NonNullable<typeof layout.logo>,
+      first: NonNullable<typeof layout.socials>,
+      second: NonNullable<typeof layout.socials>,
     ) => first.left < second.right && first.right > second.left && first.top < second.bottom && first.bottom > second.top;
 
     expect(layout.scrollWidth).toBeLessThanOrEqual(layout.clientWidth);
-    expect(layout.logo).not.toBeNull();
     expect(layout.socials).not.toBeNull();
-    expect(layout.control).not.toBeNull();
-    expect(overlaps(layout.logo!, layout.socials!)).toBe(false);
-    expect(overlaps(layout.socials!, layout.control!)).toBe(false);
-    expect(layout.logo!.left).toBeGreaterThanOrEqual(layout.socials!.right);
-    expect(layout.socials!.left).toBeGreaterThanOrEqual(layout.control!.right);
+    expect(layout.wordmark).not.toBeNull();
+    expect(overlaps(layout.socials!, layout.wordmark!)).toBe(false);
+    expect(layout.trackColumns).toBe(width >= 1024 ? 3 : width >= 600 ? 2 : 1);
   }
+});
+
+test("renders the expanded About copy and all six event tracks in order", async ({ page }) => {
+  const about = page.locator("#about");
+  await expect(about.getByRole("heading", { name: "عن كورة" })).toBeVisible();
+  await expect(about.locator(".about-content p")).toHaveCount(2);
+  await expect(about).toContainText("«كورة – الصناعة خلف اللعبة»");
+  await expect(about).toContainText("الفرص المهنية والاستثمارية الكامنة خلف كل مباراة");
+  await expect(page.locator("#about + #event-tracks")).toHaveCount(1);
+  await expect(page.locator(".event-track-card")).toHaveCount(6);
+  await expect(page.locator(".event-track-card h3")).toHaveText([
+    "المتحف التاريخي",
+    "الإعلام",
+    "الاقتصاد والاستثمار",
+    "ريادة الأعمال",
+    "الركن الترفيهي",
+    "المسرح الرئيسي",
+  ]);
 });
 
 test("mobile menu and organizational accordions support keyboard interaction", async ({ page }) => {
@@ -109,7 +124,6 @@ test("mobile menu and organizational accordions support keyboard interaction", a
   await menuButton.focus();
   await page.keyboard.press("Enter");
   await expect(menuButton).toHaveAttribute("aria-expanded", "true");
-  await expect(page.locator(".header-social-links")).toBeVisible();
   await expect(page.locator("#mobile-navigation .social-links")).toHaveCount(0);
   await page.keyboard.press("Escape");
   await expect(menuButton).toHaveAttribute("aria-expanded", "false");

@@ -1,6 +1,5 @@
 import { useEffect, useRef, useState } from "react";
 import { ApplicationAction } from "../ApplicationAction/ApplicationAction";
-import { SocialLinks } from "../SocialLinks/SocialLinks";
 import lightLogo from "../../assets/brand/logos/logo_0_transparent_HQ.svg";
 
 const navigationItems = [
@@ -40,8 +39,6 @@ export function Header() {
             decoding="async"
           />
         </a>
-
-        <SocialLinks className="header-social-links" location="header" />
 
         <nav className="desktop-nav" aria-label="التنقل الرئيسي">
           <ul>

@@ -4,6 +4,7 @@ import { describe, expect, it } from "vitest";
 import App from "../App";
 import { ApplicationAction } from "../components/ApplicationAction/ApplicationAction";
 import { siteConfig } from "../config/site";
+import { eventTracks } from "../data/eventTracks";
 import { departments, overallLeadership } from "../data/organization";
 import { teamGroups } from "../data/teams";
 
@@ -48,39 +49,34 @@ describe("صفحة انضمام كورة", () => {
     expect(container.querySelector(".hero-index")).not.toBeInTheDocument();
   });
 
-  it("removes the standalone social section and places event facts after the hero", () => {
+  it("does not render a standalone social section or duplicate social links in the header", () => {
     const { container } = render(<App />);
-    const hero = container.querySelector(".hero");
-    const facts = container.querySelector(".facts-section");
 
-    expect(hero?.nextElementSibling).toBe(facts);
     expect(container.querySelector(".social-section")).not.toBeInTheDocument();
-    expect(screen.queryByRole("heading", { name: /تابع كورة وكن أول من يعرف/ })).not.toBeInTheDocument();
+    expect(screen.getByRole("banner").querySelector(".social-links")).not.toBeInTheDocument();
   });
 
-  it("keeps one safe social-link group directly inside the header", () => {
+  it("replaces the hero color strip with accessible social buttons", () => {
     render(<App />);
 
-    const header = screen.getByRole("banner");
-    const headerSocialLinks = header.querySelector(".header-social-links");
-    expect(headerSocialLinks).not.toBeNull();
-    expect(header.querySelector("#mobile-navigation .social-links")).not.toBeInTheDocument();
+    const hero = screen.getByRole("region", { name: /لا تكتفِ بمشاهدة اللعبة/ });
+    expect(within(hero).getByText("تابعنا")).toBeInTheDocument();
 
     const expectedLinks = [
-      ["Instagram", siteConfig.socialLinks.instagram],
-      ["X", siteConfig.socialLinks.x],
-      ["TikTok", siteConfig.socialLinks.tiktok],
+      ["تابع كورة على إنستغرام", siteConfig.socialLinks.instagram],
+      ["تابع كورة على منصة X", siteConfig.socialLinks.x],
+      ["تابع كورة على تيك توك", siteConfig.socialLinks.tiktok],
     ] as const;
 
     for (const [name, href] of expectedLinks) {
-      const link = within(header).getByRole("link", { name });
+      const link = within(hero).getByRole("link", { name });
       expect(link).toHaveAttribute("href", href);
       expect(link).toHaveAttribute("target", "_blank");
       expect(link).toHaveAttribute("rel", "noopener noreferrer");
     }
   });
 
-  it("removes logo 20 from About and expands its supplied pattern", () => {
+  it("renders the canonical About copy in two paragraphs over the supplied pattern", () => {
     const { container } = render(<App />);
 
     const aboutImages = Array.from(container.querySelectorAll("#about img"));
@@ -89,6 +85,27 @@ describe("صفحة انضمام كورة", () => {
     expect(about?.style.getPropertyValue("--about-pattern-image")).toContain(
       "Pattern_2_transparent_HQ.svg",
     );
+    expect(within(about!).getByRole("heading", { name: "عن كورة" })).toBeInTheDocument();
+    expect(about?.querySelectorAll(".about-content p")).toHaveLength(2);
+    expect(within(about!).getByText("«كورة – الصناعة خلف اللعبة»")).toBeInTheDocument();
+    expect(about).toHaveTextContent("الفرص المهنية والاستثمارية الكامنة خلف كل مباراة");
+  });
+
+  it("renders all six event tracks from typed data immediately after About", () => {
+    const { container } = render(<App />);
+    const about = container.querySelector<HTMLElement>("#about");
+const tracksSection =
+  container.querySelector<HTMLElement>("#event-tracks");
+
+    expect(about?.nextElementSibling).toBe(tracksSection);
+    expect(tracksSection?.querySelectorAll(".event-track-card")).toHaveLength(6);
+
+    for (const track of eventTracks) {
+      const cardTitle = within(tracksSection!).getByRole("heading", { name: track.title });
+      const card = cardTitle.closest("article");
+      expect(card).toHaveTextContent(track.number);
+      expect(card).toHaveTextContent(track.description);
+    }
   });
 
   it("renders overall leadership and every department manager", () => {

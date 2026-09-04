@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import { readFileSync, existsSync, readdirSync, statSync } from "node:fs";
 import { join } from "node:path";
 import { siteConfig } from "../src/config/site.ts";
+import { eventTracks } from "../src/data/eventTracks";
 import { departments, overallLeadership } from "../src/data/organization.ts";
 import { teamGroups } from "../src/data/teams.ts";
 
@@ -22,8 +23,10 @@ const requiredFiles = [
   "src/config/site.ts",
   "src/data/organization.ts",
   "src/data/teams.ts",
+  "src/data/eventTracks.ts",
   "src/components/BrandName/BrandName.tsx",
   "src/components/SocialLinks/SocialLinks.tsx",
+  "src/components/EventTracks/EventTracks.tsx",
   "src/styles/fonts.css",
   "src/styles/tokens.css",
   "src/styles/globals.css",
@@ -53,6 +56,18 @@ const teams = teamGroups.flatMap((group) => group.teams);
 assert.equal(teams.length, 11);
 assert.equal(new Set(teams.map((team) => team.id)).size, teams.length);
 assert.equal(new Set(teams.map((team) => team.name)).size, teams.length);
+
+assert.equal(eventTracks.length, 6);
+assert.deepEqual(eventTracks.map((track) => track.number), ["01", "02", "03", "04", "05", "06"]);
+assert.deepEqual(eventTracks.map((track) => track.title), [
+  "المتحف التاريخي",
+  "الإعلام",
+  "الاقتصاد والاستثمار",
+  "ريادة الأعمال",
+  "الركن الترفيهي",
+  "المسرح الرئيسي",
+]);
+assert.equal(new Set(eventTracks.map((track) => track.title)).size, eventTracks.length);
 
 assert.equal(overallLeadership.length, 2);
 assert.equal(departments.length, 6);
@@ -158,11 +173,10 @@ assert.match(action, /role="status"/);
 const app = read("src/App.tsx");
 assert.doesNotMatch(app, /SocialSection/);
 assert.match(app, /<Hero\s*\/>[\s\S]*?<EventFacts\s*\/>/);
+assert.match(app, /<AboutKora\s*\/>\s*<EventTracks\s*\/>/);
 
 const header = read("src/components/Header/Header.tsx");
-assert.match(header, /<SocialLinks className="header-social-links" location="header"\s*\/>/);
-assert.match(header, /brand-wordmark[\s\S]*?<SocialLinks[\s\S]*?<nav className="desktop-nav"/);
-assert.doesNotMatch(header, /mobile-navigation[\s\S]*?<SocialLinks/);
+assert.doesNotMatch(header, /SocialLinks|header-social-links/);
 
 const footer = read("src/components/Footer/Footer.tsx");
 assert.match(footer, /<SocialLinks\s*\/>/);
@@ -173,7 +187,11 @@ assert.match(socialLinks, /SiX/);
 assert.match(socialLinks, /SiTiktok/);
 assert.match(socialLinks, /target="_blank"/);
 assert.match(socialLinks, /rel="noopener noreferrer"/);
-for (const label of ["Instagram", "X", "TikTok"]) assert.ok(socialLinks.includes(`headerLabel: "${label}"`));
+for (const label of [
+  "تابع كورة على إنستغرام",
+  "تابع كورة على منصة X",
+  "تابع كورة على تيك توك",
+]) assert.ok(socialLinks.includes(`heroLabel: "${label}"`));
 
 const hero = read("src/components/Hero/Hero.tsx");
 assert.match(hero, /KORA_only\.svg/);
@@ -181,17 +199,29 @@ assert.match(hero, /logo_14_transparent_HQ\.svg/);
 assert.doesNotMatch(hero, /Pattern_0_transparent_HQ\.svg/);
 assert.doesNotMatch(hero, />26</);
 assert.doesNotMatch(hero, /سيتم التقديم عبر نموذج Microsoft الرسمي/);
+assert.match(hero, /<SocialLinks className="hero-social-links" location="hero"\s*\/>/);
+assert.match(hero, /تابعنا[\s\S]*?hero-wordmark/);
 
 const about = read("src/components/AboutKora/AboutKora.tsx");
 assert.match(about, /Pattern_2_transparent_HQ\.svg/);
 assert.doesNotMatch(about, /logo 20\.svg/);
+assert.match(about, /<h2 id="about-title">عن كورة<\/h2>/);
+assert.equal((about.match(/<p(?:\s|>)/g) ?? []).length, 3);
+assert.match(about, /«كورة – الصناعة خلف اللعبة»/);
+
+const eventTracksComponent = read("src/components/EventTracks/EventTracks.tsx");
+assert.match(eventTracksComponent, /eventTracks\.map/);
+assert.match(eventTracksComponent, /مسارات وأركان كورة/);
 
 const styles = read("src/styles/globals.css");
 assert.doesNotMatch(styles, /\.hero::before/);
 assert.match(styles, /\.hero\s*\{[\s\S]*?background: var\(--color-navy-950\)/);
 assert.match(styles, /\.about-section::before[\s\S]*?background-repeat: repeat/);
 assert.doesNotMatch(styles, /\.social-section|\.social-account|\.social-grid/);
-assert.match(styles, /\.header-social-links[\s\S]*?flex-wrap: nowrap/);
+assert.doesNotMatch(styles, /\.header-social-links/);
+assert.doesNotMatch(styles, /\.hero-editorial::before/);
+assert.match(styles, /\.hero-social-links[\s\S]*?flex-wrap: nowrap/);
+assert.match(styles, /@media \(min-width: 1024px\)[\s\S]*?grid-template-columns: repeat\(3/);
 
 for (const path of [
   "src/components/Hero/Hero.tsx",
@@ -247,6 +277,7 @@ process.stdout.write(`${JSON.stringify({
   groups: teamGroups.length,
   teams: teams.length,
   departments: departments.length,
+  eventTracks: eventTracks.length,
   members: members.length,
   deploymentBlockedByDeadlineStatusConflict:
     siteConfig.applicationStatus === "coming-soon" && Date.now() > Date.parse(siteConfig.applicationDeadlineISO),

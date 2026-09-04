@@ -1,15 +1,5 @@
 import type { CSSProperties } from "react";
 import aboutPattern from "../../assets/brand/patterns/Pattern_2_transparent_HQ.svg";
-import { BrandName } from "../BrandName/BrandName";
-
-const tracks = [
-  "المتحف التاريخي ",
-  "الإعلام",
-  "الاقتصاد والاستثمار",
-  "ريادة الأعمال",
-  "الركن الترفيهي ",
-  "المسرح الرئيسي",
-] as const;
 
 export function AboutKora() {
   const patternStyle = {
@@ -25,21 +15,17 @@ export function AboutKora() {
     >
       <div className="container about-grid">
         <div className="section-heading">
-          <p className="eyebrow">عن <BrandName /></p>
-          <h2 id="about-title">كرة القدم أبعد من تسعين دقيقة</h2>
+          <p className="eyebrow">الصناعة خلف اللعبة</p>
+          <h2 id="about-title">عن كورة</h2>
         </div>
         <div className="about-content">
-          <p className="lead">
-            وراء كل مباراة منظومة كاملة من المعرفة والتقنية والإعلام والاستثمار وريادة الأعمال. تأتي <BrandName /> لتكشف هذه المنظومة، وتحوّل اهتمام الشباب باللعبة إلى معرفة وتجربة وعمل حقيقي.
+          <p>
+            <strong className="about-event-name">«كورة – الصناعة خلف اللعبة»</strong>{" "}
+            حدث وطني جامعي ينقل الزائر من متابعة كرة القدم بوصفها لعبة، إلى اكتشافها بوصفها صناعة متكاملة تقف خلفها منظومة من التاريخ والإعلام والاستثمار والتقنية وريادة الأعمال.
           </p>
-          <ol className="tracks-list" aria-label="مسارات الحدث الستة">
-            {tracks.map((track, index) => (
-              <li key={track}>
-                <span aria-hidden="true">{String(index + 1).padStart(2, "0")}</span>
-                {track}
-              </li>
-            ))}
-          </ol>
+          <p>
+            يأخذ الحدث زوّاره في رحلة تبدأ من جذور كرة القدم السعودية وتحولاتها، وتمرّ بكواليس صناعة المحتوى والفرص الاقتصادية والمشاريع الريادية، وصولًا إلى مستقبل القطاع الرياضي وطموحات المملكة نحو 2034. ومن خلال ستة مسارات تجمع المعرفة بالتجربة والحوار، يسعى «كورة» إلى رفع وعي الشباب بصناعة الرياضة، وتعريفهم بالفرص المهنية والاستثمارية الكامنة خلف كل مباراة.
+          </p>
         </div>
       </div>
     </section>

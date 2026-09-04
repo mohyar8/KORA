@@ -1,6 +1,7 @@
 import { AboutKora } from "./components/AboutKora/AboutKora";
 import { Benefits } from "./components/Benefits/Benefits";
 import { EventFacts } from "./components/EventFacts/EventFacts";
+import { EventTracks } from "./components/EventTracks/EventTracks";
 import { FinalCTA } from "./components/FinalCTA/FinalCTA";
 import { Footer } from "./components/Footer/Footer";
 import { Header } from "./components/Header/Header";
@@ -17,6 +18,7 @@ export default function App() {
         <Hero />
         <EventFacts />
         <AboutKora />
+        <EventTracks />
         <Benefits />
         <Teams />
         <FinalCTA />

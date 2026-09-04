@@ -1,5 +1,6 @@
 import { ApplicationAction } from "../ApplicationAction/ApplicationAction";
 import { BrandName } from "../BrandName/BrandName";
+import { SocialLinks } from "../SocialLinks/SocialLinks";
 import { siteConfig } from "../../config/site";
 import heroWordmark from "../../assets/brand/logos/KORA_only.svg";
 import heroWatermark from "../../assets/brand/logos/logo_14_transparent_HQ.svg";
@@ -18,7 +19,7 @@ export function Hero() {
       <div className="container hero-grid">
         <div className="hero-copy">
           <p className="eyebrow eyebrow--light">
-            فتح باب الانضمام إلى فريق<BrandName />
+            فتح باب الانضمام إلى فريق <BrandName />
           </p>
           <h1 id="hero-title">
             لا تكتفِ بمشاهدة اللعبة.
@@ -45,12 +46,16 @@ export function Hero() {
         </div>
 
         <div className="hero-editorial" aria-label="معلومات الحدث">
+          <div className="hero-social-block">
+            <p className="hero-social-label">تابعنا</p>
+            <SocialLinks className="hero-social-links" location="hero" />
+          </div>
           <img
             className="hero-wordmark"
             src={heroWordmark}
             alt="شعار كورة باللغة الإنجليزية"
-            width="000"
-            
+            width="1001"
+            height="248"
           />
           <p>{siteConfig.englishTagline}</p>
           <div className="hero-location">
