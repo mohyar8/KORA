@@ -29,7 +29,7 @@ export const overallLeadership = [
 export const departments: readonly Department[] = [
   {
     id: "museum-design-department",
-    name: "إدارة تصميم المتحف",
+    name: "إدارة تصميم الحدث",
     accent: "green",
     manager: { role: "مدير الإدارة", name: "أحمد بخاري" },
     subteams: [
@@ -106,14 +106,14 @@ export const departments: readonly Department[] = [
         name: "فريق العلاقات",
         teamId: "relations",
         leader: { role: "قائد الفريق", name: "عبدالله الحوطي" },
-        members: ["عبدالله القرني", "مشعل"],
+        members: ["عبدالله القرني",],
       },
       {
         id: "partnerships-subteam",
         name: "فريق الشراكات",
         teamId: "partnerships",
         leader: { role: "قائدة الفريق", name: "شوق الغامدي" },
-        members: ["نورة"],
+        members: ["فاطمة السني","نورة العباد"],
       },
       {
         id: "finance-subteam",
