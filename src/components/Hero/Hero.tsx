@@ -29,35 +29,31 @@ export function Hero() {
             انضم إلى فريق <BrandName />، وشارك في بناء حدث جامعي يعيد تقديم كرة القدم السعودية كصناعة تجمع الإعلام والتقنية وريادة الأعمال والاستثمار والتجربة.
           </p>
           <div className="hero-actions">
-            <ApplicationAction />
-            <a className="text-link text-link--light" href="#teams">
+            <div className="hero-primary-group">
+              <ApplicationAction />
+              <div className="hero-social-block">
+                <p className="hero-social-label">تابعنا</p>
+                <SocialLinks className="hero-social-links" location="hero" />
+              </div>
+            </div>
+            <a className="text-link text-link--light hero-secondary-action" href="#teams">
               اكتشف فرق العمل
               <span aria-hidden="true">←</span>
             </a>
           </div>
-          <div className="application-note">
-            <p>
-              آخر موعد للتقديم: {" "}
-              <time dateTime={siteConfig.applicationDeadlineISO}>
-                {siteConfig.applicationDeadlineArabic}
-              </time>
-            </p>
-          </div>
         </div>
 
         <div className="hero-editorial" aria-label="معلومات الحدث">
-          <div className="hero-social-block">
-            <p className="hero-social-label">تابعنا</p>
-            <SocialLinks className="hero-social-links" location="hero" />
+          <div className="hero-signature">
+            <img
+              className="hero-wordmark"
+              src={heroWordmark}
+              alt="شعار كورة باللغة الإنجليزية"
+              width="1001"
+              height="248"
+            />
+            <p>{siteConfig.englishTagline}</p>
           </div>
-          <img
-            className="hero-wordmark"
-            src={heroWordmark}
-            alt="شعار كورة باللغة الإنجليزية"
-            width="1001"
-            height="248"
-          />
-          <p>{siteConfig.englishTagline}</p>
           <div className="hero-location">
             <span>{siteConfig.eventDateArabic}</span>
             <span>{siteConfig.eventLocationArabic}</span>

@@ -56,11 +56,16 @@ describe("صفحة انضمام كورة", () => {
     expect(screen.getByRole("banner").querySelector(".social-links")).not.toBeInTheDocument();
   });
 
-  it("replaces the hero color strip with accessible social buttons", () => {
+  it("places the accessible social buttons directly below the primary hero action", () => {
     render(<App />);
 
     const hero = screen.getByRole("region", { name: /لا تكتفِ بمشاهدة اللعبة/ });
-    expect(within(hero).getByText("تابعنا")).toBeInTheDocument();
+    const primaryGroup = hero.querySelector<HTMLElement>(".hero-primary-group");
+    expect(primaryGroup).not.toBeNull();
+    expect(within(primaryGroup!).getByText("يفتح التقديم قريبًا")).toBeInTheDocument();
+    expect(within(primaryGroup!).getByText("تابعنا")).toBeInTheDocument();
+    expect(hero.querySelector(".hero-editorial .social-links")).not.toBeInTheDocument();
+    expect(within(hero).queryByText(/آخر موعد للتقديم/)).not.toBeInTheDocument();
 
     const expectedLinks = [
       ["تابع كورة على إنستغرام", siteConfig.socialLinks.instagram],
@@ -88,17 +93,18 @@ describe("صفحة انضمام كورة", () => {
     expect(within(about!).getByRole("heading", { name: "عن كورة" })).toBeInTheDocument();
     expect(about?.querySelectorAll(".about-content p")).toHaveLength(2);
     expect(within(about!).getByText("«كورة – الصناعة خلف اللعبة»")).toBeInTheDocument();
-    expect(about).toHaveTextContent("الفرص المهنية والاستثمارية الكامنة خلف كل مباراة");
+    expect(about).toHaveTextContent("منصة إعلامية ومعرفية مستدامة");
+    expect(about).toHaveTextContent("ولا تنتهي رسالة «كورة» بانتهاء أيام الحدث");
   });
 
   it("renders all six event tracks from typed data immediately after About", () => {
     const { container } = render(<App />);
     const about = container.querySelector<HTMLElement>("#about");
-const tracksSection =
-  container.querySelector<HTMLElement>("#event-tracks");
+    const tracksSection = container.querySelector<HTMLElement>("#event-tracks");
 
     expect(about?.nextElementSibling).toBe(tracksSection);
     expect(tracksSection?.querySelectorAll(".event-track-card")).toHaveLength(6);
+    expect(within(tracksSection!).getByRole("heading", { name: "مسارات الحدث وأركانه" })).toBeInTheDocument();
 
     for (const track of eventTracks) {
       const cardTitle = within(tracksSection!).getByRole("heading", { name: track.title });

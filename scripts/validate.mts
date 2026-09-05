@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import { readFileSync, existsSync, readdirSync, statSync } from "node:fs";
 import { join } from "node:path";
 import { siteConfig } from "../src/config/site.ts";
-import { eventTracks } from "../src/data/eventTracks";
+import { eventTracks } from "../src/data/eventTracks.ts";
 import { departments, overallLeadership } from "../src/data/organization.ts";
 import { teamGroups } from "../src/data/teams.ts";
 
@@ -199,8 +199,10 @@ assert.match(hero, /logo_14_transparent_HQ\.svg/);
 assert.doesNotMatch(hero, /Pattern_0_transparent_HQ\.svg/);
 assert.doesNotMatch(hero, />26</);
 assert.doesNotMatch(hero, /سيتم التقديم عبر نموذج Microsoft الرسمي/);
+assert.doesNotMatch(hero, /آخر موعد للتقديم/);
 assert.match(hero, /<SocialLinks className="hero-social-links" location="hero"\s*\/>/);
-assert.match(hero, /تابعنا[\s\S]*?hero-wordmark/);
+assert.match(hero, /hero-primary-group[\s\S]*?<ApplicationAction[\s\S]*?تابعنا[\s\S]*?<SocialLinks/);
+assert.match(hero, /hero-signature[\s\S]*?hero-wordmark[\s\S]*?englishTagline/);
 
 const about = read("src/components/AboutKora/AboutKora.tsx");
 assert.match(about, /Pattern_2_transparent_HQ\.svg/);
@@ -208,10 +210,12 @@ assert.doesNotMatch(about, /logo 20\.svg/);
 assert.match(about, /<h2 id="about-title">عن كورة<\/h2>/);
 assert.equal((about.match(/<p(?:\s|>)/g) ?? []).length, 3);
 assert.match(about, /«كورة – الصناعة خلف اللعبة»/);
+assert.match(about, /منصة إعلامية ومعرفية مستدامة/);
+assert.match(about, /ولا تنتهي رسالة «كورة» بانتهاء أيام الحدث/);
 
 const eventTracksComponent = read("src/components/EventTracks/EventTracks.tsx");
 assert.match(eventTracksComponent, /eventTracks\.map/);
-assert.match(eventTracksComponent, /مسارات وأركان كورة/);
+assert.match(eventTracksComponent, /مسارات الحدث وأركانه/);
 
 const styles = read("src/styles/globals.css");
 assert.doesNotMatch(styles, /\.hero::before/);
@@ -220,7 +224,10 @@ assert.match(styles, /\.about-section::before[\s\S]*?background-repeat: repeat/)
 assert.doesNotMatch(styles, /\.social-section|\.social-account|\.social-grid/);
 assert.doesNotMatch(styles, /\.header-social-links/);
 assert.doesNotMatch(styles, /\.hero-editorial::before/);
+assert.doesNotMatch(styles, /\.application-note/);
 assert.match(styles, /\.hero-social-links[\s\S]*?flex-wrap: nowrap/);
+assert.match(styles, /\.hero-signature[\s\S]*?direction: ltr[\s\S]*?align-items: flex-start/);
+assert.match(styles, /\.hero-watermark[\s\S]*?width: clamp\(26\.25rem, 125vw, 38\.75rem\)/);
 assert.match(styles, /@media \(min-width: 1024px\)[\s\S]*?grid-template-columns: repeat\(3/);
 
 for (const path of [

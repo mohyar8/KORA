@@ -25,13 +25,18 @@ test("loads the revised sections and coming-soon state", async ({ page }) => {
   await expect(page.getByText("يفتح التقديم قريبًا").first()).toBeVisible();
 });
 
-test("places the social squares above the hero wordmark with safe links", async ({ page }) => {
+test("places the social squares below the primary CTA with safe links", async ({ page }) => {
   await expect(page.locator(".hero + .facts-section")).toHaveCount(1);
   const header = page.getByRole("banner");
+  const primaryGroup = page.locator(".hero-primary-group");
   const socialLinks = page.locator(".hero-social-links");
   await expect(socialLinks).toBeVisible();
   await expect(socialLinks.locator("a")).toHaveCount(3);
   await expect(header.locator(".social-links")).toHaveCount(0);
+  await expect(primaryGroup.locator(".application-action")).toHaveCount(1);
+  await expect(primaryGroup.locator(".hero-social-block")).toHaveCount(1);
+  await expect(page.locator(".hero-editorial .social-links")).toHaveCount(0);
+  await expect(page.locator(".hero").getByText(/آخر موعد للتقديم/)).toHaveCount(0);
   await expect(page.locator(".hero-social-label")).toHaveText("تابعنا");
 
   const links = [
@@ -57,8 +62,8 @@ test("teams anchor reaches leadership and teams", async ({ page }) => {
   await expect(page.getByText("خالد الجهني")).toBeVisible();
 });
 
-test("keeps hero social icons visible and cards responsive across target widths", async ({ page }) => {
-  for (const width of [320, 375, 390, 768, 1024, 1440]) {
+test("keeps the mobile-first hero and event cards responsive across target widths", async ({ page }) => {
+  for (const width of [320, 360, 375, 390, 412, 430, 768, 1024, 1440]) {
     await page.setViewportSize({ width, height: 900 });
 
     const socialLinks = page.locator(".hero-social-links");
@@ -81,8 +86,17 @@ test("keeps hero social icons visible and cards responsive across target widths"
       return {
         clientWidth: document.documentElement.clientWidth,
         scrollWidth: document.documentElement.scrollWidth,
+        header: bounds(".site-header"),
+        hero: bounds(".hero"),
+        headline: bounds(".hero h1"),
+        primaryAction: bounds(".hero-primary-group .application-action"),
+        socialBlock: bounds(".hero-social-block"),
+        secondaryAction: bounds(".hero-secondary-action"),
         socials: bounds(".hero-social-links"),
         wordmark: bounds(".hero-wordmark"),
+        tagline: bounds(".hero-signature > p"),
+        watermark: bounds(".hero-watermark"),
+        heroClipsContent: document.querySelector(".hero")!.scrollHeight > document.querySelector(".hero")!.clientHeight,
         trackColumns: getComputedStyle(document.querySelector(".event-tracks-grid")!).gridTemplateColumns.split(" ").length,
       };
     });
@@ -93,9 +107,24 @@ test("keeps hero social icons visible and cards responsive across target widths"
     ) => first.left < second.right && first.right > second.left && first.top < second.bottom && first.bottom > second.top;
 
     expect(layout.scrollWidth).toBeLessThanOrEqual(layout.clientWidth);
+    expect(layout.header).not.toBeNull();
+    expect(layout.hero).not.toBeNull();
+    expect(layout.headline).not.toBeNull();
+    expect(layout.hero!.top).toBeGreaterThanOrEqual(layout.header!.bottom - 1);
+    expect(layout.headline!.top).toBeGreaterThanOrEqual(layout.hero!.top);
+    expect(layout.primaryAction).not.toBeNull();
+    expect(layout.socialBlock).not.toBeNull();
+    expect(layout.socialBlock!.top).toBeGreaterThanOrEqual(layout.primaryAction!.bottom);
+    expect(layout.secondaryAction).not.toBeNull();
+    expect(overlaps(layout.socialBlock!, layout.secondaryAction!)).toBe(false);
     expect(layout.socials).not.toBeNull();
     expect(layout.wordmark).not.toBeNull();
-    expect(overlaps(layout.socials!, layout.wordmark!)).toBe(false);
+    expect(layout.tagline).not.toBeNull();
+    expect(layout.heroClipsContent).toBe(false);
+    if (width < 900) {
+      expect(Math.abs(layout.wordmark!.left - layout.tagline!.left)).toBeLessThanOrEqual(1);
+      expect(layout.watermark!.right - layout.watermark!.left).toBeGreaterThanOrEqual(420);
+    }
     expect(layout.trackColumns).toBe(width >= 1024 ? 3 : width >= 600 ? 2 : 1);
   }
 });
@@ -105,8 +134,10 @@ test("renders the expanded About copy and all six event tracks in order", async 
   await expect(about.getByRole("heading", { name: "عن كورة" })).toBeVisible();
   await expect(about.locator(".about-content p")).toHaveCount(2);
   await expect(about).toContainText("«كورة – الصناعة خلف اللعبة»");
-  await expect(about).toContainText("الفرص المهنية والاستثمارية الكامنة خلف كل مباراة");
+  await expect(about).toContainText("منصة إعلامية ومعرفية مستدامة");
+  await expect(about).toContainText("ولا تنتهي رسالة «كورة» بانتهاء أيام الحدث");
   await expect(page.locator("#about + #event-tracks")).toHaveCount(1);
+  await expect(page.getByRole("heading", { name: "مسارات الحدث وأركانه" })).toBeVisible();
   await expect(page.locator(".event-track-card")).toHaveCount(6);
   await expect(page.locator(".event-track-card h3")).toHaveText([
     "المتحف التاريخي",

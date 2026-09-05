@@ -11,7 +11,7 @@ export function EventTracks() {
         <div className="event-tracks-intro">
           <div className="section-heading">
             <p className="eyebrow">ست تجارب مترابطة</p>
-            <h2 id="event-tracks-title">مسارات وأركان كورة</h2>
+            <h2 id="event-tracks-title">مسارات الحدث وأركانه</h2>
           </div>
           <p>ست تجارب تجمع تاريخ كرة القدم السعودية بصناعتها وفرصها ومستقبلها.</p>
         </div>
