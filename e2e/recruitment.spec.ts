@@ -174,6 +174,31 @@ test("mobile menu and organizational accordions support keyboard interaction", a
   await expect(page.getByText("محمد بكر")).toBeVisible();
 });
 
+test("keeps department and member lists collapsible on desktop", async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await page.locator("#teams").scrollIntoViewIfNeeded();
+
+  await expect(page.locator("#teams")).toHaveCSS(
+    "--teams-pattern-image",
+    /Pattern_8_transparent_HQ/,
+  );
+  await expect(page.locator(".organization-grid")).toHaveCount(0);
+  await expect(page.locator(".organization-accordion")).toBeVisible();
+
+  const departmentTriggers = page.locator(".department-accordion-heading > button");
+  await expect(departmentTriggers).toHaveCount(6);
+  for (const trigger of await departmentTriggers.all()) {
+    await expect(trigger).toHaveAttribute("aria-expanded", "false");
+    await expect(trigger.locator(".department-toggle")).toHaveText("+");
+  }
+
+  const firstDepartment = departmentTriggers.first();
+  await firstDepartment.click();
+  await expect(firstDepartment).toHaveAttribute("aria-expanded", "true");
+  await expect(firstDepartment.locator(".department-toggle")).toHaveText("−");
+  await expect(page.locator(".members-trigger").first()).toHaveAttribute("aria-expanded", "false");
+});
+
 test("reduced motion disables meaningful animation duration", async ({ browser }) => {
   const context = await browser.newContext({ reducedMotion: "reduce" });
   const page = await context.newPage();

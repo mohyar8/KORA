@@ -130,6 +130,24 @@ describe("صفحة انضمام كورة", () => {
     }
   });
 
+  it("uses the supplied background pattern and collapsed department lists at every width", () => {
+    const { container } = render(<App />);
+    const teamsSection = container.querySelector<HTMLElement>("#teams");
+
+    expect(teamsSection).not.toBeNull();
+    expect(teamsSection!.style.getPropertyValue("--teams-pattern-image")).toContain(
+      "Pattern_8_transparent_HQ.svg",
+    );
+    expect(teamsSection!.querySelector(".organization-grid")).not.toBeInTheDocument();
+    expect(teamsSection!.querySelector(".organization-accordion")).toBeInTheDocument();
+
+    for (const department of departments) {
+      const trigger = screen.getByRole("button", { name: new RegExp(department.name) });
+      expect(trigger).toHaveAttribute("aria-expanded", "false");
+      expect(trigger).toHaveTextContent("+");
+    }
+  });
+
   it("renders every team, leader, and member exactly once in the correct department", async () => {
     const user = userEvent.setup();
     render(<App />);

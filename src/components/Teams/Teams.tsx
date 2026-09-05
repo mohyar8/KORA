@@ -1,10 +1,10 @@
-import { useId, useState } from "react";
+import { useId, useState, type CSSProperties } from "react";
 import { BrandName, BrandText } from "../BrandName/BrandName";
 import type { Department, Subteam } from "../../data/organization";
 import { departments, overallLeadership } from "../../data/organization";
 import type { Team } from "../../data/teams";
 import { teamGroups } from "../../data/teams";
-import { useMediaQuery } from "../../hooks/useMediaQuery";
+import teamsPattern from "../../assets/brand/patterns/Pattern_8_transparent_HQ.svg";
 
 const teamsById = new Map<string, Team>(
   teamGroups.flatMap((group) => group.teams).map((team) => [team.id, team] as const),
@@ -39,26 +39,14 @@ function TeamInformation({ teamId }: { readonly teamId: string }) {
 
 interface MemberListProps {
   readonly members?: readonly string[];
-  readonly collapsible: boolean;
 }
 
-function MemberList({ members, collapsible }: MemberListProps) {
+function MemberList({ members }: MemberListProps) {
   const [isOpen, setIsOpen] = useState(false);
   const generatedId = useId().replaceAll(":", "");
   const panelId = `members-${generatedId}`;
 
   if (!members?.length) return null;
-
-  if (!collapsible) {
-    return (
-      <div className="members-block">
-        <p className="role-label">الأعضاء</p>
-        <ul className="member-list">
-          {members.map((member) => <li key={member}>{member}</li>)}
-        </ul>
-      </div>
-    );
-  }
 
   return (
     <div className="members-block members-block--collapsible">
@@ -81,7 +69,7 @@ function MemberList({ members, collapsible }: MemberListProps) {
   );
 }
 
-function SubteamView({ subteam, mobile }: { readonly subteam: Subteam; readonly mobile: boolean }) {
+function SubteamView({ subteam }: { readonly subteam: Subteam }) {
   return (
     <section className="organization-subteam" aria-labelledby={`subteam-${subteam.id}`}>
       <header className="subteam-heading">
@@ -92,18 +80,18 @@ function SubteamView({ subteam, mobile }: { readonly subteam: Subteam; readonly 
         </p>
       </header>
       <TeamInformation teamId={subteam.teamId} />
-      <MemberList members={subteam.members} collapsible={mobile} />
+      <MemberList members={subteam.members} />
     </section>
   );
 }
 
-function DepartmentBody({ department, mobile }: { readonly department: Department; readonly mobile: boolean }) {
+function DepartmentBody({ department }: { readonly department: Department }) {
   return (
     <div className="department-body">
       {department.primaryTeamId && <TeamInformation teamId={department.primaryTeamId} />}
-      <MemberList members={department.members} collapsible={mobile} />
+      <MemberList members={department.members} />
       {department.subteams.map((subteam) => (
-        <SubteamView subteam={subteam} mobile={mobile} key={subteam.id} />
+        <SubteamView subteam={subteam} key={subteam.id} />
       ))}
     </div>
   );
@@ -118,24 +106,6 @@ function DepartmentHeading({ department }: { readonly department: Department }) 
         <strong>{department.manager.name}</strong>
       </span>
     </>
-  );
-}
-
-function DepartmentCard({ department }: { readonly department: Department }) {
-  return (
-    <section
-      className={`department department--${department.accent}`}
-      aria-labelledby={`department-${department.id}`}
-    >
-      <header className="department-heading">
-        <h3 id={`department-${department.id}`}>{department.name}</h3>
-        <p className="manager-line">
-          <small>{department.manager.role}</small>
-          <strong>{department.manager.name}</strong>
-        </p>
-      </header>
-      <DepartmentBody department={department} mobile={false} />
-    </section>
   );
 }
 
@@ -158,7 +128,7 @@ function DepartmentAccordion({ department }: { readonly department: Department }
       </h3>
       {isOpen && (
         <div id={panelId}>
-          <DepartmentBody department={department} mobile />
+          <DepartmentBody department={department} />
         </div>
       )}
     </section>
@@ -185,10 +155,17 @@ function Leadership() {
 }
 
 export function Teams() {
-  const isDesktop = useMediaQuery("(min-width: 769px)");
+  const patternStyle = {
+    "--teams-pattern-image": `url("${teamsPattern}")`,
+  } as CSSProperties;
 
   return (
-    <section id="teams" className="section teams-section" aria-labelledby="teams-title">
+    <section
+      id="teams"
+      className="section teams-section"
+      aria-labelledby="teams-title"
+      style={patternStyle}
+    >
       <div className="container">
         <div className="teams-intro">
           <div className="section-heading">
@@ -207,12 +184,10 @@ export function Teams() {
           <h3>الإدارات وفرق العمل</h3>
         </div>
 
-        <div className={isDesktop ? "organization-grid" : "organization-accordion"}>
-          {departments.map((department) =>
-            isDesktop
-              ? <DepartmentCard department={department} key={department.id} />
-              : <DepartmentAccordion department={department} key={department.id} />,
-          )}
+        <div className="organization-accordion">
+          {departments.map((department) => (
+            <DepartmentAccordion department={department} key={department.id} />
+          ))}
         </div>
       </div>
     </section>

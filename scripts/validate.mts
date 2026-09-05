@@ -217,6 +217,13 @@ const eventTracksComponent = read("src/components/EventTracks/EventTracks.tsx");
 assert.match(eventTracksComponent, /eventTracks\.map/);
 assert.match(eventTracksComponent, /مسارات الحدث وأركانه/);
 
+const teamsComponent = read("src/components/Teams/Teams.tsx");
+assert.match(teamsComponent, /Pattern_8_transparent_HQ\.svg/);
+assert.match(teamsComponent, /--teams-pattern-image/);
+assert.match(teamsComponent, /className="organization-accordion"/);
+assert.match(teamsComponent, /<DepartmentAccordion department=\{department\}/);
+assert.doesNotMatch(teamsComponent, /useMediaQuery|DepartmentCard|organization-grid/);
+
 const styles = read("src/styles/globals.css");
 assert.doesNotMatch(styles, /\.hero::before/);
 assert.match(styles, /\.hero\s*\{[\s\S]*?background: var\(--color-navy-950\)/);
@@ -228,6 +235,9 @@ assert.doesNotMatch(styles, /\.application-note/);
 assert.match(styles, /\.hero-social-links[\s\S]*?flex-wrap: nowrap/);
 assert.match(styles, /\.hero-signature[\s\S]*?direction: ltr[\s\S]*?align-items: flex-start/);
 assert.match(styles, /\.hero-watermark[\s\S]*?width: clamp\(26\.25rem, 125vw, 38\.75rem\)/);
+assert.match(styles, /\.teams-section::before[\s\S]*?var\(--teams-pattern-image\)[\s\S]*?opacity: 0\.16/);
+assert.match(styles, /@media \(min-width: 769px\)[\s\S]*?\.organization-accordion[\s\S]*?repeat\(2/);
+assert.doesNotMatch(styles, /\.organization-grid|\.department-heading/);
 assert.match(styles, /@media \(min-width: 1024px\)[\s\S]*?grid-template-columns: repeat\(3/);
 
 for (const path of [
