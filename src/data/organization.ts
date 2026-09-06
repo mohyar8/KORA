@@ -59,8 +59,8 @@ export const departments: readonly Department[] = [
         id: "design-subteam",
         name: "فريق التصميم",
         teamId: "design",
-        leader: { role: "قائدة الفريق", name: "لمى النغموش" },
-        members: ["لجين العتيبي", "فاطمة الامير", "دانة العلوان", "شهد العتيبي", "مجد الخليفة"],
+        leader: { role: "قائدة الفريق", name: "فاطمة الأمير" },
+        members: ["لجين العتيبي", "لمى النغموش", "دانة العلوان", "شهد العتيبي", "مجد الخليفة"],
       },
       {
         id: "media-subteam",
