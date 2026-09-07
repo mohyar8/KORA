@@ -19,7 +19,7 @@ export function EventFacts() {
         ))}
         <div className="fact fact--date">
           <time dateTime="2026-11-12">{siteConfig.eventDateArabic}</time>
-          <span>الظهران، KFUPM، ساحة مبنى 57</span>
+          <span>الظهران، جامعة الملك فهد للبترول والمعادن، ساحة مبنى 57</span>
         </div>
       </div>
       <img
