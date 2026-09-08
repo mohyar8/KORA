@@ -38,7 +38,7 @@ export const departments: readonly Department[] = [
         name: "فريق تصميم المعرض",
         teamId: "exhibition-design",
         leader: { role: "قائد الفريق", name: "مهند الرحيلي" },
-        members: ["محمد بكر", "محمد أبو سمحة", "إلياس اليأس"],
+        members: ["محمد بكر", "محمد أبو سمحة", "إلياس اليأس","عمر الجهني"],
       },
       {
         id: "museum-design-subteam",
