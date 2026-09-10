@@ -64,7 +64,7 @@ export const departments: readonly Department[] = [
       },
       {
         id: "media-subteam",
-        name: "فريق الإعلام",
+        name: "فريق التسويق الرقمي ",
         teamId: "media",
         leader: { role: "قائد الفريق", name: "خالد المسلم" },
         members: ["محمد سامي", "حسين اليامي", "عبدالرحمن الجفري", "مشاري الرماح", "محمد النجيمي"],
