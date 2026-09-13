@@ -3,8 +3,8 @@ import factsPattern from "../../assets/brand/patterns/Pattern_6_transparent_HQ.s
 
 const facts = [
   { value: "3", label: "أيام" },
-  { value: "6", label: "مسارات" },
-  { value: "+20,000", label: "زائر متوقع" },
+  { value: "9", label: "مسارات" },
+  { value: "+10,000", label: "زائر متوقع" },
 ] as const;
 
 export function EventFacts() {
