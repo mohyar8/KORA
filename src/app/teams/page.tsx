@@ -5,7 +5,7 @@ import { BRAND } from "@/lib/constants";
 export const metadata: Metadata = {
   title: `الإدارات والفرق | ${BRAND.nameAr}`,
   description:
-    "تعرّف على إدارات وفرق كورة: التصميم، التسويق، إدارة المشاريع، العمليات، العلاقات، الشراكات والمالية.",
+    "تعرّف على إدارات وفرق كورة: التصميم، التسويق، إدارة المشاريع، العمليات، العلاقات، الشراكات والمالية، والتقنية.",
 };
 
 export default function TeamsPage() {

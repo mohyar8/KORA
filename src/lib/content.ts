@@ -6,6 +6,9 @@ import {
   Lightbulb,
   Gamepad2,
   Presentation,
+  HeartPulse,
+  Cpu,
+  Cog,
 } from "lucide-react";
 import { COLORS } from "./constants";
 
@@ -13,7 +16,7 @@ export type AccentColor = keyof typeof COLORS;
 
 export const EVENT_FACTS = [
   { value: 3, unit: "", label: "أيام" },
-  { value: 6, unit: "", label: "مسارات" },
+  { value: 9, unit: "", label: "مسارات" },
   { value: 20000, unit: "+", label: "زائر متوقع" },
 ] as const;
 
@@ -80,6 +83,30 @@ export const TRACKS: Track[] = [
     accent: "green",
     icon: Presentation,
   },
+  {
+    number: "07",
+    title: "ركن الصحة",
+    description:
+      "مسار يستعرض دور العلوم الصحية في كرة القدم، من الطب الرياضي والوقاية من الإصابات والتأهيل، إلى التغذية والاستشفاء ورفع جاهزية اللاعبين وأدائهم.",
+    accent: "coral",
+    icon: HeartPulse,
+  },
+  {
+    number: "08",
+    title: "ركن التقنية",
+    description:
+      "مسار يكشف كيف غيّرت التقنية كرة القدم، من تحليل البيانات والإحصائيات والذكاء الاصطناعي، إلى تتبع أداء اللاعبين واكتشاف المواهب ودعم القرارات داخل وخارج الملعب.",
+    accent: "fuchsia",
+    icon: Cpu,
+  },
+  {
+    number: "09",
+    title: "ركن الهندسة",
+    description:
+      "مسار يعرّف الزائر بدور الهندسة خلف تجربة كرة القدم، من تصميم الملاعب وتجهيزها وتطوير بنيتها وتقنياتها، إلى هندسة المعدات والكرة وصناعة بيئة رياضية أكثر كفاءة وأمانًا.",
+    accent: "green",
+    icon: Cog,
+  },
 ];
 
 export interface Benefit {
@@ -108,11 +135,20 @@ export const BENEFITS: Benefit[] = [
   },
 ];
 
+export interface Person {
+  role: string;
+  name: string;
+}
+
+export type TeamAudience = "male" | "female";
+
 export interface TeamUnit {
   slug: string;
   title: string;
   description: string;
   skills: readonly string[];
+  audience?: TeamAudience;
+  leader?: Person;
 }
 
 export interface Department {
@@ -121,6 +157,7 @@ export interface Department {
   short: string;
   lead: string;
   accent: AccentColor;
+  manager: Person;
   teams: readonly TeamUnit[];
 }
 
@@ -131,6 +168,7 @@ export const DEPARTMENTS: readonly Department[] = [
     short: "تصميم الحدث",
     lead: "تحوّل مسارات كورة إلى مكان يُزار: توزيع الأركان، سرد المتحف، ومسار الزائر.",
     accent: "coral",
+    manager: { role: "مدير الإدارة", name: "أحمد بخاري" },
     teams: [
       {
         slug: "exhibition-design",
@@ -138,6 +176,8 @@ export const DEPARTMENTS: readonly Department[] = [
         description:
           "يحوّل أفكار مسارات كورة إلى تجربة مكانية متكاملة، من توزيع الأركان ومسار الزائر إلى اللوحات والعناصر البصرية والتنسيق مع الفرق التنفيذية.",
         skills: ["التصميم المكاني", "النمذجة ثلاثية الأبعاد", "تجربة الزائر", "التفكير البصري"],
+        audience: "male",
+        leader: { role: "قائد الفريق", name: "مهند الرحيلي" },
       },
       {
         slug: "museum-design",
@@ -145,6 +185,8 @@ export const DEPARTMENTS: readonly Department[] = [
         description:
           "يبني تجربة المعرض التاريخي التي تروي تطور كرة القدم السعودية، وينظم عرض المحطات والمواد التاريخية والعناصر التفاعلية بأسلوب مترابط.",
         skills: ["البحث", "السرد القصصي", "تنظيم المعارض", "التصميم البصري"],
+        audience: "female",
+        leader: { role: "قائدة الفريق", name: "زهرة الحداد" },
       },
     ],
   },
@@ -154,6 +196,7 @@ export const DEPARTMENTS: readonly Department[] = [
     short: "التسويق",
     lead: "ثلاثة فرق تمسك الهوية والمحتوى والحضور الميداني، قبل الحدث وأثناءه.",
     accent: "fuchsia",
+    manager: { role: "مدير الإدارة", name: "طارق الحربي" },
     teams: [
       {
         slug: "graphic-design",
@@ -161,6 +204,8 @@ export const DEPARTMENTS: readonly Department[] = [
         description:
           "يصمم المواد الرقمية والمطبوعة والحملات الإعلامية وفق هوية كورة، ويحافظ على اتساق العلامة عبر جميع نقاط التواصل.",
         skills: ["التصميم الجرافيكي", "الموشن", "الهوية البصرية", "تصميم المحتوى"],
+        audience: "female",
+        leader: { role: "قائدة الفريق", name: "فاطمة الأمير" },
       },
       {
         slug: "digital-marketing",
@@ -168,6 +213,8 @@ export const DEPARTMENTS: readonly Department[] = [
         description:
           "يبحث ويكتب ويخطط للمحتوى، ويساهم في إنتاج وتغطية المواد الإعلامية عبر المنصات الرقمية قبل الحدث وأثناءه.",
         skills: ["الكتابة", "البحث", "صناعة المحتوى", "التصوير والتحرير"],
+        audience: "male",
+        leader: { role: "قائد الفريق", name: "خالد المسلم" },
       },
       {
         slug: "field-marketing",
@@ -175,6 +222,8 @@ export const DEPARTMENTS: readonly Department[] = [
         description:
           "ينفذ الحملات والأنشطة التعريفية داخل الجامعة، ويتواصل مباشرة مع الجمهور لزيادة الوعي بالحدث وتحفيز الحضور.",
         skills: ["التواصل", "العمل الميداني", "تنظيم الحملات", "التفاعل مع الجمهور"],
+        audience: "female",
+        leader: { role: "قائدة الفريق", name: "دنيا الغميجان" },
       },
     ],
   },
@@ -182,15 +231,26 @@ export const DEPARTMENTS: readonly Department[] = [
     slug: "project",
     title: "إدارة المشاريع",
     short: "المشاريع",
-    lead: "تحوّل خطة كورة إلى مهام ومراحل، وتتابع الإنجاز بين كل الفرق.",
+    lead: "فريقان يمسكان الخطة والمتابعة: تحويل كورة إلى مهام ومراحل، ثم تتبع الإنجاز بين الفرق.",
     accent: "green",
+    manager: { role: "مدير الإدارة", name: "عمار الهذلي" },
     teams: [
       {
-        slug: "project-office",
-        title: "إدارة المشاريع",
+        slug: "planning",
+        title: "فريق التخطيط",
         description:
-          "تحوّل خطة كورة إلى مهام ومراحل واضحة، وتتابع الإنجاز والمواعيد والتنسيق بين الفرق والمخاطر التي قد تؤثر في التنفيذ.",
-        skills: ["التخطيط", "المتابعة", "التنسيق", "حل المشكلات"],
+          "تحوّل خطة كورة إلى مهام ومراحل واضحة، وتوزّع الأعمال والمواعيد والتنسيق بين الفرق قبل التنفيذ.",
+        skills: ["التخطيط", "التنسيق", "تحديد الأولويات", "حل المشكلات"],
+        audience: "male",
+      },
+     
+      {
+        slug: "follow-up",
+        title: "فريق المتابعة",
+        description:
+          "تتابع الإنجاز والمواعيد والمخاطر التي قد تؤثر في التنفيذ، وتبقي الفرق على المسار حتى اكتمال المهام.",
+        skills: ["المتابعة", "التوثيق", "التواصل", "إدارة المواعيد"],
+        audience: "female",
       },
     ],
   },
@@ -200,6 +260,7 @@ export const DEPARTMENTS: readonly Department[] = [
     short: "العمليات",
     lead: "جاهزية الموقع، الجداول، وحركة المواد والفرق يوم التنفيذ.",
     accent: "coral",
+    manager: { role: "مدير الإدارة", name: "محمد العوفي" },
     teams: [
       {
         slug: "operations-office",
@@ -207,6 +268,8 @@ export const DEPARTMENTS: readonly Department[] = [
         description:
           "تتولى جاهزية الموقع والاحتياجات التشغيلية والجداول وحركة المواد والفرق، وتدعم انسيابية التنفيذ وتجربة الزائر.",
         skills: ["التنظيم", "العمل الميداني", "إدارة الوقت", "التعامل مع التفاصيل"],
+        audience: "male",
+        leader: { role: "قائد الفريق", name: "محمد العوفي" },
       },
     ],
   },
@@ -216,6 +279,7 @@ export const DEPARTMENTS: readonly Department[] = [
     short: "العلاقات",
     lead: "الضيوف، الشركاء، والميزانية: واجهة كورة الرسمية ومواردها.",
     accent: "fuchsia",
+    manager: { role: "مدير الإدارة", name: "خالد النجدي" },
     teams: [
       {
         slug: "relations-team",
@@ -223,6 +287,8 @@ export const DEPARTMENTS: readonly Department[] = [
         description:
           "تدير التواصل الرسمي وتنسيق الضيوف والمتحدثين والمراسلات والبروتوكول، وتضمن تجربة مهنية للأطراف الخارجية.",
         skills: ["التواصل الرسمي", "التنسيق", "البروتوكول", "إدارة الضيوف"],
+        audience: "male",
+        leader: { role: "قائد الفريق", name: "عبدالله الحوطي" },
       },
       {
         slug: "partnerships",
@@ -230,6 +296,8 @@ export const DEPARTMENTS: readonly Department[] = [
         description:
           "تبحث عن جهات متوافقة مع كورة، وتعد عروض الشراكة، وتتابع التواصل والالتزامات بين الحدث وشركائه.",
         skills: ["التفاوض", "إعداد العروض", "بناء العلاقات", "المتابعة"],
+        audience: "female",
+        leader: { role: "قائدة الفريق", name: "شوق الغامدي" },
       },
       {
         slug: "finance",
@@ -237,10 +305,39 @@ export const DEPARTMENTS: readonly Department[] = [
         description:
           "تتابع الميزانية والمصروفات والمستندات المالية، وتساعد على اتخاذ قرارات دقيقة تحافظ على موارد المشروع.",
         skills: ["الدقة", "Excel", "إعداد الميزانيات", "التوثيق"],
+        audience: "male",
+        leader: { role: "قائد الفريق", name: "سعيد العيد" },
+      },
+    ],
+  },
+  {
+    slug: "tech",
+    title: "إدارة التقنية",
+    short: "التقنية",
+    lead: "المنصات والأنظمة والتجارب الرقمية التي تشغّل الحدث أمام الزائر وخلف الكواليس.",
+    accent: "green",
+    manager: { role: "مدير الإدارة", name: "أسامة الغامدي" },
+    teams: [
+      {
+        slug: "tech-team",
+        title: "فريق التقنية",
+        description:
+          "يبني ويدير الحلول التقنية للحدث، من المنصات الرقمية والأنظمة التشغيلية إلى التجارب التفاعلية ودعم الفرق أثناء التنفيذ.",
+        skills: ["التطوير", "الأنظمة", "التجارب الرقمية", "الدعم التقني"],
+        audience: "male",
+        leader: { role: "قائد الفريق", name: "محمد يار" },
       },
     ],
   },
 ];
+
+export const LEADERSHIP = {
+  title: "قيادة كورة",
+  people: [
+    { role: "قائد كورة", name: "عمر الحربي", highlight: "كورة" },
+    { role: "نائب القائد", name: "خالد الجهني" },
+  ],
+} as const;
 
 export const NAV_LINKS = [
   { href: "/#about", label: "عن كورة" },

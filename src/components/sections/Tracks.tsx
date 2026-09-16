@@ -3,7 +3,17 @@
 import { useId, useState } from "react";
 import { TRACKS } from "@/lib/content";
 
-const SHORT_TRACK_TITLES = ["المتحف", "إعلام", "اقتصاد", "ريادة", "ترفيه", "المسرح"] as const;
+const SHORT_TRACK_TITLES = [
+  "المتحف",
+  "إعلام",
+  "اقتصاد",
+  "ريادة",
+  "ترفيه",
+  "المسرح",
+  "صحة",
+  "تقنية",
+  "هندسة",
+] as const;
 
 export function Tracks() {
   const [open, setOpen] = useState(0);

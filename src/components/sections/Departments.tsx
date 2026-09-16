@@ -2,7 +2,12 @@
 
 import { useEffect, useState } from "react";
 import { APPLY_URL } from "@/lib/constants";
-import { DEPARTMENTS } from "@/lib/content";
+import { DEPARTMENTS, LEADERSHIP, type TeamAudience } from "@/lib/content";
+
+const AUDIENCE_LABEL: Record<TeamAudience, string> = {
+  male: "طلاب",
+  female: "طالبات",
+};
 
 export function Departments() {
   const [active, setActive] = useState(DEPARTMENTS[0].slug);
@@ -31,9 +36,33 @@ export function Departments() {
         <h1 id="depts-heading">الإدارات والفرق</h1>
         <p className="depts-lead">
           اختر إدارة، ثم اقرأ فرقها. كل فريق يمسك جزءًا واضحًا من كورة: المكان،
-          التسويق، التخطيط، التشغيل، أو العلاقات والموارد.
+          التسويق، التخطيط، التشغيل، العلاقات والموارد، أو التقنية.
         </p>
       </header>
+
+      <section className="depts-leaders" aria-labelledby="leaders-heading">
+        <div className="depts-leaders-title">
+          <h2 id="leaders-heading">
+            قيادة <em className="word-mark">كورة</em>
+          </h2>
+        </div>
+        <ul className="depts-leaders-people">
+          {LEADERSHIP.people.map((person) => (
+            <li key={person.name}>
+              <span>
+                {"highlight" in person ? (
+                  <>
+                    قائد <em>{person.highlight}</em>
+                  </>
+                ) : (
+                  person.role
+                )}
+              </span>
+              <strong>{person.name}</strong>
+            </li>
+          ))}
+        </ul>
+      </section>
 
       <div className="depts-tabs" role="tablist" aria-label="الإدارات">
         {DEPARTMENTS.map((item, itemIndex) => (
@@ -45,7 +74,6 @@ export function Departments() {
             aria-selected={active === item.slug}
             aria-controls="depts-stage"
             data-accent={item.accent}
-            data-wide={item.slug === "event-design" ? "true" : undefined}
             onClick={() => open(item.slug)}
           >
             <span>{String(itemIndex + 1).padStart(2, "0")}</span>
@@ -63,6 +91,10 @@ export function Departments() {
       >
         <div className="depts-stage-head">
           <h2>{dept.title}</h2>
+          <p className="depts-person">
+            <span>{dept.manager.role}</span>
+            <strong>{dept.manager.name}</strong>
+          </p>
           <p className="depts-stage-lead">{dept.lead}</p>
         </div>
 
@@ -72,9 +104,28 @@ export function Departments() {
               <article className="depts-card">
                 <div className="depts-card-top">
                   <span>{String(teamIndex + 1).padStart(2, "0")}</span>
+                  {team.audience ? (
+                    <b
+                      className="depts-audience"
+                      data-audience={team.audience}
+                      aria-label={
+                        team.audience === "female"
+                          ? "هذا الفريق للطالبات"
+                          : "هذا الفريق للطلاب"
+                      }
+                    >
+                      {AUDIENCE_LABEL[team.audience]}
+                    </b>
+                  ) : null}
                   <i className="kora-pentagon" />
                 </div>
                 <h3>{team.title}</h3>
+                {team.leader ? (
+                  <p className="depts-person">
+                    <span>{team.leader.role}</span>
+                    <strong>{team.leader.name}</strong>
+                  </p>
+                ) : null}
                 <p>{team.description}</p>
                 <ul>
                   {team.skills.map((skill) => (

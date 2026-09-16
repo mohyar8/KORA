@@ -11,7 +11,7 @@ export const BRAND = {
 export const APPLY_URL = "https://forms.cloud.microsoft/r/QQmb1auxvd";
 
 export const APPLICATION_DEADLINE = {
-  date: "20 سبتمبر 2026",
+  date: "29 سبتمبر 2026",
   time: "الساعة 11:59 مساءً بتوقيت السعودية",
 } as const;
 
