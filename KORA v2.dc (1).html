@@ -1,0 +1,781 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="" />
+<link href="https://fonts.googleapis.com/css2?family=Jost:ital,wght@0,200..900;1,200..900&family=Noto+Kufi+Arabic:wght@400..900&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+<style>
+:root{
+  --navy:#2D3B70;
+  --navy-d:#1A2350;
+  --ink:#0E1435;
+  --paper:#ECEFF5;
+  --coral:#F2624F;
+  --green:#4FB05A;
+  --line:rgba(236,239,245,0.18);
+  --line2:rgba(236,239,245,0.38);
+}
+*{box-sizing:border-box;}
+html,body{margin:0;padding:0;background:#0E1435;}
+body{-webkit-font-smoothing:antialiased;}
+a{color:var(--coral);text-decoration:none;}
+a:hover{color:var(--paper);}
+::selection{background:var(--coral);color:var(--paper);}
+input::placeholder{color:rgba(236,239,245,0.45);}
+@keyframes kora-ticker{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+@keyframes kora-marquee{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+@keyframes kora-spin{from{transform:rotate(0)}to{transform:rotate(360deg)}}
+@keyframes kora-blink{0%,49%{opacity:1}50%,100%{opacity:0.2}}
+@keyframes kora-sway{0%,100%{transform:rotate(-1.2deg) translateY(0)}50%{transform:rotate(1.2deg) translateY(-6px)}}
+@media (max-width:820px){
+  [data-rail]{flex-wrap:wrap !important;min-height:0 !important;}
+  [data-rail] [data-panel]{flex-basis:100% !important;min-width:0 !important;min-height:112px;}
+  [data-rail] [data-panel][data-open="1"]{min-height:300px;}
+}
+</style>
+</helmet>
+
+<div style="background:var(--ink);color:var(--paper);font-family:Jost,Helvetica,sans-serif;overflow-x:hidden;position:relative;">
+
+<div ref="{{ spotRef }}" style="position:fixed;inset:0;pointer-events:none;z-index:40;opacity:0;transition:opacity .6s ease;mix-blend-mode:screen;"></div>
+
+<div style="position:fixed;top:0;left:0;right:0;z-index:60;border-bottom:1px solid var(--line);background:rgba(14,20,53,0.86);backdrop-filter:blur(16px);">
+  <div style="display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:16px;height:58px;padding:0 clamp(12px,2vw,28px);">
+    <div style="display:flex;align-items:center;gap:12px;min-width:0;">
+      <img src="assets/kora-mark.png" alt="KORA" style="height:20px;width:auto;flex:none;display:block;" />
+      <div style="font-family:'Noto Kufi Arabic',sans-serif;font-weight:800;font-size:17px;line-height:1;">كورة</div>
+      <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:0.22em;opacity:.68;white-space:nowrap;">KORA / 2026</div>
+    </div>
+    <div style="overflow:hidden;height:58px;display:flex;align-items:center;border-left:1px solid var(--line);border-right:1px solid var(--line);">
+      <div style="display:flex;white-space:nowrap;animation:kora-ticker 46s linear infinite;font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:0.2em;opacity:.72;">
+        <span style="padding:0 20px;">12–14 NOVEMBER 2026</span><span style="padding:0 20px;color:var(--coral);">●</span>
+        <span style="padding:0 20px;">KFUPM · DHAHRAN · BUILDING 57 SQUARE</span><span style="padding:0 20px;color:var(--green);">●</span>
+        <span style="padding:0 20px;">3 DAYS / 6 TRACKS / +20,000 VISITORS</span><span style="padding:0 20px;color:var(--coral);">●</span>
+        <span style="padding:0 20px;">APPLICATIONS OPEN — JOIN THE KORA TEAM</span><span style="padding:0 20px;color:var(--green);">●</span>
+        <span style="padding:0 20px;">12–14 NOVEMBER 2026</span><span style="padding:0 20px;color:var(--coral);">●</span>
+        <span style="padding:0 20px;">KFUPM · DHAHRAN · BUILDING 57 SQUARE</span><span style="padding:0 20px;color:var(--green);">●</span>
+        <span style="padding:0 20px;">3 DAYS / 6 TRACKS / +20,000 VISITORS</span><span style="padding:0 20px;color:var(--coral);">●</span>
+        <span style="padding:0 20px;">APPLICATIONS OPEN — JOIN THE KORA TEAM</span><span style="padding:0 20px;color:var(--green);">●</span>
+      </div>
+    </div>
+    <a href="#apply" style="font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:0.18em;background:var(--coral);color:var(--paper);padding:11px 16px;white-space:nowrap;" style-hover="background:var(--paper);color:var(--ink);">JOIN THE TEAM ↘</a>
+  </div>
+  <div style="height:2px;background:var(--line);">
+    <div ref="{{ progRef }}" style="height:2px;width:0%;background:var(--coral);"></div>
+  </div>
+</div>
+
+<section data-screen-label="01 Hero" style="position:relative;min-height:100vh;padding:60px 0 0;display:flex;flex-direction:column;justify-content:space-between;overflow:hidden;background:var(--ink);">
+  <div aria-hidden="true" style="position:absolute;inset:0;pointer-events:none;background-image:linear-gradient(to right, var(--line) 1px, transparent 1px);background-size:calc(100% / 12) 100%;opacity:.5;"></div>
+  <div aria-hidden="true" style="position:absolute;left:50%;top:54%;width:min(88vh,940px);height:min(88vh,940px);transform:translate(-50%,-50%);border:1px solid var(--line2);border-radius:50%;pointer-events:none;"></div>
+  <div aria-hidden="true" style="position:absolute;left:50%;top:54%;width:min(36vh,360px);height:min(36vh,360px);transform:translate(-50%,-50%);border:1px solid var(--line2);border-radius:50%;pointer-events:none;"></div>
+  <div aria-hidden="true" style="position:absolute;left:0;right:0;top:54%;height:1px;background:var(--line2);pointer-events:none;"></div>
+  <div aria-hidden="true" style="position:absolute;left:-90px;top:16%;width:230px;height:230px;background:var(--navy);clip-path:polygon(50% 0%,100% 38%,82% 100%,18% 100%,0% 38%);opacity:.85;pointer-events:none;"></div>
+  <div aria-hidden="true" style="position:absolute;left:20px;top:34%;width:150px;height:150px;border:1px solid var(--coral);clip-path:polygon(50% 0%,100% 38%,82% 100%,18% 100%,0% 38%);opacity:.55;pointer-events:none;"></div>
+  <div aria-hidden="true" style="position:absolute;right:-70px;bottom:16%;width:260px;height:260px;background:var(--navy);clip-path:polygon(50% 0%,100% 38%,82% 100%,18% 100%,0% 38%);opacity:.7;pointer-events:none;"></div>
+
+  <div style="position:relative;display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));padding:clamp(16px,3vw,34px) clamp(12px,2vw,28px) 0;font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:0.18em;">
+    <div style="opacity:.7;">FILE / KORA—26</div>
+    <div style="opacity:.7;">SAUDI FOOTBALL INDUSTRY</div>
+    <div style="opacity:.7;">EASTERN PROVINCE, KSA</div>
+    <div style="color:var(--green);">● STATUS: BUILDING</div>
+  </div>
+
+  <div ref="{{ heroRef }}" style="position:relative;padding:0 clamp(12px,2vw,28px);">
+    <div style="position:relative;width:100%;">
+      <div style="position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:min(1100px,96%);font-family:Jost,sans-serif;font-weight:800;font-size:clamp(90px,17vw,270px);line-height:.8;letter-spacing:0.02em;text-align:center;color:transparent;-webkit-text-stroke:1px rgba(236,239,245,0.4);white-space:nowrap;pointer-events:none;">KORA</div>
+      <div style="position:relative;font-family:'Noto Kufi Arabic',sans-serif;font-weight:900;font-size:clamp(120px,25vw,420px);line-height:.95;text-align:center;color:var(--paper);mix-blend-mode:difference;direction:rtl;">كورة</div>
+      <div style="position:absolute;left:0;right:0;top:57%;height:clamp(58px,7vw,100px);overflow:hidden;border-top:1px solid var(--line2);border-bottom:1px solid var(--line2);pointer-events:none;background-image:repeating-linear-gradient(115deg, rgba(242,98,79,0.5) 0 3px, rgba(242,98,79,0) 3px 10px);"></div>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:clamp(14px,2vw,32px);align-items:end;margin-top:clamp(14px,2vw,26px);">
+      <div style="font-family:'IBM Plex Mono',monospace;font-size:clamp(10px,1vw,12px);letter-spacing:0.3em;"><span style="color:var(--paper);">THE INDUSTRY</span><br /><span style="color:var(--green);">BEHIND THE GAME</span></div>
+      <div style="font-family:Jost,sans-serif;font-weight:400;font-size:clamp(16px,1.5vw,22px);line-height:1.35;max-width:34ch;text-wrap:pretty;">A match lasts ninety minutes. The industry behind it never stops.</div>
+      <div style="justify-self:end;text-align:right;font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:0.2em;opacity:.7;">SCROLL TO ENTER<br /><span style="animation:kora-blink 1.4s steps(1) infinite;">↓</span></div>
+    </div>
+  </div>
+
+  <div style="position:relative;display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));border-top:1px solid var(--line);margin-top:clamp(20px,4vw,54px);background:var(--navy-d);">
+    <div style="padding:18px clamp(12px,2vw,24px);border-right:1px solid var(--line);">
+      <div style="font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:0.22em;opacity:.68;margin-bottom:8px;">DATE</div>
+      <div style="font-family:Jost,sans-serif;font-weight:600;font-size:clamp(20px,2vw,28px);line-height:1;">12–14 NOV 2026</div>
+    </div>
+    <div style="padding:18px clamp(12px,2vw,24px);border-right:1px solid var(--line);">
+      <div style="font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:0.22em;opacity:.68;margin-bottom:8px;">VENUE</div>
+      <div style="font-family:Jost,sans-serif;font-weight:600;font-size:clamp(20px,2vw,28px);line-height:1;">KFUPM, DHAHRAN</div>
+    </div>
+    <div style="padding:18px clamp(12px,2vw,24px);border-right:1px solid var(--line);">
+      <div style="font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:0.22em;opacity:.68;margin-bottom:8px;">SITE</div>
+      <div style="font-family:Jost,sans-serif;font-weight:600;font-size:clamp(20px,2vw,28px);line-height:1;">BUILDING 57 SQUARE</div>
+    </div>
+    <div style="padding:18px clamp(12px,2vw,24px);">
+      <div style="font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:0.22em;opacity:.68;margin-bottom:8px;">SCALE</div>
+      <div style="font-family:Jost,sans-serif;font-weight:600;font-size:clamp(20px,2vw,28px);line-height:1;color:var(--coral);">+20,000 VISITORS</div>
+    </div>
+  </div>
+</section>
+
+<section data-screen-label="02 What is KORA" style="position:relative;background:var(--navy);">
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));">
+    <div style="padding:clamp(28px,5vw,80px) clamp(16px,3vw,56px);border-right:1px solid var(--line);">
+      <div style="display:flex;align-items:baseline;gap:14px;margin-bottom:clamp(20px,3vw,40px);">
+        <div style="font-family:Jost,sans-serif;font-weight:800;font-size:clamp(56px,9vw,140px);line-height:.8;color:transparent;-webkit-text-stroke:1px var(--line2);">01</div>
+        <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:0.22em;opacity:.75;">WHAT IS KORA<br />ما هي كورة</div>
+      </div>
+      <h2 style="margin:0;font-family:Jost,sans-serif;font-weight:600;font-size:clamp(28px,3.6vw,56px);line-height:1.06;letter-spacing:-0.01em;text-wrap:pretty;">KORA presents Saudi football as a <span style="color:var(--coral);">complete industry</span>, not only a sport.</h2>
+      <p style="font-family:Jost,sans-serif;font-weight:300;font-size:clamp(16px,1.35vw,20px);line-height:1.55;max-width:56ch;margin:clamp(18px,2.5vw,32px) 0 0;opacity:.9;text-wrap:pretty;">Three days in Dhahran where the record of the game meets the machinery around it. KORA connects history, media, technology, investment, entrepreneurship and entertainment — and puts the future of the sport on one floor, in one square.</p>
+      <div style="margin-top:clamp(24px,3vw,44px);height:clamp(180px,26vw,340px);border:1px solid var(--line2);position:relative;overflow:hidden;background-image:repeating-linear-gradient(115deg, rgba(236,239,245,0.14) 0 4px, rgba(236,239,245,0) 4px 12px);">
+        <div style="position:absolute;right:-40px;top:-40px;width:180px;height:180px;background:var(--coral);clip-path:polygon(50% 0%,100% 38%,82% 100%,18% 100%,0% 38%);opacity:.9;"></div>
+        <div style="position:absolute;left:14px;bottom:12px;font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:0.2em;opacity:.8;">IMAGE SLOT — ARCHIVE CROWD / GREEN FALCONS</div>
+      </div>
+    </div>
+    <div style="padding:clamp(28px,5vw,80px) clamp(16px,3vw,56px);display:flex;flex-direction:column;">
+      <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:0.22em;opacity:.68;padding-bottom:14px;">INDEX OF THE INDUSTRY</div>
+      <div>
+        <div style="display:grid;grid-template-columns:46px 1fr auto;gap:14px;align-items:baseline;padding:14px 0;border-top:1px solid var(--line);"><span style="font-family:'IBM Plex Mono',monospace;font-size:10px;opacity:.62;">A.01</span><span style="font-family:Jost,sans-serif;font-weight:500;font-size:clamp(18px,1.8vw,25px);">HISTORY</span><span style="font-family:'Noto Kufi Arabic',sans-serif;font-size:13px;opacity:.7;">التاريخ</span></div>
+        <div style="display:grid;grid-template-columns:46px 1fr auto;gap:14px;align-items:baseline;padding:14px 0;border-top:1px solid var(--line);"><span style="font-family:'IBM Plex Mono',monospace;font-size:10px;opacity:.62;">A.02</span><span style="font-family:Jost,sans-serif;font-weight:500;font-size:clamp(18px,1.8vw,25px);">MEDIA</span><span style="font-family:'Noto Kufi Arabic',sans-serif;font-size:13px;opacity:.7;">الإعلام</span></div>
+        <div style="display:grid;grid-template-columns:46px 1fr auto;gap:14px;align-items:baseline;padding:14px 0;border-top:1px solid var(--line);"><span style="font-family:'IBM Plex Mono',monospace;font-size:10px;opacity:.62;">A.03</span><span style="font-family:Jost,sans-serif;font-weight:500;font-size:clamp(18px,1.8vw,25px);">TECHNOLOGY</span><span style="font-family:'Noto Kufi Arabic',sans-serif;font-size:13px;opacity:.7;">التقنية</span></div>
+        <div style="display:grid;grid-template-columns:46px 1fr auto;gap:14px;align-items:baseline;padding:14px 0;border-top:1px solid var(--line);"><span style="font-family:'IBM Plex Mono',monospace;font-size:10px;opacity:.62;">A.04</span><span style="font-family:Jost,sans-serif;font-weight:500;font-size:clamp(18px,1.8vw,25px);">INVESTMENT</span><span style="font-family:'Noto Kufi Arabic',sans-serif;font-size:13px;opacity:.7;">الاستثمار</span></div>
+        <div style="display:grid;grid-template-columns:46px 1fr auto;gap:14px;align-items:baseline;padding:14px 0;border-top:1px solid var(--line);"><span style="font-family:'IBM Plex Mono',monospace;font-size:10px;opacity:.62;">A.05</span><span style="font-family:Jost,sans-serif;font-weight:500;font-size:clamp(18px,1.8vw,25px);">ENTREPRENEURSHIP</span><span style="font-family:'Noto Kufi Arabic',sans-serif;font-size:13px;opacity:.7;">ريادة الأعمال</span></div>
+        <div style="display:grid;grid-template-columns:46px 1fr auto;gap:14px;align-items:baseline;padding:14px 0;border-top:1px solid var(--line);"><span style="font-family:'IBM Plex Mono',monospace;font-size:10px;opacity:.62;">A.06</span><span style="font-family:Jost,sans-serif;font-weight:500;font-size:clamp(18px,1.8vw,25px);">ENTERTAINMENT</span><span style="font-family:'Noto Kufi Arabic',sans-serif;font-size:13px;opacity:.7;">الترفيه</span></div>
+        <div style="display:grid;grid-template-columns:46px 1fr auto;gap:14px;align-items:baseline;padding:14px 0;border-top:1px solid var(--line);border-bottom:1px solid var(--line);"><span style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--green);">A.07</span><span style="font-family:Jost,sans-serif;font-weight:500;font-size:clamp(18px,1.8vw,25px);color:var(--green);">THE FUTURE</span><span style="font-family:'Noto Kufi Arabic',sans-serif;font-size:13px;color:var(--green);">المستقبل</span></div>
+      </div>
+      <div style="margin-top:auto;padding-top:clamp(24px,3vw,44px);display:flex;align-items:center;gap:20px;justify-content:flex-end;">
+        <img src="assets/kora-lockup.png" alt="KORA" style="width:132px;height:auto;flex:none;display:block;opacity:.95;" />
+        <div style="font-family:'Noto Kufi Arabic',sans-serif;font-weight:700;font-size:clamp(20px,2.2vw,32px);line-height:1.5;direction:rtl;text-align:right;">الصناعة التي تقف<br />خلف اللعبة</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="tracks" data-screen-label="03 Tracks" style="position:relative;background:var(--ink);border-top:1px solid var(--line2);">
+  <div style="display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:16px;padding:clamp(28px,5vw,72px) clamp(16px,3vw,56px) clamp(18px,2.5vw,30px);">
+    <div style="display:flex;align-items:baseline;gap:14px;">
+      <div style="font-family:Jost,sans-serif;font-weight:800;font-size:clamp(56px,9vw,140px);line-height:.8;color:transparent;-webkit-text-stroke:1px var(--line2);">02</div>
+      <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:0.22em;opacity:.75;">SIX TRACKS<br />ستة مسارات</div>
+    </div>
+    <div style="display:flex;flex-wrap:wrap;gap:10px;align-items:center;" ref="{{ pentNavRef }}">
+      <div data-pent="1" onClick="{{ onTrack }}" onMouseEnter="{{ onTrack }}" style="cursor:pointer;position:relative;width:54px;height:54px;display:flex;align-items:center;justify-content:center;clip-path:polygon(50% 0%,100% 38%,82% 100%,18% 100%,0% 38%);background:rgba(236,239,245,0.1);transition:background .35s ease,transform .35s ease;"><span style="font-family:'IBM Plex Mono',monospace;font-size:11px;">01</span></div>
+      <div data-pent="2" onClick="{{ onTrack }}" onMouseEnter="{{ onTrack }}" style="cursor:pointer;position:relative;width:54px;height:54px;display:flex;align-items:center;justify-content:center;clip-path:polygon(50% 0%,100% 38%,82% 100%,18% 100%,0% 38%);background:rgba(236,239,245,0.1);transition:background .35s ease,transform .35s ease;"><span style="font-family:'IBM Plex Mono',monospace;font-size:11px;">02</span></div>
+      <div data-pent="3" onClick="{{ onTrack }}" onMouseEnter="{{ onTrack }}" style="cursor:pointer;position:relative;width:54px;height:54px;display:flex;align-items:center;justify-content:center;clip-path:polygon(50% 0%,100% 38%,82% 100%,18% 100%,0% 38%);background:rgba(236,239,245,0.1);transition:background .35s ease,transform .35s ease;"><span style="font-family:'IBM Plex Mono',monospace;font-size:11px;">03</span></div>
+      <div data-pent="4" onClick="{{ onTrack }}" onMouseEnter="{{ onTrack }}" style="cursor:pointer;position:relative;width:54px;height:54px;display:flex;align-items:center;justify-content:center;clip-path:polygon(50% 0%,100% 38%,82% 100%,18% 100%,0% 38%);background:rgba(236,239,245,0.1);transition:background .35s ease,transform .35s ease;"><span style="font-family:'IBM Plex Mono',monospace;font-size:11px;">04</span></div>
+      <div data-pent="5" onClick="{{ onTrack }}" onMouseEnter="{{ onTrack }}" style="cursor:pointer;position:relative;width:54px;height:54px;display:flex;align-items:center;justify-content:center;clip-path:polygon(50% 0%,100% 38%,82% 100%,18% 100%,0% 38%);background:rgba(236,239,245,0.1);transition:background .35s ease,transform .35s ease;"><span style="font-family:'IBM Plex Mono',monospace;font-size:11px;">05</span></div>
+      <div data-pent="6" onClick="{{ onTrack }}" onMouseEnter="{{ onTrack }}" style="cursor:pointer;position:relative;width:54px;height:54px;display:flex;align-items:center;justify-content:center;clip-path:polygon(50% 0%,100% 38%,82% 100%,18% 100%,0% 38%);background:rgba(236,239,245,0.1);transition:background .35s ease,transform .35s ease;"><span style="font-family:'IBM Plex Mono',monospace;font-size:11px;">06</span></div>
+    </div>
+  </div>
+
+  <div ref="{{ railRef }}" data-rail="1" style="display:flex;flex-wrap:nowrap;gap:2px;padding:0 clamp(16px,3vw,56px) clamp(28px,5vw,72px);min-height:clamp(400px,52vh,620px);">
+    <div data-panel="1" onMouseEnter="{{ onTrack }}" onClick="{{ onTrack }}" style="position:relative;flex:1 1 0;min-width:64px;overflow:hidden;cursor:pointer;background:var(--navy-d);transition:flex-grow .7s cubic-bezier(.16,1,.3,1),min-height .7s cubic-bezier(.16,1,.3,1),background .7s ease;">
+      <div data-art="1" style="position:absolute;inset:0;background-image:repeating-linear-gradient(115deg, rgba(236,239,245,0.12) 0 4px, rgba(236,239,245,0) 4px 12px);opacity:.55;transition:opacity .7s ease,transform .9s cubic-bezier(.16,1,.3,1);"></div>
+      <div data-pent-art="1" style="position:absolute;right:-50px;bottom:-50px;width:210px;height:210px;clip-path:polygon(50% 0%,100% 38%,82% 100%,18% 100%,0% 38%);background:var(--coral);opacity:.25;transition:opacity .7s ease,transform .9s cubic-bezier(.16,1,.3,1);"></div>
+      <div style="position:relative;height:100%;display:flex;flex-direction:column;justify-content:space-between;padding:clamp(14px,1.6vw,22px);">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px;">
+          <span style="font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:0.18em;opacity:.8;">T/01</span>
+          <span data-dot="1" style="width:9px;height:9px;flex:none;background:var(--coral);clip-path:polygon(50% 0%,100% 38%,82% 100%,18% 100%,0% 38%);"></span>
+        </div>
+        <div>
+          <div style="font-family:Jost,sans-serif;font-weight:600;font-size:clamp(22px,2.6vw,40px);line-height:1;letter-spacing:-0.01em;">HISTORICAL<br />MUSEUM</div>
+          <div style="font-family:'Noto Kufi Arabic',sans-serif;font-weight:600;font-size:14px;opacity:.75;margin-top:8px;">المتحف التاريخي</div>
+          <div data-body="1" style="max-height:0;opacity:0;overflow:hidden;transition:max-height .7s cubic-bezier(.16,1,.3,1),opacity .5s ease;">
+            <p style="margin:14px 0 0;font-family:Jost,sans-serif;font-weight:300;font-size:16px;line-height:1.5;max-width:42ch;">Where the record is kept. Kits, trophies, documents and the decades that built the Saudi league — presented as evidence, not nostalgia.</p>
+            <div style="margin-top:16px;font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:0.2em;color:var(--coral);">ZONE A · OPEN ALL THREE DAYS</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div data-panel="2" onMouseEnter="{{ onTrack }}" onClick="{{ onTrack }}" style="position:relative;flex:1 1 0;min-width:64px;overflow:hidden;cursor:pointer;background:var(--navy-d);transition:flex-grow .7s cubic-bezier(.16,1,.3,1),min-height .7s cubic-bezier(.16,1,.3,1),background .7s ease;">
+      <div data-art="2" style="position:absolute;inset:0;background-image:repeating-linear-gradient(115deg, rgba(236,239,245,0.12) 0 4px, rgba(236,239,245,0) 4px 12px);opacity:.55;transition:opacity .7s ease,transform .9s cubic-bezier(.16,1,.3,1);"></div>
+      <div data-pent-art="2" style="position:absolute;right:-50px;bottom:-50px;width:210px;height:210px;clip-path:polygon(50% 0%,100% 38%,82% 100%,18% 100%,0% 38%);background:var(--green);opacity:.25;transition:opacity .7s ease,transform .9s cubic-bezier(.16,1,.3,1);"></div>
+      <div style="position:relative;height:100%;display:flex;flex-direction:column;justify-content:space-between;padding:clamp(14px,1.6vw,22px);">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px;">
+          <span style="font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:0.18em;opacity:.8;">T/02</span>
+          <span data-dot="2" style="width:9px;height:9px;flex:none;background:var(--green);clip-path:polygon(50% 0%,100% 38%,82% 100%,18% 100%,0% 38%);"></span>
+        </div>
+        <div>
+          <div style="font-family:Jost,sans-serif;font-weight:600;font-size:clamp(22px,2.6vw,40px);line-height:1;letter-spacing:-0.01em;">MEDIA</div>
+          <div style="font-family:'Noto Kufi Arabic',sans-serif;font-weight:600;font-size:14px;opacity:.75;margin-top:8px;">الإعلام</div>
+          <div data-body="2" style="max-height:0;opacity:0;overflow:hidden;transition:max-height .7s cubic-bezier(.16,1,.3,1),opacity .5s ease;">
+            <p style="margin:14px 0 0;font-family:Jost,sans-serif;font-weight:300;font-size:16px;line-height:1.5;max-width:42ch;">Broadcast, commentary, production and the studio floor that turns ninety minutes into a national conversation. Live desks running across all three days.</p>
+            <div style="margin-top:16px;font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:0.2em;color:var(--green);">ZONE B · LIVE BROADCAST</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div data-panel="3" onMouseEnter="{{ onTrack }}" onClick="{{ onTrack }}" style="position:relative;flex:1 1 0;min-width:64px;overflow:hidden;cursor:pointer;background:var(--navy-d);transition:flex-grow .7s cubic-bezier(.16,1,.3,1),min-height .7s cubic-bezier(.16,1,.3,1),background .7s ease;">
+      <div data-art="3" style="position:absolute;inset:0;background-image:repeating-linear-gradient(115deg, rgba(236,239,245,0.12) 0 4px, rgba(236,239,245,0) 4px 12px);opacity:.55;transition:opacity .7s ease,transform .9s cubic-bezier(.16,1,.3,1);"></div>
+      <div data-pent-art="3" style="position:absolute;right:-50px;bottom:-50px;width:210px;height:210px;clip-path:polygon(50% 0%,100% 38%,82% 100%,18% 100%,0% 38%);background:var(--paper);opacity:.16;transition:opacity .7s ease,transform .9s cubic-bezier(.16,1,.3,1);"></div>
+      <div style="position:relative;height:100%;display:flex;flex-direction:column;justify-content:space-between;padding:clamp(14px,1.6vw,22px);">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px;">
+          <span style="font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:0.18em;opacity:.8;">T/03</span>
+          <span data-dot="3" style="width:9px;height:9px;flex:none;background:var(--paper);clip-path:polygon(50% 0%,100% 38%,82% 100%,18% 100%,0% 38%);"></span>
+        </div>
+        <div>
+          <div style="font-family:Jost,sans-serif;font-weight:600;font-size:clamp(22px,2.6vw,40px);line-height:1;letter-spacing:-0.01em;">ECONOMY &amp;<br />INVESTMENT</div>
+          <div style="font-family:'Noto Kufi Arabic',sans-serif;font-weight:600;font-size:14px;opacity:.75;margin-top:8px;">الاقتصاد والاستثمار</div>
+          <div data-body="3" style="max-height:0;opacity:0;overflow:hidden;transition:max-height .7s cubic-bezier(.16,1,.3,1),opacity .5s ease;">
+            <p style="margin:14px 0 0;font-family:Jost,sans-serif;font-weight:300;font-size:16px;line-height:1.5;max-width:42ch;">Club valuations, sponsorship, infrastructure and the capital moving into the game. Where the money enters and what it builds.</p>
+            <div style="margin-top:16px;font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:0.2em;opacity:.85;">ZONE C · INVESTOR ROOMS</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div data-panel="4" onMouseEnter="{{ onTrack }}" onClick="{{ onTrack }}" style="position:relative;flex:1 1 0;min-width:64px;overflow:hidden;cursor:pointer;background:var(--navy-d);transition:flex-grow .7s cubic-bezier(.16,1,.3,1),min-height .7s cubic-bezier(.16,1,.3,1),background .7s ease;">
+      <div data-art="4" style="position:absolute;inset:0;background-image:repeating-linear-gradient(115deg, rgba(236,239,245,0.12) 0 4px, rgba(236,239,245,0) 4px 12px);opacity:.55;transition:opacity .7s ease,transform .9s cubic-bezier(.16,1,.3,1);"></div>
+      <div data-pent-art="4" style="position:absolute;right:-50px;bottom:-50px;width:210px;height:210px;clip-path:polygon(50% 0%,100% 38%,82% 100%,18% 100%,0% 38%);background:var(--coral);opacity:.25;transition:opacity .7s ease,transform .9s cubic-bezier(.16,1,.3,1);"></div>
+      <div style="position:relative;height:100%;display:flex;flex-direction:column;justify-content:space-between;padding:clamp(14px,1.6vw,22px);">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px;">
+          <span style="font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:0.18em;opacity:.8;">T/04</span>
+          <span data-dot="4" style="width:9px;height:9px;flex:none;background:var(--coral);clip-path:polygon(50% 0%,100% 38%,82% 100%,18% 100%,0% 38%);"></span>
+        </div>
+        <div>
+          <div style="font-family:Jost,sans-serif;font-weight:600;font-size:clamp(22px,2.6vw,40px);line-height:1;letter-spacing:-0.01em;">ENTRE-<br />PRENEURSHIP</div>
+          <div style="font-family:'Noto Kufi Arabic',sans-serif;font-weight:600;font-size:14px;opacity:.75;margin-top:8px;">ريادة الأعمال</div>
+          <div data-body="4" style="max-height:0;opacity:0;overflow:hidden;transition:max-height .7s cubic-bezier(.16,1,.3,1),opacity .5s ease;">
+            <p style="margin:14px 0 0;font-family:Jost,sans-serif;font-weight:300;font-size:16px;line-height:1.5;max-width:42ch;">Founders building the products, platforms and services the sport runs on — performance data, ticketing, fan apps. Pitches, demos, and rooms where deals start.</p>
+            <div style="margin-top:16px;font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:0.2em;color:var(--coral);">ZONE D · STARTUP FLOOR</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div data-panel="5" onMouseEnter="{{ onTrack }}" onClick="{{ onTrack }}" style="position:relative;flex:1 1 0;min-width:64px;overflow:hidden;cursor:pointer;background:var(--navy-d);transition:flex-grow .7s cubic-bezier(.16,1,.3,1),min-height .7s cubic-bezier(.16,1,.3,1),background .7s ease;">
+      <div data-art="5" style="position:absolute;inset:0;background-image:repeating-linear-gradient(115deg, rgba(236,239,245,0.12) 0 4px, rgba(236,239,245,0) 4px 12px);opacity:.55;transition:opacity .7s ease,transform .9s cubic-bezier(.16,1,.3,1);"></div>
+      <div data-pent-art="5" style="position:absolute;right:-50px;bottom:-50px;width:210px;height:210px;clip-path:polygon(50% 0%,100% 38%,82% 100%,18% 100%,0% 38%);background:var(--green);opacity:.25;transition:opacity .7s ease,transform .9s cubic-bezier(.16,1,.3,1);"></div>
+      <div style="position:relative;height:100%;display:flex;flex-direction:column;justify-content:space-between;padding:clamp(14px,1.6vw,22px);">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px;">
+          <span style="font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:0.18em;opacity:.8;">T/05</span>
+          <span data-dot="5" style="width:9px;height:9px;flex:none;background:var(--green);clip-path:polygon(50% 0%,100% 38%,82% 100%,18% 100%,0% 38%);"></span>
+        </div>
+        <div>
+          <div style="font-family:Jost,sans-serif;font-weight:600;font-size:clamp(22px,2.6vw,40px);line-height:1;letter-spacing:-0.01em;">ENTERTAIN-<br />MENT</div>
+          <div style="font-family:'Noto Kufi Arabic',sans-serif;font-weight:600;font-size:14px;opacity:.75;margin-top:8px;">الترفيه</div>
+          <div data-body="5" style="max-height:0;opacity:0;overflow:hidden;transition:max-height .7s cubic-bezier(.16,1,.3,1),opacity .5s ease;">
+            <p style="margin:14px 0 0;font-family:Jost,sans-serif;font-weight:300;font-size:16px;line-height:1.5;max-width:42ch;">Fan culture treated as an industry: music, gaming, food, collectibles and the matchday economy that surrounds every fixture.</p>
+            <div style="margin-top:16px;font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:0.2em;color:var(--green);">ZONE E · THE SQUARE</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div data-panel="6" onMouseEnter="{{ onTrack }}" onClick="{{ onTrack }}" style="position:relative;flex:1 1 0;min-width:64px;overflow:hidden;cursor:pointer;background:var(--navy-d);transition:flex-grow .7s cubic-bezier(.16,1,.3,1),min-height .7s cubic-bezier(.16,1,.3,1),background .7s ease;">
+      <div data-art="6" style="position:absolute;inset:0;background-image:repeating-linear-gradient(115deg, rgba(236,239,245,0.12) 0 4px, rgba(236,239,245,0) 4px 12px);opacity:.55;transition:opacity .7s ease,transform .9s cubic-bezier(.16,1,.3,1);"></div>
+      <div data-pent-art="6" style="position:absolute;right:-50px;bottom:-50px;width:210px;height:210px;clip-path:polygon(50% 0%,100% 38%,82% 100%,18% 100%,0% 38%);background:var(--coral);opacity:.3;transition:opacity .7s ease,transform .9s cubic-bezier(.16,1,.3,1);"></div>
+      <div style="position:relative;height:100%;display:flex;flex-direction:column;justify-content:space-between;padding:clamp(14px,1.6vw,22px);">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px;">
+          <span style="font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:0.18em;color:var(--coral);">T/06</span>
+          <span data-dot="6" style="width:9px;height:9px;flex:none;background:var(--coral);clip-path:polygon(50% 0%,100% 38%,82% 100%,18% 100%,0% 38%);"></span>
+        </div>
+        <div>
+          <div style="font-family:Jost,sans-serif;font-weight:600;font-size:clamp(22px,2.6vw,40px);line-height:1;letter-spacing:-0.01em;">MAIN<br />STAGE</div>
+          <div style="font-family:'Noto Kufi Arabic',sans-serif;font-weight:600;font-size:14px;opacity:.75;margin-top:8px;">المسرح الرئيسي</div>
+          <div data-body="6" style="max-height:0;opacity:0;overflow:hidden;transition:max-height .7s cubic-bezier(.16,1,.3,1),opacity .5s ease;">
+            <p style="margin:14px 0 0;font-family:Jost,sans-serif;font-weight:300;font-size:16px;line-height:1.5;max-width:42ch;">Three days of talks, interviews and announcements from the people running the game — players, executives, broadcasters, builders.</p>
+            <div style="margin-top:16px;font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:0.2em;color:var(--coral);">ZONE F · 1,200 SEATS</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<section data-screen-label="04 Date and numbers" style="position:relative;background:var(--navy);border-top:1px solid var(--line);overflow:hidden;">
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));">
+    <div style="padding:clamp(28px,5vw,80px) clamp(16px,3vw,56px);border-right:1px solid var(--line);">
+      <div style="display:flex;align-items:baseline;gap:14px;margin-bottom:clamp(18px,3vw,34px);">
+        <div style="font-family:Jost,sans-serif;font-weight:800;font-size:clamp(56px,9vw,140px);line-height:.8;color:transparent;-webkit-text-stroke:1px var(--line2);">03</div>
+        <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:0.22em;opacity:.75;">WHEN &amp; WHERE<br />الزمان والمكان</div>
+      </div>
+      <div style="font-family:Jost,sans-serif;font-weight:800;font-size:clamp(84px,15vw,220px);line-height:.82;letter-spacing:-0.02em;">12–14</div>
+      <div style="display:flex;flex-wrap:wrap;align-items:baseline;gap:8px 20px;margin-top:8px;">
+        <div style="font-family:Jost,sans-serif;font-weight:500;font-size:clamp(26px,3.4vw,52px);line-height:1;color:var(--coral);">NOVEMBER 2026</div>
+        <div style="font-family:'Noto Kufi Arabic',sans-serif;font-weight:600;font-size:clamp(14px,1.4vw,20px);opacity:.75;">نوفمبر ٢٠٢٦</div>
+      </div>
+      <div style="margin-top:clamp(22px,3vw,40px);display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));border-top:1px solid var(--line2);">
+        <div style="padding:18px 0;border-right:1px solid var(--line);">
+          <div style="font-family:Jost,sans-serif;font-weight:700;font-size:clamp(38px,5vw,76px);line-height:.9;">3</div>
+          <div style="font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:0.22em;opacity:.7;margin-top:6px;">DAYS / أيام</div>
+        </div>
+        <div style="padding:18px 0 18px 16px;border-right:1px solid var(--line);">
+          <div style="font-family:Jost,sans-serif;font-weight:700;font-size:clamp(38px,5vw,76px);line-height:.9;">6</div>
+          <div style="font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:0.22em;opacity:.7;margin-top:6px;">TRACKS / مسارات</div>
+        </div>
+        <div style="padding:18px 0 18px 16px;">
+          <div style="font-family:Jost,sans-serif;font-weight:700;font-size:clamp(34px,4.4vw,66px);line-height:.9;color:var(--green);">+20,000</div>
+          <div style="font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:0.22em;opacity:.7;margin-top:6px;">VISITORS / زائر</div>
+        </div>
+      </div>
+    </div>
+    <div style="padding:clamp(28px,5vw,80px) clamp(16px,3vw,56px);display:flex;flex-direction:column;gap:clamp(18px,2.5vw,30px);">
+      <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:0.22em;opacity:.7;">SITE PLAN — BUILDING 57 SQUARE</div>
+      <div style="position:relative;flex:1;min-height:clamp(260px,32vw,420px);border:1px solid var(--line2);overflow:hidden;background:var(--navy-d);">
+        <div aria-hidden="true" style="position:absolute;inset:0;background-image:linear-gradient(to right, var(--line) 1px, transparent 1px), linear-gradient(to bottom, var(--line) 1px, transparent 1px);background-size:46px 46px;opacity:.8;"></div>
+        <div style="position:absolute;left:12%;top:16%;width:44%;height:30%;border:1px solid var(--coral);background:rgba(242,98,79,0.12);"><div style="position:absolute;left:8px;top:6px;font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:0.14em;color:var(--coral);">MAIN STAGE</div></div>
+        <div style="position:absolute;left:62%;top:16%;width:26%;height:44%;border:1px solid var(--line2);"><div style="position:absolute;left:8px;top:6px;font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:0.14em;opacity:.8;">MUSEUM</div></div>
+        <div style="position:absolute;left:12%;top:52%;width:22%;height:30%;border:1px solid var(--line2);"><div style="position:absolute;left:8px;top:6px;font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:0.14em;opacity:.8;">MEDIA</div></div>
+        <div style="position:absolute;left:37%;top:52%;width:19%;height:30%;border:1px solid var(--green);background:rgba(79,176,90,0.1);"><div style="position:absolute;left:8px;top:6px;font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:0.14em;color:var(--green);">ECONOMY</div></div>
+        <div style="position:absolute;left:59%;top:64%;width:14%;height:18%;border:1px solid var(--line2);"></div>
+        <div style="position:absolute;left:76%;top:64%;width:12%;height:18%;border:1px solid var(--line2);"></div>
+        <div style="position:absolute;left:50%;top:50%;width:96px;height:96px;transform:translate(-50%,-50%);"><div style="position:absolute;inset:0;clip-path:polygon(50% 0%,100% 38%,82% 100%,18% 100%,0% 38%);border:1px solid var(--coral);"></div></div>
+        <div style="position:absolute;right:12px;bottom:10px;font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:0.18em;opacity:.7;">26.3069° N, 50.1440° E</div>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:14px;border-top:1px solid var(--line);padding-top:16px;">
+        <div><div style="font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:0.22em;opacity:.7;margin-bottom:6px;">HOST</div><div style="font-family:Jost,sans-serif;font-weight:500;font-size:16px;line-height:1.35;">King Fahd University of Petroleum and Minerals</div></div>
+        <div><div style="font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:0.22em;opacity:.7;margin-bottom:6px;">CITY</div><div style="font-family:Jost,sans-serif;font-weight:500;font-size:16px;line-height:1.35;">Dhahran, Eastern Province<br /><span style="font-family:'Noto Kufi Arabic',sans-serif;font-weight:600;opacity:.75;">الظهران</span></div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section data-screen-label="05 Why join" style="position:relative;background:var(--paper);color:var(--ink);">
+  <div style="display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:18px;padding:clamp(28px,5vw,80px) clamp(16px,3vw,56px) clamp(16px,2vw,28px);border-bottom:1px solid rgba(45,59,112,0.25);">
+    <div style="display:flex;align-items:baseline;gap:14px;">
+      <div style="font-family:Jost,sans-serif;font-weight:800;font-size:clamp(56px,9vw,140px);line-height:.8;color:transparent;-webkit-text-stroke:1px rgba(45,59,112,0.4);">04</div>
+      <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:0.22em;color:var(--navy);">WHY JOIN<br />لماذا تنضم</div>
+    </div>
+    <h2 style="margin:0;font-family:Jost,sans-serif;font-weight:600;font-size:clamp(28px,4.4vw,64px);line-height:1.02;letter-spacing:-0.015em;max-width:22ch;text-wrap:pretty;">You don't watch an industry. You work inside it.</h2>
+  </div>
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));">
+    <div style="padding:clamp(22px,3vw,40px) clamp(16px,3vw,40px);border-right:1px solid rgba(45,59,112,0.25);border-bottom:1px solid rgba(45,59,112,0.25);">
+      <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:0.2em;color:var(--coral);">R/01</div>
+      <div style="font-family:Jost,sans-serif;font-weight:600;font-size:clamp(21px,2.2vw,31px);line-height:1.05;margin:14px 0 10px;">STAND ON THE FLOOR</div>
+      <p style="margin:0;font-family:Jost,sans-serif;font-weight:300;font-size:16px;line-height:1.5;color:var(--navy);max-width:34ch;">Three days inside the operation: stage, museum, media desks, investor rooms.</p>
+    </div>
+    <div style="padding:clamp(22px,3vw,40px) clamp(16px,3vw,40px);border-right:1px solid rgba(45,59,112,0.25);border-bottom:1px solid rgba(45,59,112,0.25);">
+      <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:0.2em;color:var(--coral);">R/02</div>
+      <div style="font-family:Jost,sans-serif;font-weight:600;font-size:clamp(21px,2.2vw,31px);line-height:1.05;margin:14px 0 10px;">MEET THE DECIDERS</div>
+      <p style="margin:0;font-family:Jost,sans-serif;font-weight:300;font-size:16px;line-height:1.5;color:var(--navy);max-width:34ch;">Clubs, broadcasters, founders and funds — in the same square, for once.</p>
+    </div>
+    <div style="padding:clamp(22px,3vw,40px) clamp(16px,3vw,40px);border-right:1px solid rgba(45,59,112,0.25);border-bottom:1px solid rgba(45,59,112,0.25);">
+      <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:0.2em;color:var(--coral);">R/03</div>
+      <div style="font-family:Jost,sans-serif;font-weight:600;font-size:clamp(21px,2.2vw,31px);line-height:1.05;margin:14px 0 10px;">BUILD A REAL CREDIT</div>
+      <p style="margin:0;font-family:Jost,sans-serif;font-weight:300;font-size:16px;line-height:1.5;color:var(--navy);max-width:34ch;">Your name on the crew list of the first edition. Production, content, hospitality, research.</p>
+    </div>
+    <div style="padding:clamp(22px,3vw,40px) clamp(16px,3vw,40px);border-bottom:1px solid rgba(45,59,112,0.25);">
+      <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:0.2em;color:var(--green);">R/04</div>
+      <div style="font-family:Jost,sans-serif;font-weight:600;font-size:clamp(21px,2.2vw,31px);line-height:1.05;margin:14px 0 10px;">LEARN THE MACHINE</div>
+      <p style="margin:0;font-family:Jost,sans-serif;font-weight:300;font-size:16px;line-height:1.5;color:var(--navy);max-width:34ch;">See how the sport is financed, filmed, staged and sold — from the inside out.</p>
+    </div>
+  </div>
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));align-items:stretch;">
+    <div style="padding:clamp(26px,4vw,60px) clamp(16px,3vw,56px);border-right:1px solid rgba(45,59,112,0.25);">
+      <div style="font-family:Jost,sans-serif;font-weight:500;font-size:clamp(24px,3vw,44px);line-height:1.12;letter-spacing:-0.01em;max-width:26ch;text-wrap:pretty;">“The game is ninety minutes. Everything that makes it possible takes a year.”</div>
+      <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:0.2em;color:var(--navy);margin-top:18px;">KORA ORGANISING COMMITTEE</div>
+    </div>
+    <div style="position:relative;min-height:clamp(200px,22vw,300px);background-image:repeating-linear-gradient(115deg, rgba(45,59,112,0.16) 0 4px, rgba(45,59,112,0) 4px 12px);">
+      <div style="position:absolute;right:-30px;top:-30px;width:150px;height:150px;background:var(--navy);clip-path:polygon(50% 0%,100% 38%,82% 100%,18% 100%,0% 38%);opacity:.9;"></div>
+      <div style="position:absolute;left:16px;bottom:14px;font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:0.2em;color:var(--navy);">IMAGE SLOT — CREW AT WORK, BACK OF HOUSE</div>
+    </div>
+  </div>
+</section>
+
+<section data-screen-label="06 The team" style="position:relative;background:var(--ink);border-top:1px solid var(--line2);overflow:hidden;">
+  <div style="display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:16px;padding:clamp(28px,5vw,72px) clamp(16px,3vw,56px) clamp(20px,3vw,40px);">
+    <div style="display:flex;align-items:baseline;gap:14px;">
+      <div style="font-family:Jost,sans-serif;font-weight:800;font-size:clamp(56px,9vw,140px);line-height:.8;color:transparent;-webkit-text-stroke:1px var(--line2);">05</div>
+      <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:0.22em;opacity:.75;">THE KORA TEAM<br />فريق كورة</div>
+    </div>
+    <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:0.2em;opacity:.7;max-width:40ch;text-align:right;">EVERY CREW MEMBER GETS A NUMBER. THE SQUAD SHEET FOR THE FIRST EDITION.</div>
+  </div>
+  <div style="display:flex;flex-wrap:wrap;gap:clamp(18px,2.6vw,44px);justify-content:center;padding:0 clamp(16px,3vw,56px) clamp(30px,5vw,70px);">
+
+    <div style="width:230px;flex:none;text-align:center;" style-hover="transform:translateY(-10px);">
+      <div style="position:relative;width:230px;height:268px;filter:drop-shadow(0 26px 26px rgba(0,0,0,0.55));animation:kora-sway 7s ease-in-out infinite;">
+        <div style="position:absolute;inset:0;clip-path:polygon(30% 2%,70% 2%,79% 5%,100% 20%,90% 40%,80% 33%,80% 100%,20% 100%,20% 33%,10% 40%,0% 20%,21% 5%);background-color:#4FB05A;background-image:radial-gradient(120% 70% at 50% 0%, rgba(255,255,255,0.26), rgba(255,255,255,0) 62%),linear-gradient(102deg, rgba(0,0,0,0.45) 0%, rgba(0,0,0,0) 24%, rgba(255,255,255,0.16) 46%, rgba(0,0,0,0) 64%, rgba(0,0,0,0.42) 100%),radial-gradient(55% 38% at 20% 74%, rgba(0,0,0,0.38), rgba(0,0,0,0) 72%),radial-gradient(46% 32% at 82% 62%, rgba(0,0,0,0.3), rgba(0,0,0,0) 72%),repeating-linear-gradient(90deg, rgba(255,255,255,0.05) 0 1px, rgba(0,0,0,0) 1px 3px);"></div>
+        <div style="position:absolute;left:50%;top:2px;transform:translateX(-50%);width:92px;height:22px;background:#22303F;border-radius:0 0 46px 46px;box-shadow:inset 0 -2px 3px rgba(0,0,0,0.4);"></div>
+        <div style="position:absolute;left:50%;top:22px;transform:translateX(-50%);width:56px;height:16px;background:#4FB05A;clip-path:polygon(0 0,100% 0,50% 100%);filter:brightness(0.92);"></div>
+        <div style="position:absolute;left:20%;top:33%;width:1px;height:67%;background:rgba(0,0,0,0.22);"></div>
+        <div style="position:absolute;right:20%;top:33%;width:1px;height:67%;background:rgba(255,255,255,0.12);"></div>
+        <div style="position:absolute;left:0;top:20%;width:100%;height:7px;background:rgba(255,255,255,0.16);"></div>
+        <div style="position:absolute;left:50%;top:31%;transform:translateX(-50%);font-family:Jost,sans-serif;font-weight:600;font-size:13px;letter-spacing:0.14em;color:rgba(255,255,255,0.95);text-shadow:0 1px 2px rgba(0,0,0,0.35);">AL-DOSSARY</div>
+        <div style="position:absolute;left:50%;top:38%;transform:translateX(-50%);font-family:Jost,sans-serif;font-weight:800;font-size:88px;line-height:1;color:#ECEFF5;text-shadow:0 3px 4px rgba(0,0,0,0.4);">10</div>
+      </div>
+      <div style="margin-top:16px;font-family:Jost,sans-serif;font-weight:500;font-size:18px;">Sara Al-Dossary</div>
+      <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:0.2em;opacity:.7;margin-top:5px;">EVENT DIRECTOR</div>
+    </div>
+
+    <div style="width:230px;flex:none;text-align:center;" style-hover="transform:translateY(-10px);">
+      <div style="position:relative;width:230px;height:268px;filter:drop-shadow(0 26px 26px rgba(0,0,0,0.55));animation:kora-sway 8.4s ease-in-out infinite;">
+        <div style="position:absolute;inset:0;clip-path:polygon(30% 2%,70% 2%,79% 5%,100% 20%,90% 40%,80% 33%,80% 100%,20% 100%,20% 33%,10% 40%,0% 20%,21% 5%);background-color:#ECEFF5;background-image:radial-gradient(120% 70% at 50% 0%, rgba(255,255,255,0.5), rgba(255,255,255,0) 62%),linear-gradient(102deg, rgba(45,59,112,0.4) 0%, rgba(45,59,112,0) 24%, rgba(255,255,255,0.5) 46%, rgba(45,59,112,0) 64%, rgba(45,59,112,0.36) 100%),radial-gradient(55% 38% at 20% 74%, rgba(45,59,112,0.32), rgba(45,59,112,0) 72%),radial-gradient(46% 32% at 82% 62%, rgba(45,59,112,0.26), rgba(45,59,112,0) 72%),repeating-linear-gradient(90deg, rgba(45,59,112,0.05) 0 1px, rgba(0,0,0,0) 1px 3px);"></div>
+        <div style="position:absolute;left:50%;top:2px;transform:translateX(-50%);width:92px;height:22px;background:#2D3B70;border-radius:0 0 46px 46px;box-shadow:inset 0 -2px 3px rgba(0,0,0,0.4);"></div>
+        <div style="position:absolute;left:50%;top:22px;transform:translateX(-50%);width:56px;height:16px;background:#ECEFF5;clip-path:polygon(0 0,100% 0,50% 100%);filter:brightness(0.94);"></div>
+        <div style="position:absolute;left:0;top:44%;width:100%;height:26px;background:rgba(242,98,79,0.9);"></div>
+        <div style="position:absolute;left:20%;top:33%;width:1px;height:67%;background:rgba(45,59,112,0.18);"></div>
+        <div style="position:absolute;right:20%;top:33%;width:1px;height:67%;background:rgba(45,59,112,0.12);"></div>
+        <div style="position:absolute;left:50%;top:31%;transform:translateX(-50%);font-family:Jost,sans-serif;font-weight:600;font-size:13px;letter-spacing:0.14em;color:#2D3B70;">AL-HARBI</div>
+        <div style="position:absolute;left:50%;top:53%;transform:translateX(-50%);font-family:Jost,sans-serif;font-weight:800;font-size:82px;line-height:1;color:#2D3B70;">07</div>
+      </div>
+      <div style="margin-top:16px;font-family:Jost,sans-serif;font-weight:500;font-size:18px;">Faisal Al-Harbi</div>
+      <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:0.2em;opacity:.7;margin-top:5px;">HEAD OF MEDIA</div>
+    </div>
+
+    <div style="width:230px;flex:none;text-align:center;" style-hover="transform:translateY(-10px);">
+      <div style="position:relative;width:230px;height:268px;filter:drop-shadow(0 26px 26px rgba(0,0,0,0.55));animation:kora-sway 6.4s ease-in-out infinite;">
+        <div style="position:absolute;inset:0;clip-path:polygon(30% 2%,70% 2%,79% 5%,100% 20%,90% 40%,80% 33%,80% 100%,20% 100%,20% 33%,10% 40%,0% 20%,21% 5%);background-color:#2D3B70;background-image:radial-gradient(120% 70% at 50% 0%, rgba(255,255,255,0.22), rgba(255,255,255,0) 62%),linear-gradient(102deg, rgba(0,0,0,0.5) 0%, rgba(0,0,0,0) 24%, rgba(255,255,255,0.18) 46%, rgba(0,0,0,0) 64%, rgba(0,0,0,0.46) 100%),radial-gradient(55% 38% at 20% 74%, rgba(0,0,0,0.4), rgba(0,0,0,0) 72%),radial-gradient(46% 32% at 82% 62%, rgba(0,0,0,0.32), rgba(0,0,0,0) 72%),repeating-linear-gradient(90deg, rgba(255,255,255,0.05) 0 1px, rgba(0,0,0,0) 1px 3px);"></div>
+        <div style="position:absolute;left:50%;top:2px;transform:translateX(-50%);width:92px;height:22px;background:#F2624F;border-radius:0 0 46px 46px;box-shadow:inset 0 -2px 3px rgba(0,0,0,0.4);"></div>
+        <div style="position:absolute;left:50%;top:22px;transform:translateX(-50%);width:56px;height:16px;background:#2D3B70;clip-path:polygon(0 0,100% 0,50% 100%);filter:brightness(0.92);"></div>
+        <div style="position:absolute;left:8%;top:24%;width:210px;height:210px;clip-path:polygon(50% 0%,100% 38%,82% 100%,18% 100%,0% 38%);background:rgba(255,255,255,0.07);"></div>
+        <div style="position:absolute;left:20%;top:33%;width:1px;height:67%;background:rgba(0,0,0,0.25);"></div>
+        <div style="position:absolute;right:20%;top:33%;width:1px;height:67%;background:rgba(255,255,255,0.1);"></div>
+        <div style="position:absolute;left:50%;top:31%;transform:translateX(-50%);font-family:Jost,sans-serif;font-weight:600;font-size:13px;letter-spacing:0.14em;color:rgba(255,255,255,0.95);">AL-QAHTANI</div>
+        <div style="position:absolute;left:50%;top:38%;transform:translateX(-50%);font-family:Jost,sans-serif;font-weight:800;font-size:88px;line-height:1;color:#F2624F;text-shadow:0 3px 4px rgba(0,0,0,0.4);">04</div>
+      </div>
+      <div style="margin-top:16px;font-family:Jost,sans-serif;font-weight:500;font-size:18px;">Noura Al-Qahtani</div>
+      <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:0.2em;opacity:.7;margin-top:5px;">PARTNERSHIPS</div>
+    </div>
+
+    <div style="width:230px;flex:none;text-align:center;" style-hover="transform:translateY(-10px);">
+      <div style="position:relative;width:230px;height:268px;filter:drop-shadow(0 26px 26px rgba(0,0,0,0.55));animation:kora-sway 9s ease-in-out infinite;">
+        <div style="position:absolute;inset:0;clip-path:polygon(30% 2%,70% 2%,79% 5%,100% 20%,90% 40%,80% 33%,80% 100%,20% 100%,20% 33%,10% 40%,0% 20%,21% 5%);background-color:#F2624F;background-image:radial-gradient(120% 70% at 50% 0%, rgba(255,255,255,0.28), rgba(255,255,255,0) 62%),linear-gradient(102deg, rgba(0,0,0,0.42) 0%, rgba(0,0,0,0) 24%, rgba(255,255,255,0.2) 46%, rgba(0,0,0,0) 64%, rgba(0,0,0,0.4) 100%),radial-gradient(55% 38% at 20% 74%, rgba(0,0,0,0.34), rgba(0,0,0,0) 72%),radial-gradient(46% 32% at 82% 62%, rgba(0,0,0,0.28), rgba(0,0,0,0) 72%),repeating-linear-gradient(90deg, rgba(255,255,255,0.05) 0 1px, rgba(0,0,0,0) 1px 3px);"></div>
+        <div style="position:absolute;left:50%;top:2px;transform:translateX(-50%);width:92px;height:22px;background:#2D3B70;border-radius:0 0 46px 46px;box-shadow:inset 0 -2px 3px rgba(0,0,0,0.4);"></div>
+        <div style="position:absolute;left:50%;top:22px;transform:translateX(-50%);width:56px;height:16px;background:#F2624F;clip-path:polygon(0 0,100% 0,50% 100%);filter:brightness(0.93);"></div>
+        <div style="position:absolute;left:0;top:62%;width:100%;height:12px;background:rgba(45,59,112,0.85);"></div>
+        <div style="position:absolute;left:20%;top:33%;width:1px;height:67%;background:rgba(0,0,0,0.2);"></div>
+        <div style="position:absolute;right:20%;top:33%;width:1px;height:67%;background:rgba(255,255,255,0.14);"></div>
+        <div style="position:absolute;left:50%;top:31%;transform:translateX(-50%);font-family:Jost,sans-serif;font-weight:600;font-size:13px;letter-spacing:0.14em;color:#ECEFF5;">AL-SHEHRI</div>
+        <div style="position:absolute;left:50%;top:38%;transform:translateX(-50%);font-family:Jost,sans-serif;font-weight:800;font-size:88px;line-height:1;color:#2D3B70;">21</div>
+      </div>
+      <div style="margin-top:16px;font-family:Jost,sans-serif;font-weight:500;font-size:18px;">Omar Al-Shehri</div>
+      <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:0.2em;opacity:.7;margin-top:5px;">STAGE PRODUCTION</div>
+    </div>
+  </div>
+</section>
+
+<section id="apply" data-screen-label="07 Application" style="position:relative;background:var(--navy);border-top:1px solid var(--line2);overflow:hidden;">
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));">
+    <div style="padding:clamp(28px,5vw,80px) clamp(16px,3vw,56px);border-right:1px solid var(--line);">
+      <div style="display:flex;align-items:baseline;gap:14px;margin-bottom:clamp(18px,3vw,34px);">
+        <div style="font-family:Jost,sans-serif;font-weight:800;font-size:clamp(56px,9vw,140px);line-height:.8;color:transparent;-webkit-text-stroke:1px var(--line2);">06</div>
+        <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:0.22em;opacity:.75;">JOIN THE KORA TEAM<br />انضم إلى فريق كورة</div>
+      </div>
+      <h2 style="margin:0 0 10px;font-family:Jost,sans-serif;font-weight:600;font-size:clamp(30px,4vw,60px);line-height:1.02;letter-spacing:-0.015em;max-width:20ch;">Print your name on the shirt.</h2>
+      <p style="margin:0 0 clamp(22px,3vw,34px);font-family:Jost,sans-serif;font-weight:300;font-size:17px;line-height:1.5;opacity:.85;max-width:44ch;">Fill in the fields and your kit is printed live. Two minutes to start the application.</p>
+      <div style="border-top:1px solid var(--line2);">
+        <label style="display:grid;grid-template-columns:clamp(96px,12vw,150px) 1fr;gap:14px;align-items:center;padding:14px 0;border-bottom:1px solid var(--line);">
+          <span style="font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:0.2em;opacity:.7;">FULL NAME</span>
+          <input onInput="{{ onName }}" placeholder="e.g. Sara Al-Dossary" style="width:100%;background:transparent;border:0;outline:none;color:var(--paper);font-family:Jost,sans-serif;font-weight:500;font-size:clamp(17px,1.6vw,22px);padding:8px 0;" />
+        </label>
+        <label style="display:grid;grid-template-columns:clamp(96px,12vw,150px) 1fr;gap:14px;align-items:center;padding:14px 0;border-bottom:1px solid var(--line);">
+          <span style="font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:0.2em;opacity:.7;">SQUAD NUMBER</span>
+          <input onInput="{{ onNum }}" inputMode="numeric" maxLength="2" placeholder="26" style="width:100%;background:transparent;border:0;outline:none;color:var(--paper);font-family:Jost,sans-serif;font-weight:500;font-size:clamp(17px,1.6vw,22px);padding:8px 0;" />
+        </label>
+        <label style="display:grid;grid-template-columns:clamp(96px,12vw,150px) 1fr;gap:14px;align-items:center;padding:14px 0;border-bottom:1px solid var(--line);">
+          <span style="font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:0.2em;opacity:.7;">ROLE WANTED</span>
+          <input onInput="{{ onRole }}" placeholder="Production, media, crew…" style="width:100%;background:transparent;border:0;outline:none;color:var(--paper);font-family:Jost,sans-serif;font-weight:500;font-size:clamp(17px,1.6vw,22px);padding:8px 0;" />
+        </label>
+        <div style="padding:18px 0 6px;">
+          <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:0.2em;opacity:.7;margin-bottom:14px;">TRACKS OF INTEREST — SELECT ANY</div>
+          <div style="display:flex;flex-wrap:wrap;gap:10px;">
+            <button type="button" data-on="0" onClick="{{ onChip }}" style="cursor:pointer;background:transparent;color:var(--paper);border:1px solid var(--line2);padding:11px 15px;font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:0.16em;min-height:44px;transition:all .25s ease;">MUSEUM</button>
+            <button type="button" data-on="0" onClick="{{ onChip }}" style="cursor:pointer;background:transparent;color:var(--paper);border:1px solid var(--line2);padding:11px 15px;font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:0.16em;min-height:44px;transition:all .25s ease;">MEDIA</button>
+            <button type="button" data-on="0" onClick="{{ onChip }}" style="cursor:pointer;background:transparent;color:var(--paper);border:1px solid var(--line2);padding:11px 15px;font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:0.16em;min-height:44px;transition:all .25s ease;">ECONOMY</button>
+            <button type="button" data-on="0" onClick="{{ onChip }}" style="cursor:pointer;background:transparent;color:var(--paper);border:1px solid var(--line2);padding:11px 15px;font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:0.16em;min-height:44px;transition:all .25s ease;">STARTUPS</button>
+            <button type="button" data-on="0" onClick="{{ onChip }}" style="cursor:pointer;background:transparent;color:var(--paper);border:1px solid var(--line2);padding:11px 15px;font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:0.16em;min-height:44px;transition:all .25s ease;">ENTERTAINMENT</button>
+            <button type="button" data-on="0" onClick="{{ onChip }}" style="cursor:pointer;background:transparent;color:var(--paper);border:1px solid var(--line2);padding:11px 15px;font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:0.16em;min-height:44px;transition:all .25s ease;">MAIN STAGE</button>
+          </div>
+        </div>
+        <div style="display:flex;flex-wrap:wrap;align-items:center;gap:16px;padding:clamp(20px,3vw,32px) 0 0;">
+          <button type="button" onClick="{{ onSubmit }}" style="cursor:pointer;background:var(--coral);color:var(--paper);border:0;padding:19px 30px;font-family:Jost,sans-serif;font-weight:600;font-size:clamp(16px,1.4vw,19px);letter-spacing:0.04em;min-height:48px;transition:background .3s ease,color .3s ease;" style-hover="background:var(--paper);color:var(--ink);">START YOUR APPLICATION ↘</button>
+          <div ref="{{ msgRef }}" style="font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:0.18em;color:var(--green);">APPLICATIONS CLOSE 30 SEP 2026</div>
+        </div>
+      </div>
+    </div>
+
+    <div style="position:relative;padding:clamp(30px,5vw,80px) clamp(16px,3vw,56px);display:flex;align-items:center;justify-content:center;background:var(--navy-d);">
+      <div aria-hidden="true" style="position:absolute;inset:0;background-image:linear-gradient(to right, var(--line) 1px, transparent 1px), linear-gradient(to bottom, var(--line) 1px, transparent 1px);background-size:56px 56px;opacity:.6;"></div>
+      <div aria-hidden="true" style="position:absolute;left:50%;top:50%;width:min(70%,420px);height:min(70%,420px);transform:translate(-50%,-50%);border:1px solid var(--line2);border-radius:50%;"></div>
+      <div ref="{{ passRef }}" style="position:relative;width:300px;height:350px;transition:transform .25s ease;filter:drop-shadow(0 34px 34px rgba(0,0,0,0.6));">
+        <div style="position:absolute;inset:0;clip-path:polygon(30% 2%,70% 2%,79% 5%,100% 20%,90% 40%,80% 33%,80% 100%,20% 100%,20% 33%,10% 40%,0% 20%,21% 5%);background-color:#4FB05A;background-image:radial-gradient(120% 70% at 50% 0%, rgba(255,255,255,0.26), rgba(255,255,255,0) 62%),linear-gradient(102deg, rgba(0,0,0,0.45) 0%, rgba(0,0,0,0) 24%, rgba(255,255,255,0.17) 46%, rgba(0,0,0,0) 64%, rgba(0,0,0,0.42) 100%),radial-gradient(55% 38% at 20% 74%, rgba(0,0,0,0.38), rgba(0,0,0,0) 72%),radial-gradient(46% 32% at 82% 62%, rgba(0,0,0,0.3), rgba(0,0,0,0) 72%),repeating-linear-gradient(90deg, rgba(255,255,255,0.05) 0 1px, rgba(0,0,0,0) 1px 3px);"></div>
+        <div style="position:absolute;left:50%;top:3px;transform:translateX(-50%);width:118px;height:28px;background:#2D3B70;border-radius:0 0 60px 60px;box-shadow:inset 0 -2px 4px rgba(0,0,0,0.45);"></div>
+        <div style="position:absolute;left:50%;top:29px;transform:translateX(-50%);width:70px;height:20px;background:#4FB05A;clip-path:polygon(0 0,100% 0,50% 100%);filter:brightness(0.92);"></div>
+        <div style="position:absolute;left:20%;top:33%;width:1px;height:67%;background:rgba(0,0,0,0.22);"></div>
+        <div style="position:absolute;right:20%;top:33%;width:1px;height:67%;background:rgba(255,255,255,0.12);"></div>
+        <div style="position:absolute;left:0;top:21%;width:100%;height:8px;background:rgba(255,255,255,0.18);"></div>
+        <div ref="{{ jerseyNameRef }}" style="position:absolute;left:50%;top:30%;transform:translateX(-50%);white-space:nowrap;font-family:Jost,sans-serif;font-weight:600;font-size:15px;letter-spacing:0.14em;color:#ECEFF5;text-shadow:0 1px 2px rgba(0,0,0,0.4);">YOUR NAME</div>
+        <div ref="{{ jerseyNumRef }}" style="position:absolute;left:50%;top:36%;transform:translateX(-50%);font-family:Jost,sans-serif;font-weight:800;font-size:112px;line-height:1;color:#ECEFF5;text-shadow:0 4px 5px rgba(0,0,0,0.42);">26</div>
+        <div style="position:absolute;left:0;right:0;bottom:46px;display:flex;justify-content:center;gap:10px;align-items:center;">
+          <div ref="{{ jerseyRoleRef }}" style="font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:0.18em;color:rgba(255,255,255,0.95);">CREW</div>
+          <div style="width:4px;height:4px;background:rgba(255,255,255,0.8);"></div>
+          <div ref="{{ jerseyTrackRef }}" style="font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:0.18em;color:rgba(255,255,255,0.95);">ALL TRACKS</div>
+        </div>
+        <div style="position:absolute;left:50%;bottom:12px;transform:translateX(-50%);line-height:1;font-family:'Noto Kufi Arabic',sans-serif;font-weight:800;font-size:12px;color:rgba(255,255,255,0.95);">كورة ٢٠٢٦</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section data-screen-label="08 Mobile" style="position:relative;border-top:1px solid var(--line2);background:var(--ink);padding:clamp(28px,5vw,72px) clamp(16px,3vw,56px);">
+  <div style="display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:16px;margin-bottom:clamp(22px,3vw,44px);">
+    <div style="display:flex;align-items:baseline;gap:14px;">
+      <div style="font-family:Jost,sans-serif;font-weight:800;font-size:clamp(46px,7vw,110px);line-height:.8;color:transparent;-webkit-text-stroke:1px var(--line2);">07</div>
+      <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:0.22em;opacity:.75;">MOBILE ADAPTATION<br />النسخة المحمولة</div>
+    </div>
+    <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:0.2em;opacity:.7;max-width:40ch;text-align:right;">THE RAIL BECOMES A STACK. THE KIT STAYS FULL WIDTH.</div>
+  </div>
+  <div style="display:flex;flex-wrap:wrap;gap:clamp(20px,3vw,46px);justify-content:center;">
+    <div style="width:284px;flex:none;">
+      <div style="height:566px;border:9px solid #10162E;border-radius:40px;overflow:hidden;background:var(--ink);position:relative;box-shadow:0 30px 60px rgba(0,0,0,0.55);">
+        <div style="height:26px;display:flex;align-items:center;justify-content:space-between;padding:0 14px;font-family:'IBM Plex Mono',monospace;font-size:8px;letter-spacing:0.1em;opacity:.7;">9:41<span>KORA</span></div>
+        <div style="padding:10px 14px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;">
+          <div style="font-family:'Noto Kufi Arabic',sans-serif;font-weight:800;font-size:15px;">كورة</div>
+          <div style="font-family:'IBM Plex Mono',monospace;font-size:8px;letter-spacing:0.14em;background:var(--coral);padding:7px 9px;">JOIN ↘</div>
+        </div>
+        <div style="position:relative;padding:26px 0 0;overflow:hidden;">
+          <div style="position:absolute;left:-30px;top:30px;width:110px;height:110px;background:var(--navy);clip-path:polygon(50% 0%,100% 38%,82% 100%,18% 100%,0% 38%);"></div>
+          <div style="position:absolute;left:50%;top:66px;transform:translateX(-50%);font-family:Jost,sans-serif;font-weight:800;font-size:60px;line-height:.8;color:transparent;-webkit-text-stroke:1px rgba(236,239,245,0.4);white-space:nowrap;">KORA</div>
+          <div style="position:relative;font-family:'Noto Kufi Arabic',sans-serif;font-weight:900;font-size:92px;line-height:1;text-align:center;mix-blend-mode:difference;direction:rtl;">كورة</div>
+          <div style="padding:16px 14px 0;font-family:'IBM Plex Mono',monospace;font-size:8px;letter-spacing:0.24em;color:var(--green);">THE INDUSTRY BEHIND THE GAME</div>
+          <div style="padding:10px 14px 20px;font-family:Jost,sans-serif;font-weight:300;font-size:15px;line-height:1.35;">A match lasts ninety minutes. The industry behind it never stops.</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;border-top:1px solid var(--line);background:var(--navy-d);">
+            <div style="padding:12px 14px;border-right:1px solid var(--line);"><div style="font-family:'IBM Plex Mono',monospace;font-size:7px;letter-spacing:0.2em;opacity:.7;">DATE</div><div style="font-family:Jost,sans-serif;font-weight:600;font-size:15px;margin-top:5px;">12–14 NOV</div></div>
+            <div style="padding:12px 14px;"><div style="font-family:'IBM Plex Mono',monospace;font-size:7px;letter-spacing:0.2em;opacity:.7;">VENUE</div><div style="font-family:Jost,sans-serif;font-weight:600;font-size:15px;margin-top:5px;">KFUPM</div></div>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;border-top:1px solid var(--line);background:var(--navy-d);">
+            <div style="padding:12px 14px;border-right:1px solid var(--line);"><div style="font-family:'IBM Plex Mono',monospace;font-size:7px;letter-spacing:0.2em;opacity:.7;">SITE</div><div style="font-family:Jost,sans-serif;font-weight:600;font-size:15px;margin-top:5px;">BLDG 57 SQ</div></div>
+            <div style="padding:12px 14px;"><div style="font-family:'IBM Plex Mono',monospace;font-size:7px;letter-spacing:0.2em;opacity:.7;">SCALE</div><div style="font-family:Jost,sans-serif;font-weight:600;font-size:15px;margin-top:5px;color:var(--coral);">+20,000</div></div>
+          </div>
+        </div>
+      </div>
+      <div style="font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:0.2em;opacity:.7;margin-top:12px;text-align:center;">M/01 — OPENING</div>
+    </div>
+
+    <div style="width:284px;flex:none;">
+      <div style="height:566px;border:9px solid #10162E;border-radius:40px;overflow:hidden;background:var(--ink);position:relative;box-shadow:0 30px 60px rgba(0,0,0,0.55);">
+        <div style="height:26px;display:flex;align-items:center;justify-content:space-between;padding:0 14px;font-family:'IBM Plex Mono',monospace;font-size:8px;letter-spacing:0.1em;opacity:.7;">9:41<span>KORA</span></div>
+        <div style="padding:12px 14px;border-bottom:1px solid var(--line2);display:flex;gap:6px;align-items:center;">
+          <div style="width:26px;height:26px;background:var(--coral);clip-path:polygon(50% 0%,100% 38%,82% 100%,18% 100%,0% 38%);display:flex;align-items:center;justify-content:center;font-family:'IBM Plex Mono',monospace;font-size:8px;">01</div>
+          <div style="width:26px;height:26px;background:rgba(236,239,245,0.12);clip-path:polygon(50% 0%,100% 38%,82% 100%,18% 100%,0% 38%);display:flex;align-items:center;justify-content:center;font-family:'IBM Plex Mono',monospace;font-size:8px;">02</div>
+          <div style="width:26px;height:26px;background:rgba(236,239,245,0.12);clip-path:polygon(50% 0%,100% 38%,82% 100%,18% 100%,0% 38%);display:flex;align-items:center;justify-content:center;font-family:'IBM Plex Mono',monospace;font-size:8px;">03</div>
+          <div style="width:26px;height:26px;background:rgba(236,239,245,0.12);clip-path:polygon(50% 0%,100% 38%,82% 100%,18% 100%,0% 38%);display:flex;align-items:center;justify-content:center;font-family:'IBM Plex Mono',monospace;font-size:8px;">04</div>
+          <div style="width:26px;height:26px;background:rgba(236,239,245,0.12);clip-path:polygon(50% 0%,100% 38%,82% 100%,18% 100%,0% 38%);display:flex;align-items:center;justify-content:center;font-family:'IBM Plex Mono',monospace;font-size:8px;">05</div>
+          <div style="width:26px;height:26px;background:rgba(236,239,245,0.12);clip-path:polygon(50% 0%,100% 38%,82% 100%,18% 100%,0% 38%);display:flex;align-items:center;justify-content:center;font-family:'IBM Plex Mono',monospace;font-size:8px;">06</div>
+        </div>
+        <div style="padding:14px;background:var(--navy);position:relative;overflow:hidden;">
+          <div style="position:absolute;right:-40px;bottom:-40px;width:150px;height:150px;background:var(--coral);opacity:.4;clip-path:polygon(50% 0%,100% 38%,82% 100%,18% 100%,0% 38%);"></div>
+          <div style="position:relative;font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:0.18em;opacity:.8;">T/01</div>
+          <div style="position:relative;font-family:Jost,sans-serif;font-weight:600;font-size:26px;line-height:1;margin-top:8px;">HISTORICAL<br />MUSEUM</div>
+          <div style="position:relative;font-family:'Noto Kufi Arabic',sans-serif;font-size:12px;opacity:.8;margin-top:8px;">المتحف التاريخي</div>
+          <div style="position:relative;font-family:Jost,sans-serif;font-weight:300;font-size:13px;line-height:1.45;margin-top:10px;">Kits, trophies and the decades that built the Saudi league — presented as evidence.</div>
+        </div>
+        <div style="padding:13px 14px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:baseline;"><div style="font-family:Jost,sans-serif;font-weight:600;font-size:20px;">MEDIA</div><div style="font-family:'IBM Plex Mono',monospace;font-size:8px;opacity:.62;">T/02</div></div>
+        <div style="padding:13px 14px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:baseline;"><div style="font-family:Jost,sans-serif;font-weight:600;font-size:20px;">ECONOMY</div><div style="font-family:'IBM Plex Mono',monospace;font-size:8px;opacity:.62;">T/03</div></div>
+        <div style="padding:13px 14px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:baseline;"><div style="font-family:Jost,sans-serif;font-weight:600;font-size:18px;">ENTREPRENEURSHIP</div><div style="font-family:'IBM Plex Mono',monospace;font-size:8px;opacity:.62;">T/04</div></div>
+        <div style="padding:13px 14px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:baseline;"><div style="font-family:Jost,sans-serif;font-weight:600;font-size:20px;">ENTERTAINMENT</div><div style="font-family:'IBM Plex Mono',monospace;font-size:8px;opacity:.62;">T/05</div></div>
+        <div style="padding:13px 14px;display:flex;justify-content:space-between;align-items:baseline;"><div style="font-family:Jost,sans-serif;font-weight:600;font-size:20px;color:var(--coral);">MAIN STAGE</div><div style="font-family:'IBM Plex Mono',monospace;font-size:8px;color:var(--coral);">T/06</div></div>
+      </div>
+      <div style="font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:0.2em;opacity:.7;margin-top:12px;text-align:center;">M/02 — TRACK STACK</div>
+    </div>
+
+    <div style="width:284px;flex:none;">
+      <div style="height:566px;border:9px solid #10162E;border-radius:40px;overflow:hidden;background:var(--navy);position:relative;box-shadow:0 30px 60px rgba(0,0,0,0.55);">
+        <div style="height:26px;display:flex;align-items:center;justify-content:space-between;padding:0 14px;font-family:'IBM Plex Mono',monospace;font-size:8px;letter-spacing:0.1em;opacity:.7;">9:41<span>KORA</span></div>
+        <div style="padding:12px 14px;border-bottom:1px solid var(--line);"><div style="font-family:'IBM Plex Mono',monospace;font-size:8px;letter-spacing:0.2em;opacity:.75;">06 — JOIN THE KORA TEAM</div></div>
+        <div style="padding:12px 14px 0;">
+          <div style="font-family:Jost,sans-serif;font-weight:600;font-size:23px;line-height:1.05;">Print your name on the shirt.</div>
+        </div>
+        <div style="display:flex;justify-content:center;padding:10px 0 0;">
+          <div style="position:relative;width:176px;height:205px;filter:drop-shadow(0 16px 18px rgba(0,0,0,0.5));">
+            <div style="position:absolute;inset:0;clip-path:polygon(30% 2%,70% 2%,79% 5%,100% 20%,90% 40%,80% 33%,80% 100%,20% 100%,20% 33%,10% 40%,0% 20%,21% 5%);background-color:#4FB05A;background-image:radial-gradient(120% 70% at 50% 0%, rgba(255,255,255,0.26), rgba(255,255,255,0) 62%),linear-gradient(102deg, rgba(0,0,0,0.45) 0%, rgba(0,0,0,0) 24%, rgba(255,255,255,0.16) 46%, rgba(0,0,0,0) 64%, rgba(0,0,0,0.42) 100%),radial-gradient(55% 38% at 20% 74%, rgba(0,0,0,0.36), rgba(0,0,0,0) 72%),repeating-linear-gradient(90deg, rgba(255,255,255,0.05) 0 1px, rgba(0,0,0,0) 1px 3px);"></div>
+            <div style="position:absolute;left:50%;top:2px;transform:translateX(-50%);width:70px;height:17px;background:#2D3B70;border-radius:0 0 36px 36px;"></div>
+            <div style="position:absolute;left:50%;top:30%;transform:translateX(-50%);font-family:Jost,sans-serif;font-weight:600;font-size:11px;letter-spacing:0.12em;color:#ECEFF5;">YOUR NAME</div>
+            <div style="position:absolute;left:50%;top:37%;transform:translateX(-50%);font-family:Jost,sans-serif;font-weight:800;font-size:66px;line-height:1;color:#ECEFF5;">26</div>
+          </div>
+        </div>
+        <div style="padding:12px 14px;">
+          <div style="border-top:1px solid var(--line);padding-top:11px;font-family:'IBM Plex Mono',monospace;font-size:8px;letter-spacing:0.18em;opacity:.75;">TRACKS OF INTEREST</div>
+          <div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:9px;">
+            <div style="border:1px solid var(--line2);padding:8px 9px;font-family:'IBM Plex Mono',monospace;font-size:8px;">MEDIA</div>
+            <div style="border:1px solid var(--coral);background:var(--coral);padding:8px 9px;font-family:'IBM Plex Mono',monospace;font-size:8px;">MAIN STAGE</div>
+            <div style="border:1px solid var(--line2);padding:8px 9px;font-family:'IBM Plex Mono',monospace;font-size:8px;">ECONOMY</div>
+          </div>
+          <div style="margin-top:14px;background:var(--coral);color:var(--paper);padding:15px;text-align:center;font-family:Jost,sans-serif;font-weight:600;font-size:14px;">START YOUR APPLICATION ↘</div>
+        </div>
+      </div>
+      <div style="font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:0.2em;opacity:.7;margin-top:12px;text-align:center;">M/03 — APPLICATION</div>
+    </div>
+  </div>
+</section>
+
+<section data-screen-label="09 Final CTA" style="position:relative;border-top:1px solid var(--line2);overflow:hidden;padding:clamp(40px,7vw,110px) 0 0;background:var(--ink);">
+  <div aria-hidden="true" style="position:absolute;left:50%;top:38%;width:min(70vw,760px);height:min(70vw,760px);transform:translate(-50%,-50%);border:1px solid var(--line2);border-radius:50%;pointer-events:none;"></div>
+  <div aria-hidden="true" style="position:absolute;left:6%;top:18%;width:120px;height:120px;background:var(--navy);clip-path:polygon(50% 0%,100% 38%,82% 100%,18% 100%,0% 38%);"></div>
+  <div aria-hidden="true" style="position:absolute;right:8%;top:24%;width:90px;height:90px;border:1px solid var(--green);clip-path:polygon(50% 0%,100% 38%,82% 100%,18% 100%,0% 38%);"></div>
+  <div style="position:relative;padding:0 clamp(16px,3vw,56px);text-align:center;">
+    <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:0.3em;color:var(--green);">THE INDUSTRY BEHIND THE GAME</div>
+    <div style="font-family:'Noto Kufi Arabic',sans-serif;font-weight:900;font-size:clamp(46px,10vw,150px);line-height:1.15;margin-top:10px;direction:rtl;">انضم إلى فريق كورة</div>
+    <a href="#apply" style="display:inline-block;margin-top:clamp(20px,3vw,34px);background:var(--coral);color:var(--paper);padding:20px 36px;font-family:Jost,sans-serif;font-weight:600;font-size:clamp(16px,1.4vw,20px);" style-hover="background:var(--paper);color:var(--ink);">START YOUR APPLICATION ↘</a>
+  </div>
+  <div style="margin-top:clamp(36px,6vw,80px);overflow:hidden;border-top:1px solid var(--line);border-bottom:1px solid var(--line);padding:clamp(10px,1.4vw,18px) 0;">
+    <div style="display:flex;white-space:nowrap;animation:kora-marquee 26s linear infinite;font-family:Jost,sans-serif;font-weight:700;font-size:clamp(40px,7vw,110px);line-height:1;">
+      <span style="padding:0 26px;">JOIN THE KORA TEAM</span><span style="padding:0 26px;color:var(--coral);">●</span><span style="padding:0 26px;color:transparent;-webkit-text-stroke:1px var(--line2);">12–14 NOV 2026</span><span style="padding:0 26px;color:var(--green);">●</span>
+      <span style="padding:0 26px;">JOIN THE KORA TEAM</span><span style="padding:0 26px;color:var(--coral);">●</span><span style="padding:0 26px;color:transparent;-webkit-text-stroke:1px var(--line2);">12–14 NOV 2026</span><span style="padding:0 26px;color:var(--green);">●</span>
+    </div>
+  </div>
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));border-bottom:1px solid var(--line);">
+    <div style="padding:22px clamp(16px,3vw,32px);border-right:1px solid var(--line);"><div style="font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:0.22em;opacity:.7;margin-bottom:8px;">EVENT</div><div style="font-family:Jost,sans-serif;font-weight:500;font-size:15px;line-height:1.4;">KORA — The Industry Behind the Game</div></div>
+    <div style="padding:22px clamp(16px,3vw,32px);border-right:1px solid var(--line);"><div style="font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:0.22em;opacity:.7;margin-bottom:8px;">DATES</div><div style="font-family:Jost,sans-serif;font-weight:500;font-size:15px;line-height:1.4;">12–14 November 2026</div></div>
+    <div style="padding:22px clamp(16px,3vw,32px);border-right:1px solid var(--line);"><div style="font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:0.22em;opacity:.7;margin-bottom:8px;">VENUE</div><div style="font-family:Jost,sans-serif;font-weight:500;font-size:15px;line-height:1.4;">KFUPM, Dhahran — Building 57 Square</div></div>
+    <div style="padding:22px clamp(16px,3vw,32px);"><div style="font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:0.22em;opacity:.7;margin-bottom:8px;">CONTACT</div><div style="font-family:Jost,sans-serif;font-weight:500;font-size:15px;line-height:1.4;"><a href="#apply">team@kora.sa</a></div></div>
+  </div>
+  <div style="display:flex;flex-wrap:wrap;gap:12px;justify-content:space-between;padding:18px clamp(16px,3vw,32px);font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:0.2em;opacity:.62;">
+    <div>© 2026 KORA · ALL RIGHTS RESERVED</div>
+    <div>DHAHRAN · 26.3069° N, 50.1440° E</div>
+  </div>
+</section>
+</div></x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;accentColor&quot;:{&quot;editor&quot;:&quot;color&quot;,&quot;default&quot;:&quot;#F2624F&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;options&quot;:[&quot;#F2624F&quot;,&quot;#4FB05A&quot;,&quot;#2D3B70&quot;,&quot;#ECEFF5&quot;],&quot;section&quot;:&quot;Art direction&quot;},&quot;enableSpotlight&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Interaction&quot;}}">
+class Component extends DCLogic {
+  constructor(props){
+    super(props);
+    this.spotRef = React.createRef();
+    this.progRef = React.createRef();
+    this.heroRef = React.createRef();
+    this.railRef = React.createRef();
+    this.pentNavRef = React.createRef();
+    this.passRef = React.createRef();
+    this.jerseyNameRef = React.createRef();
+    this.jerseyNumRef = React.createRef();
+    this.jerseyRoleRef = React.createRef();
+    this.jerseyTrackRef = React.createRef();
+    this.msgRef = React.createRef();
+    this.open = 1;
+    this.chips = new Set();
+  }
+  componentDidMount(){
+    const accent = this.props.accentColor;
+    if (accent) document.documentElement.style.setProperty('--coral', accent);
+
+    this._move = (e) => {
+      if (this.props.enableSpotlight === false) return;
+      const s = this.spotRef.current;
+      if (s){
+        s.style.opacity = '1';
+        s.style.background = 'radial-gradient(260px 260px at ' + e.clientX + 'px ' + e.clientY + 'px, rgba(242,98,79,0.16), rgba(242,98,79,0) 70%)';
+      }
+      const h = this.heroRef.current;
+      if (h){
+        const dx = (e.clientX / window.innerWidth - 0.5) * 18;
+        const dy = (e.clientY / window.innerHeight - 0.5) * 10;
+        h.style.transform = 'translate(' + dx.toFixed(2) + 'px,' + dy.toFixed(2) + 'px)';
+      }
+      const p = this.passRef.current;
+      if (p){
+        const r = p.getBoundingClientRect();
+        const rx = ((e.clientY - (r.top + r.height/2)) / r.height) * -8;
+        const ry = ((e.clientX - (r.left + r.width/2)) / r.width) * 10;
+        p.style.transform = 'perspective(1100px) rotateX(' + rx.toFixed(2) + 'deg) rotateY(' + ry.toFixed(2) + 'deg)';
+      }
+    };
+    this._scroll = () => {
+      const el = this.progRef.current;
+      if (!el) return;
+      const max = document.documentElement.scrollHeight - window.innerHeight;
+      el.style.width = (max > 0 ? (window.scrollY / max) * 100 : 0) + '%';
+    };
+    window.addEventListener('pointermove', this._move, {passive:true});
+    window.addEventListener('scroll', this._scroll, {passive:true});
+    this._scroll();
+    const init = () => {
+      if (this._inited) return;
+      if (!this.railRef.current || !this.railRef.current.querySelector('[data-panel]')){
+        this._initT = setTimeout(init, 120);
+        return;
+      }
+      this._inited = true;
+      this.setTrack(1);
+    };
+    init();
+  }
+  componentWillUnmount(){
+    clearTimeout(this._initT);
+    window.removeEventListener('pointermove', this._move);
+    window.removeEventListener('scroll', this._scroll);
+
+  }
+  setTrack(n){
+    n = String(n);
+    this.open = n;
+    const rail = this.railRef.current;
+    if (rail){
+      rail.querySelectorAll('[data-panel]').forEach((p) => {
+        const on = p.getAttribute('data-panel') === n;
+        p.dataset.open = on ? '1' : '0';
+        p.style.flexGrow = on ? '4.2' : '1';
+        p.style.background = on ? 'var(--navy)' : 'var(--navy-d)';
+        const art = p.querySelector('[data-art]');
+        const pent = p.querySelector('[data-pent-art]');
+        const body = p.querySelector('[data-body]');
+        if (art){ art.style.opacity = on ? '1' : '0.4'; art.style.transform = on ? 'scale(1.06)' : 'scale(1)'; }
+        if (pent){ pent.style.opacity = on ? '0.9' : '0.22'; pent.style.transform = on ? 'translate(-14px,-14px) rotate(-8deg)' : 'none'; }
+        if (body){ body.style.maxHeight = on ? '320px' : '0px'; body.style.opacity = on ? '1' : '0'; }
+      });
+    }
+    const nav = this.pentNavRef.current;
+    if (nav){
+      nav.querySelectorAll('[data-pent]').forEach((d) => {
+        const on = d.getAttribute('data-pent') === n;
+        d.style.background = on ? 'var(--coral)' : 'rgba(236,239,245,0.1)';
+        d.style.transform = on ? 'scale(1.12)' : 'scale(1)';
+      });
+    }
+  }
+  renderVals(){
+    return {
+      spotRef: this.spotRef, progRef: this.progRef, heroRef: this.heroRef,
+      railRef: this.railRef, pentNavRef: this.pentNavRef, passRef: this.passRef,
+      jerseyNameRef: this.jerseyNameRef, jerseyNumRef: this.jerseyNumRef,
+      jerseyRoleRef: this.jerseyRoleRef, jerseyTrackRef: this.jerseyTrackRef, msgRef: this.msgRef,
+      onTrack: (e) => {
+        const el = e.currentTarget;
+        const n = el.getAttribute('data-panel') || el.getAttribute('data-pent');
+        if (n) this.setTrack(n);
+      },
+      onChip: (e) => {
+        const b = e.currentTarget;
+        const on = b.dataset.on === '1';
+        b.dataset.on = on ? '0' : '1';
+        b.style.background = on ? 'transparent' : 'var(--coral)';
+        b.style.borderColor = on ? 'var(--line2)' : 'var(--coral)';
+        if (on) this.chips.delete(b.textContent); else this.chips.add(b.textContent);
+        const t = this.jerseyTrackRef.current;
+        if (t){
+          const list = Array.from(this.chips);
+          t.textContent = list.length === 0 ? 'ALL TRACKS' : (list.length === 1 ? list[0] : list.length + ' TRACKS');
+        }
+      },
+      onName: (e) => {
+        const v = e.target.value.trim();
+        const el = this.jerseyNameRef.current;
+        if (el) el.textContent = v ? v.toUpperCase() : 'YOUR NAME';
+      },
+      onNum: (e) => {
+        const v = e.target.value.replace(/[^0-9]/g,'').slice(0,2);
+        e.target.value = v;
+        const el = this.jerseyNumRef.current;
+        if (el) el.textContent = v || '26';
+      },
+      onRole: (e) => {
+        const v = e.target.value.trim();
+        const el = this.jerseyRoleRef.current;
+        if (el) el.textContent = v ? v.toUpperCase() : 'CREW';
+      },
+      onSubmit: () => {
+        const el = this.msgRef.current;
+        if (el) el.textContent = '● APPLICATION STARTED — CHECK YOUR EMAIL FOR THE NEXT ROUND';
+      }
+    };
+  }
+}
+</script>
+</body>
+</html>
