@@ -1,5 +1,5 @@
 import { CONTACT_EMAIL, SOCIAL_LINKS } from "@/lib/constants";
-import { InstagramIcon, TikTokIcon, XIcon } from "@/components/ui/SocialIcons";
+import { InstagramIcon, TikTokIcon, XIcon, LinkedInIcon } from "@/components/ui/SocialIcons";
 
 function MailIcon() {
   return (
@@ -15,6 +15,7 @@ const APPS = [
   { href: SOCIAL_LINKS.instagram, label: "إنستغرام", accent: "fuchsia", Icon: InstagramIcon, external: true },
   { href: SOCIAL_LINKS.x, label: "إكس", accent: "green", Icon: XIcon, external: true },
   { href: SOCIAL_LINKS.tiktok, label: "تيك توك", accent: "coral", Icon: TikTokIcon, external: true },
+  { href: SOCIAL_LINKS.linkedin, label: "لينكدإن",  accent: "fuchsia", Icon: LinkedInIcon, external: true },
 ] as const;
 
 export function Footer() {

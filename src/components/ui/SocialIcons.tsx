@@ -26,8 +26,17 @@ export function TikTokIcon() {
   );
 }
 
+export function LinkedInIcon() {
+  return (
+    <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+      <path d="M5.37 3.02A2.37 2.37 0 1 1 5.37 7.76a2.37 2.37 0 0 1 0-4.74ZM3.33 9.67h4.08V21.75H3.33V9.67Zm6.64 0h3.91v1.65h.06c.54-1.03 1.88-2.12 3.87-2.12 4.14 0 4.91 2.73 4.91 6.28v6.27h-4.08v-5.56c0-1.33-.02-3.04-1.85-3.04-1.86 0-2.15 1.45-2.15 2.94v5.66h-4.08V9.67Z" />
+    </svg>
+  );
+}
+
 export const SOCIAL_NETWORKS = [
   { href: SOCIAL_LINKS.instagram, label: "إنستغرام", Icon: InstagramIcon, accent: "fuchsia" },
   { href: SOCIAL_LINKS.x, label: "إكس", Icon: XIcon, accent: "green" },
   { href: SOCIAL_LINKS.tiktok, label: "تيك توك", Icon: TikTokIcon, accent: "coral" },
+  { href: SOCIAL_LINKS.linkedin, label: "لينكدإن", Icon: LinkedInIcon, accent: "fuchsia" },
 ] as const;

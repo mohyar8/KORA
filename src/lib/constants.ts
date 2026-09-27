@@ -27,6 +27,7 @@ export const SOCIAL_LINKS = {
   instagram: "https://www.instagram.com/kora_kfupm",
   x: "https://x.com/KORA_KFUPM",
   tiktok: "https://www.tiktok.com/@kfupm_kora",
+  linkedin: "https://www.linkedin.com/company/kora-kfupm/",
 } as const;
 
 /** Brand colors — see brand-assets/03 Colors/Colors.pdf (exact hex/RGB/Pantone values). */
