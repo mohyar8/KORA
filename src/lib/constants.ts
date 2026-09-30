@@ -1,4 +1,4 @@
-export const SITE_URL = "https://kora.kfupm.edu.sa";
+export const SITE_URL = "https://korakfupm.com";
 
 export const BRAND = {
   name: "KORA",
