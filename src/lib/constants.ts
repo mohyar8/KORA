@@ -21,7 +21,7 @@ export const EVENT = {
   venueLong: "الظهران، جامعة الملك فهد للبترول والمعادن، ساحة مبنى 57",
 } as const;
 
-export const CONTACT_EMAIL = "kora.kfupm@gmail.com";
+export const CONTACT_EMAIL = "KORA-Initiative@kfupm.edu.sa";
 
 export const SOCIAL_LINKS = {
   instagram: "https://www.instagram.com/kora_kfupm",
