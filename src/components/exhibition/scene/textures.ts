@@ -379,3 +379,183 @@ export async function passageSignTexture() {
   ctx.stroke();
   return finish(c);
 }
+
+/** Deep navy LED field with diagonal light rays (stage screens in the render). */
+function drawRays(ctx: CanvasRenderingContext2D, w: number, h: number, seed: number, strength = 1) {
+  const g = ctx.createLinearGradient(0, 0, 0, h);
+  g.addColorStop(0, "#0b1438");
+  g.addColorStop(1, "#060b22");
+  ctx.fillStyle = g;
+  ctx.fillRect(0, 0, w, h);
+  const r = rng(seed);
+  ctx.globalCompositeOperation = "lighter";
+  const tints = ["120,160,255", "200,220,255", "230,190,120"];
+  for (let i = 0; i < 26; i++) {
+    const x = r() * w * 1.2 - w * 0.1;
+    const lean = (r() - 0.5) * w * 0.5;
+    const width = 2 + r() * w * 0.012;
+    const a = (0.05 + r() * 0.18) * strength;
+    const grad = ctx.createLinearGradient(x, h, x + lean, 0);
+    const tint = tints[i % 3 === 2 && r() > 0.5 ? 2 : r() > 0.4 ? 0 : 1];
+    grad.addColorStop(0, `rgba(${tint},0)`);
+    grad.addColorStop(0.5, `rgba(${tint},${a})`);
+    grad.addColorStop(1, `rgba(${tint},0)`);
+    ctx.strokeStyle = grad;
+    ctx.lineWidth = width;
+    ctx.beginPath();
+    ctx.moveTo(x, h);
+    ctx.lineTo(x + lean, 0);
+    ctx.stroke();
+  }
+  ctx.globalCompositeOperation = "source-over";
+}
+
+/** Composes the official bilingual lockup: "KORA" · ball · "كورة" (render layout). */
+async function drawLockup(ctx: CanvasRenderingContext2D, cx: number, cy: number, height: number, stacked = false) {
+  const [ball, en, ar] = await Promise.all([
+    loadImage("/assets/brand/kora-lockup-ball.png"),
+    loadImage("/assets/brand/kora-lockup-en.png"),
+    loadImage("/assets/brand/kora-lockup-ar.png"),
+  ]);
+  const enH = height * 0.55;
+  const enW = (en.width / en.height) * enH;
+  const arH = height * 0.8;
+  const arW = (ar.width / ar.height) * arH;
+  const bH = height * 0.8;
+  const bW = (ball.width / ball.height) * bH;
+  if (stacked) {
+    const y0 = cy - height * 1.3;
+    ctx.drawImage(en, cx - enW / 2, y0, enW, enH);
+    ctx.drawImage(ball, cx - bW / 2, y0 + enH + height * 0.15, bW, bH);
+    ctx.drawImage(ar, cx - arW / 2, y0 + enH + bH + height * 0.3, arW, arH);
+    return;
+  }
+  const gap = height * 0.25;
+  const total = enW + gap + bW + gap + arW;
+  let x = cx - total / 2;
+  ctx.drawImage(en, x, cy - enH / 2, enW, enH);
+  x += enW + gap;
+  ctx.drawImage(ball, x, cy - bH / 2, bW, bH);
+  x += bW + gap;
+  ctx.drawImage(ar, x, cy - arH / 2 - height * 0.05, arW, arH);
+}
+
+/** Main stage LED wall: rays + centred official lockup. */
+export async function stageScreenTexture() {
+  const { c, ctx } = canvas(2048, 960);
+  drawRays(ctx, c.width, c.height, 31);
+  await drawLockup(ctx, c.width / 2, c.height * 0.47, 165);
+  return finish(c);
+}
+
+/** Inner side screens: rays only. */
+export function raysTexture(seed: number) {
+  const { c, ctx } = canvas(512, 960);
+  drawRays(ctx, c.width, c.height, seed, 1.2);
+  return finish(c);
+}
+
+/** Portrait LED panel with the stacked lockup (outer stage panels, lectern). */
+export async function portraitLogoTexture() {
+  const { c, ctx } = canvas(512, 900);
+  drawRays(ctx, c.width, c.height, 47, 0.6);
+  await drawLockup(ctx, c.width / 2, c.height * 0.4, 110, true);
+  return finish(c);
+}
+
+/** Glowing title letters (booth crowns) on transparent background. */
+export async function glowTitleTexture(text: string, color: string, width = 1024, height = 256) {
+  const family = brandFontFamily();
+  try {
+    await document.fonts.load(`700 120px ${family}`, text);
+  } catch {
+    /* fall back */
+  }
+  const { c, ctx } = canvas(width, height);
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
+  ctx.direction = "rtl";
+  ctx.font = `800 ${Math.round(height * 0.62)}px ${family}`;
+  ctx.shadowColor = color;
+  ctx.shadowBlur = height * 0.12;
+  ctx.fillStyle = color;
+  ctx.fillText(text, width / 2, height / 2);
+  ctx.shadowBlur = 0;
+  ctx.fillStyle = "#fff4fb";
+  ctx.globalAlpha = 0.85;
+  ctx.fillText(text, width / 2, height / 2);
+  return finish(c);
+}
+
+/** Dark sign plate with a light caption (booth headers and hanging section signs). */
+export async function plateTexture(lines: { text: string; size: number; dir?: CanvasDirection }[], opts: { width?: number; height?: number; bg?: string; fg?: string; number?: string } = {}) {
+  const family = brandFontFamily();
+  const { width = 1024, height = 256, bg = "#2b2330", fg = "#f2e9f2" } = opts;
+  try {
+    await document.fonts.load(`600 80px ${family}`, lines.map((l) => l.text).join(" "));
+  } catch {
+    /* fall back */
+  }
+  const { c, ctx } = canvas(width, height);
+  ctx.fillStyle = bg;
+  ctx.fillRect(0, 0, width, height);
+  ctx.strokeStyle = "rgba(255,255,255,0.18)";
+  ctx.lineWidth = 4;
+  ctx.strokeRect(6, 6, width - 12, height - 12);
+  ctx.fillStyle = fg;
+  ctx.textBaseline = "middle";
+  const n = lines.length;
+  lines.forEach((l, i) => {
+    ctx.font = `600 ${l.size}px ${family}`;
+    ctx.direction = l.dir ?? "rtl";
+    ctx.textAlign = "center";
+    ctx.fillText(l.text, opts.number ? width * 0.45 : width / 2, (height * (i + 1)) / (n + 1));
+  });
+  if (opts.number) {
+    ctx.direction = "ltr";
+    ctx.textAlign = "center";
+    ctx.font = `300 ${Math.round(height * 0.42)}px ${family}`;
+    ctx.fillText(opts.number, width * 0.88, height / 2);
+  }
+  return finish(c);
+}
+
+/**
+ * Stylised match broadcast frame for booth screens: our own pitch graphic,
+ * no third-party footage, players or broadcaster marks.
+ */
+export function broadcastTexture(seed: number, split = false) {
+  const { c, ctx } = canvas(512, 288);
+  const r = rng(seed);
+  const pitch = (x: number, y: number, w: number, h: number) => {
+    for (let i = 0; i < 8; i++) {
+      ctx.fillStyle = i % 2 ? "#2f7a3a" : "#368544";
+      ctx.fillRect(x + (w / 8) * i, y, w / 8 + 1, h);
+    }
+    ctx.strokeStyle = "rgba(255,255,255,0.75)";
+    ctx.lineWidth = Math.max(1, w / 220);
+    ctx.strokeRect(x + w * 0.04, y + h * 0.08, w * 0.92, h * 0.84);
+    ctx.beginPath();
+    ctx.moveTo(x + w / 2, y + h * 0.08);
+    ctx.lineTo(x + w / 2, y + h * 0.92);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.arc(x + w / 2, y + h / 2, h * 0.16, 0, Math.PI * 2);
+    ctx.stroke();
+    for (let i = 0; i < 6; i++) {
+      ctx.fillStyle = i % 2 ? "#f0f0f0" : "#1f2f6b";
+      ctx.beginPath();
+      ctx.arc(x + w * (0.2 + r() * 0.6), y + h * (0.25 + r() * 0.5), Math.max(2, h * 0.025), 0, Math.PI * 2);
+      ctx.fill();
+    }
+  };
+  if (split) {
+    pitch(0, 0, 255, 143);
+    pitch(257, 0, 255, 143);
+    pitch(0, 145, 255, 143);
+    pitch(257, 145, 255, 143);
+  } else pitch(0, 0, 512, 288);
+  ctx.fillStyle = "rgba(0,0,0,0.55)";
+  ctx.fillRect(0, 262, 512, 26);
+  return finish(c);
+}

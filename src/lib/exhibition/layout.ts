@@ -107,9 +107,10 @@ export const MUSEUM_PATH_PLANTERS = {
     [3.2, 22.4],
     [25.2, 34],
   ] as const,
-  // Plan shows palms at ≈5.7 / 17.5 / 26.4 / 33.6 m; the first two sit at
-  // the strip ends instead so they don't stand in the museum viewpoint's sightline.
-  palms: [3.5, 22, 26.4, 33.6] as const,
+  // Plan shows palms at ≈5.7 / 17.5 / 26.4 / 33.6 m. The 17.5 m palm sits at
+  // the strip end (22 m) and the 5.7 m palm is omitted: both stood in the
+  // museum viewpoint's sightline (F-10).
+  palms: [22, 26.4, 33.6] as const,
 };
 
 /** West edge planter column with palms (plan), broken by the entrance. */

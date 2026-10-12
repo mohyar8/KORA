@@ -21,20 +21,15 @@ function sectorBounds(from: number, to: number) {
     }
   const xs = pts.map((p) => p[0]);
   const zs = pts.map((p) => p[1]);
-  return box(Math.min(...xs), 0, Math.min(...zs), Math.max(...xs), 1.4, Math.max(...zs));
+  // Stone tiers rise to ≈1.7 m at the back row.
+  return box(Math.min(...xs), 0, Math.min(...zs), Math.max(...xs), 1.9, Math.max(...zs));
 }
 
 export const OBSTACLES: readonly THREE.Box3[] = [
   ...Object.values(BUILDINGS).map((b) => box(b.minX, 0, b.minZ, b.maxX, b.height + 0.6, b.maxZ + 3.5)),
   box(MUSEUM.facadeX - 0.3, 0, MUSEUM.northZ, MUSEUM.facadeX + MUSEUM.depth, MUSEUM.height + 0.2, MUSEUM.northZ + MUSEUM.length),
-  box(
-    STAGE.centerX - STAGE.width / 2 - 0.8,
-    0,
-    STAGE.centerZ - STAGE.depth / 2,
-    STAGE.centerX + STAGE.width / 2 + 0.8,
-    STAGE.deckHeight + STAGE.screenHeight + 0.6,
-    STAGE.centerZ + STAGE.depth / 2,
-  ),
+  // Stage incl. side stairs, towers (±7.8 m) and roof truss (≈7.5 m).
+  box(STAGE.centerX - 8.6, 0, STAGE.centerZ - STAGE.depth / 2, STAGE.centerX + 8.6, 7.7, STAGE.centerZ + STAGE.depth / 2),
   ...SEATING.blocks.map((b) => sectorBounds(b.from, b.to)),
   ...CORNER_SLOTS.map((s) => {
     const [sx, sz] = s.facing === "north" ? [s.w, s.d] : [s.d, s.w];

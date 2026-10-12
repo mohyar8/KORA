@@ -3,7 +3,7 @@
 import { useEffect, useMemo } from "react";
 import * as THREE from "three";
 import { mergeGeometries } from "three/examples/jsm/utils/BufferGeometryUtils.js";
-import { BOOTH_HEIGHT } from "@/lib/exhibition/areas";
+import { AREAS, BOOTH_HEIGHT, CORNER_IDS } from "@/lib/exhibition/areas";
 import { CORNER_SLOTS, ENTERTAINMENT, GATE, SEATING, STAGE } from "@/lib/exhibition/layout";
 
 /**
@@ -38,8 +38,11 @@ function box(w: number, h: number, d: number, x: number, y: number, z: number) {
   return new THREE.BoxGeometry(w, h, d).translate(x, y, z);
 }
 
+/** Only areas still without a model are ghosted. */
+const ghosted = (i: number) => AREAS[CORNER_IDS[i]].model === "placeholder";
+
 function cornerParts() {
-  return CORNER_SLOTS.flatMap((s) => {
+  return CORNER_SLOTS.filter((_, i) => ghosted(i)).flatMap((s) => {
     const [w, d] = s.facing === "north" ? [s.w, s.d] : [s.d, s.w];
     // A neutral open-fronted shell: back wall, two side walls, header.
     const t = 0.12;
@@ -128,7 +131,7 @@ function entertainmentParts() {
 }
 
 const FOOTPRINTS: Rect[] = [
-  ...CORNER_SLOTS.map((s) => {
+  ...CORNER_SLOTS.filter((_, i) => ghosted(i)).map((s) => {
     const [w, d] = s.facing === "north" ? [s.w, s.d] : [s.d, s.w];
     return { x: s.x, z: s.z, w, d };
   }),
@@ -160,7 +163,8 @@ function normalise(g: THREE.BufferGeometry) {
 
 export function Placeholders() {
   const { fill, edges, foot } = useMemo(() => {
-    const parts = [...stageParts(), ...seatingParts(), ...cornerParts(), ...gateParts(), ...entertainmentParts()];
+    const stageGhost = AREAS.stage.model === "placeholder" ? [...stageParts(), ...seatingParts()] : [];
+    const parts = [...stageGhost, ...cornerParts(), ...gateParts(), ...entertainmentParts()];
     const fill = mergeGeometries(parts.map(normalise));
     const edges = mergeGeometries(parts.map((p) => new THREE.EdgesGeometry(p, 20)));
     parts.forEach((p) => p.dispose());

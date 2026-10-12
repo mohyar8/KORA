@@ -83,9 +83,9 @@ export const BOOTH_HEIGHT = 3;
 const MODELLED_CORNERS = new Set<CornerId>(["corner-2"]);
 
 function cornerArea(id: CornerId, slot: CornerSlot, index: number): AreaConfig {
-  // Side corners are viewed diagonally from the open middle of the zone (the
-  // lower ones more so, to stand clear of the bottom-row booths).
-  const skew = index === 0 || index === 5 ? 0.25 : 0.6;
+  // Side corners are viewed almost head-on, turned slightly towards the open
+  // middle of the zone (the south row was set back to free their fronts).
+  const skew = index === 0 || index === 5 ? 0.2 : 0.12;
   const azimuth = slot.facing === "east" ? -skew : slot.facing === "west" ? Math.PI + skew : -Math.PI / 2;
   const [sx, sz] = slot.facing === "north" ? [slot.w, slot.d] : [slot.d, slot.w];
   const rotationY = slot.facing === "east" ? Math.PI / 2 : slot.facing === "west" ? -Math.PI / 2 : Math.PI;
@@ -97,12 +97,12 @@ function cornerArea(id: CornerId, slot: CornerSlot, index: number): AreaConfig {
     frame: { position: [slot.x, 0, slot.z], rotationY },
     placementNote: "توزيع الأركان على المواقع مبدئي",
     anchor: {
-      target: [slot.x, 1.2, slot.z],
+      target: [slot.x, 1.35, slot.z],
       azimuth,
-      elevation: 0.22,
-      distance: 10,
-      fitWidth: 8,
-      maxDistance: 12,
+      elevation: 0.16,
+      distance: 7.2,
+      fitWidth: 6,
+      maxDistance: 9.5,
     },
     look: { yaw: 1.0, pitchUp: 0.2, pitchDown: 0.15 },
     hitBoxes: [{ center: [slot.x, BOOTH_HEIGHT / 2, slot.z], size: [sx + 0.3, BOOTH_HEIGHT, sz + 0.3] }],
@@ -137,9 +137,10 @@ export const AREAS: Record<AreaId, AreaConfig> = {
     // the facade (the M1 standpoint is now occupied by the stage).
     anchor: {
       target: [MUSEUM.facadeX, 1.5, museumMidZ],
-      azimuth: Math.atan2(-16, -10),
+      // Steeper than M2 so the stage's east truss tower stays out of frame.
+      azimuth: Math.atan2(-16, -8),
       elevation: 0.15,
-      distance: 20.5,
+      distance: 19.5,
       fitWidth: 18,
       maxDistance: 21,
     },
@@ -167,10 +168,10 @@ export const AREAS: Record<AreaId, AreaConfig> = {
       provisional: true,
     },
     anchor: {
-      target: [STAGE.centerX, 2.6, STAGE.centerZ - 1],
+      target: [STAGE.centerX, 3.4, STAGE.centerZ - 1],
       azimuth: Math.PI / 2,
-      elevation: 0.13,
-      distance: 18,
+      elevation: 0.12,
+      distance: 20,
       fitWidth: 17,
       maxDistance: 22,
     },

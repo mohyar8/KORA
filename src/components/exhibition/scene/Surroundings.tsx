@@ -15,6 +15,7 @@ import {
 } from "@/lib/exhibition/layout";
 import { concreteTexture, frondTexture, passageSignTexture, radialTexture, rng, windowTexture } from "./textures";
 import { useAsyncTexture } from "./useAsyncTexture";
+import { Batched } from "./Batched";
 import { useQuality } from "./quality";
 
 /**
@@ -501,8 +502,12 @@ export function Surroundings() {
 
   return (
     <group>
-      <AcademicBuilding {...BUILDINGS.b70} seed={70} concrete={tex.concrete} />
-      <AcademicBuilding {...BUILDINGS.b57} seed={57} concrete={tex.concrete} />
+      <Batched>
+        <AcademicBuilding {...BUILDINGS.b70} seed={70} concrete={tex.concrete} />
+        <AcademicBuilding {...BUILDINGS.b57} seed={57} concrete={tex.concrete} />
+        <PlazaEdge />
+        <EntertainmentGround />
+      </Batched>
 
       {/* Tree belt (dense evergreen screen seen in the site photos). */}
       <Instances geometry={geo.trunk} items={items.trunks}>
@@ -612,8 +617,6 @@ export function Surroundings() {
         <planeGeometry args={[6, 18]} />
         <meshStandardMaterial color="#6f6f73" roughness={0.9} />
       </mesh>
-      <PlazaEdge />
-      <EntertainmentGround />
       <PassageSign />
     </group>
   );

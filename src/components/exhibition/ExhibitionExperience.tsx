@@ -12,7 +12,7 @@ import { Atmosphere } from "./scene/Atmosphere";
 import { Ground } from "./scene/Ground";
 import { HitTargets, CLICK_SLOP } from "./scene/HitTargets";
 import { Effects, Lighting } from "./scene/Lighting";
-import { Museum } from "./scene/Museum";
+import { AreaModels } from "./scene/AreaModels";
 import { Placeholders } from "./scene/Placeholders";
 import { QualityContext, detectQuality, type Quality } from "./scene/quality";
 import { Surroundings } from "./scene/Surroundings";
@@ -57,6 +57,7 @@ export default function ExhibitionExperience({ onFail }: { onFail: () => void })
   const glRef = useRef<WebGLRenderer | null>(null);
   const getRef = useRef<(() => RootState) | null>(null);
   const [instant, setInstant] = useState(false);
+  const [modelOverrides, setModelOverrides] = useState<Partial<Record<AreaId, string>>>({});
 
   useEffect(() => {
     const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
@@ -115,6 +116,24 @@ export default function ExhibitionExperience({ onFail }: { onFail: () => void })
         look.current = { yaw, pitch };
         invalidate();
       },
+      /**
+       * Model-swap proof: exports an area's current kit model to GLB in the
+       * browser and loads it back through the GLB slot (or `url` if given).
+       */
+      swapModel: async (id: AreaId, url?: string) => {
+        if (!url) {
+          const root = getRef.current?.().scene.getObjectByName(`area-${id}`);
+          if (!root) return "no model";
+          const { GLTFExporter } = await import("three/examples/jsm/exporters/GLTFExporter.js");
+          const glb = (await new GLTFExporter().parseAsync(root.children[0], { binary: true })) as ArrayBuffer;
+          url = URL.createObjectURL(new Blob([glb], { type: "model/gltf-binary" }));
+          setModelOverrides((m) => ({ ...m, [id]: url }));
+          return { bytes: glb.byteLength, url };
+        }
+        setModelOverrides((m) => ({ ...m, [id]: url }));
+        return { url };
+      },
+      clearModels: () => setModelOverrides({}),
       /** Checks every overview/area flight pair against the obstacle volumes. */
       checkFlights: (aspect = 16 / 9) => {
         const ids: (AreaId | null)[] = [null, ...AREA_ORDER];
@@ -292,7 +311,7 @@ export default function ExhibitionExperience({ onFail }: { onFail: () => void })
         className="exh-canvas"
         frameloop={visible ? "demand" : "never"}
         dpr={quality.dpr}
-        shadows={quality.shadows ? "soft" : false}
+        shadows={quality.shadows ? "percentage" : false}
         gl={{ antialias: false, alpha: false, stencil: false, powerPreference: "high-performance" }}
         camera={{ fov: 40, near: 0.3, far: 2000, position: [0, 40, 80] }}
         onCreated={({ gl, get }) => {
@@ -312,7 +331,7 @@ export default function ExhibitionExperience({ onFail }: { onFail: () => void })
           <Lighting />
           <Ground />
           <Surroundings />
-          <Museum />
+          <AreaModels overrides={modelOverrides} />
           <Placeholders />
           <HitTargets
             current={selected}

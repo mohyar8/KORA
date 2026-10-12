@@ -12,7 +12,8 @@ import { useAsyncTexture } from "./useAsyncTexture";
 /**
  * Museum exterior after the preliminary render (references/…12.05.47 PM.jpeg).
  *
- * Local frame: the plaza-facing (west) facade lies in the plane x = 0 and
+ * Placed by its area frame (AreaModels). Local frame: the plaza-facing
+ * (west) facade lies in the plane x = 0 and
  * faces −X; the building extends into +X (depth) and +Z (length, from its
  * northern end). Unseen faces follow the provisional linework in
  * museumFacade.ts.
@@ -225,7 +226,7 @@ export function Museum() {
   const exitMid = (exit.u0 + exit.u1) / 2;
 
   return (
-    <group position={[MUSEUM.facadeX, 0, MUSEUM.northZ]}>
+    <group>
       {faces.map(({ spec, surface, lines, base, wash }) => (
         <group key={spec.face}>
           <mesh geometry={surface} castShadow receiveShadow>

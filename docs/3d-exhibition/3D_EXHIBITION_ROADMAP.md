@@ -1,6 +1,6 @@
 # KORA 3D Exhibition — Implementation Roadmap
 
-**Status:** v0.3 — M1 approved (GATE 1 passed); M2 implemented, awaiting review before M3 (2026-10-12)  
+**Status:** v0.4 — M1 and M2 approved; M3 implemented, awaiting GATE 2 review before M4 (2026-10-12)  
 **Authoritative spec:** [`3D_EXHIBITION_SPEC.md`](./3D_EXHIBITION_SPEC.md) (v1.0, 2026-10-12). This roadmap never overrides it; where they conflict, the spec wins and the conflict is logged in §9.  
 **Progress tracker:** [`3D_EXHIBITION_STATE.md`](./3D_EXHIBITION_STATE.md)  
 **Owner of this file:** Claude Code (update on every material plan change; log it in §10).
@@ -16,6 +16,7 @@ A non-blocking, full-width 3D exhibition section placed **directly after the exi
 - **Selectable areas (10):** the **seven experience corners**, the **museum**, the **main stage** and the **entertainment zone**. Everything else (entrance arch, gate, press wall, coffee kiosk, photo booth, corridor/tunnel, control booth, Buildings 57/70, planters, lighting) is **environmental scenery**: rendered, never selectable, not in the menu.
 - **Fidelity:** follow the preliminary architectural designs closely, prioritising visual realism and quality.
 - **Hero:** preserved without modification (unchanged requirement).
+- **M3 instructions (2026-10-12):** all previously recommended decisions approved (D-7 no people for now, D-11 Media corner first, D-14 neutral replacement for third-party marks, D-17 provisional slot mapping, D-18 control booth omitted, D-19 entertainment zone provisional, R-8 stage placed per masterplan without the render's background building). South row (slots 3–5) and its palms set back so slots 2 and 7 have clear fronts.
 - **M2 instructions (2026-10-12):** keep the M1 museum entrance orientation; place areas from the masterplan and references; never invent missing corner designs or treat ambiguous references as confirmed (clearly marked placeholders instead); the full PDF is not required while the available references suffice.
 
 ### Explicit exclusions
@@ -99,6 +100,9 @@ Stage 12.0 m × 5.0 m; aisle between seating wedges 2.0 m; entrance-to-museum pa
 - **F-9** **Seven corner slots** are drawn in the "Corners / Experience Zones" block (2 squares west, 3 rectangles south, 2 squares east). Only the bottom-centre slot is dimensioned (4.0 × 2.5 m, 1.5 m gap); others are scaled from the drawing. **Which corner occupies which slot is not stated.**
 - **F-10** The masterplan's palms at ≈ z 5.7 and 17.5 m on the museum-path planter strip stood in the museum viewpoint's sightline; they are placed at the strip ends (z 3.5 and 22 m) instead.
 - **F-11** The **entertainment zone** is only an arrow on the plan ("To Entertainment Area", through the passage between Buildings 70 and 57). It is placed provisionally just north of the passage (x 11–43, z −54…−32 m), with that caveat shown in its card.
+- **F-12** Seating: the masterplan aerial shows rows of loose chairs; the dedicated "Stage & Theater" render shows stepped stone tiers with navy cushions plus a front lounge row of armchairs. M3 follows the **design render** inside the **plan footprint** (lounge row = first band, four stone tiers behind).
+- **F-13** Media render content: some lettering is garbled AI text ("KOXA X", "TANK", the 01 caption) and some marks are third-party (VISA, partners). These are omitted; plate 01 shows its number only, and "هل تعرف هذا الصوتي؟" is corrected to «هل تعرف هذا الصوت؟». Screens show our own pitch graphics, not footage.
+- **F-14** Stage-screen tagline in the render («الرياضة السعودية.. إنجاز وحكاية») is not approved copy, so the screens carry the official lockup only.
 - **F-7** Museum circulation conflict: the masterplan routes visitors **into the museum's south end** and out on the west side near the north end, while the exterior render shows **entrance and exit on the same long facade, entrance at the left (north) end**. M1 follows the exterior render (the architectural design); the masterplan arrows are treated as schematic. Needs owner confirmation before M2 (D-15).
 
 ---
@@ -238,12 +242,39 @@ Outputs: ROADMAP + STATE. No code, no installs.
 - **Verification:** scripted manual matrix (all transitions, interrupt mid-flight, resize mid-flight, rotate phone, reduced-motion on/off, keyboard-only pass, NVDA/VoiceOver spot-check), real iOS + Android touch tests.
 - **Risks:** iOS Safari gesture conflicts (`touch-action` + passive listeners); camera paths through stage truss (midpoint lift + per-pair overrides); masterplan orientation dispute.
 
+**M3 as built (summary):** see the M3 section below and STATE.
+
 **M2 as built (summary):** all 10 selectable areas at masterplan positions with anchors, look bounds, hit volumes and pins; museum (modelled) + translucent placeholders for everything else; three navigation paths (3D click incl. visible neighbours, panel/bottom sheet, overview); obstacle-aware interruptible flights; keyboard, reduced motion, optional fullscreen with scroll restore; "skip the exhibition" link; dev-only flight clearance check (`__exh.checkFlights`). The M1 museum standpoint now lies behind the stage, so the museum anchor moved north-east of it (similar three-quarter view, slightly more oblique). Details and results: STATE.
 
 ### M3 — Stage & theater + booth kit + first corner — **GATE 2 (booth fidelity & production plan)**
 - **Objective:** Validate the second visual-quality class (event structures) and settle who produces the remaining models.
 - **Dependencies:** M2 review; R-8 confirmation; D-11 (which booth first — proposal: Media corner, cleanest design family); R-12 sponsor-mark policy; ideally R-5 (slot ↔ corner mapping).
 - **Carry-over from M2:** mobile draw calls ≈104–134 vs proposed ≤100 — merge static museum/building meshes per material while touching these files (or in M6).
+
+**M3 — implemented (2026-10-12), awaiting GATE 2:**
+- *Layout:* slots 3–5 moved 2.2–2.5 m south (z 34.15–34.4), south palms to z 37.4, south lanterns to z 38.7. No overlaps; ≥ 0.7 m clearance between slot 2/7 and the south row, open fronts for 2 and 7. Side-corner cameras now face 2 and 7 almost head-on.
+- *Model-slot architecture:* `AreaConfig.frame` (local model frame) + optional `modelUrl`; `scene/AreaModels.tsx` renders the code kit or a GLB in that frame (lazy GLTFLoader, error → kit fallback). Proven with `__exh.swapModel('corner-2')`: the kit was exported to GLB in-browser (610 KB) and loaded back with an identical render; a missing URL falls back to the kit.
+- *Stage & amphitheatre* (`scene/models/Stage.tsx`): curved-apron deck with warm under-lip light, side stairs with lit nosings, LED wall with the official lockup, angled ray screens, portrait logo panels, gold light bars, line arrays, box-truss towers + roof grid (instanced), roof/deck fixtures, restrained blue beams and floor gobos, KORA lectern, one stage spot (desktop). Lounge band of armchairs + tables, four stone tiers with cushions and warm nosing strips.
+- *Booth kit* (`scene/kit/booth.tsx`, `kit/primitives.tsx`): walls between plan points, on-wall placement, chamfered portals, beam loops / octagon canopies, plates, screens, tripod camera, truss generator, instanced struts/parts, tube LEDs.
+- *Media corner* (`scene/models/MediaCorner.tsx`, slot 2): faceted plum walls, chamfered broadcast portal with pink LED edge, twin screens over a control desk, TV + broadcast camera, listening stations, player-info screen, octagonal canopy with LED + spots, header «من الملعب إلى العالم», section plates 01–03, glowing «ركن الإعلام». Adapted to the 3 × 3 m slot (F-3).
+- *Static batching* (`scene/Batched.tsx`): opaque meshes with identical materials merged per subtree, so overview draw calls are back to ≈151 (from 201) with no visual change.
+
+**GATE 2 — production recommendation per remaining area**
+| Area | Design source | Recommendation | Rough effort |
+|---|---|---|---|
+| Entrepreneurship (slot 3) | Render (same octagon-frame family as Media) | Code kit (reuse Media pieces) | ≈ 0.5 day |
+| Technology (slot 1) / Economy & Investment (slot 4) | Renders (navy shell + KORA header family); Economy has two variants (R-4) | Code kit for shell, screens, kiosks; the **stadium miniature** is better as a designer GLB (or a simplified kit version) | ≈ 1 day each + stadium asset |
+| Health (slot 5) | Render (cyan neon frame) | Code kit, neon toned down (spec); medical chair/stretcher props simplified or designer GLB; no third-party marks | ≈ 1 day |
+| Corners 6–7 | none | Blocked on identity/design (D-17) | — |
+| Entertainment zone | Render (games layout, LED arch, big screen); location provisional (D-19) | Kit for arch, screen, cages, lanes and tables; arcade cabinets and foosball/air-hockey tables from a designer or CC0 library (D-3) | ≈ 2 days kit + assets |
+| Scenery (entrance arch, press wall, coffee kiosk, photo booth, light tunnel) | Renders | Code kit | ≈ 1.5 days total |
+
+**Decision needed at GATE 2 — booth scale (F-3):** the renders read roughly 8–12 m wide, while the masterplan slots are 3–4 m (only slot 4 is dimensioned: 4.0 × 2.5 m). The Media corner was built faithfully to its *design* but compressed into the 3 × 3 m slot, so it reads as a compact kiosk. Options:
+- **(a)** keep the plan sizes (compact booths);
+- **(b)** use render-scale booths, which needs a reflowed corners zone and probably more plaza;
+- **(c)** confirm real booth dimensions with the event designer.
+
+**Recommended: (c), keeping (a) meanwhile.** The kit is parametric, so a slot size change re-flows the booth.
 - **Scope:** stage (12 × 5 m, truss, LED wall with official logo, steps, under-stage strip lights), seating wedges + front lounge row, control booth; parametric booth kit; first corner booth to final-candidate fidelity; replaceable GLB slot wiring (load a GLB per area if present, else kit model) proving model swap without code changes elsewhere.
 - **Acceptance:** stage and first booth match their references' design language; swapping a GLB for one area requires only config change; perf still within budget.
 - **Gate output:** recommendation per remaining area — code kit vs designer GLB — with effort estimates.
@@ -311,11 +342,15 @@ Available now: `npx tsc --noEmit`, `npx eslint` (baseline: 1 pre-existing error 
 | D-17 | Slot ↔ corner mapping (F-9 / R-5). M2 provisional: 1 Technology, 2 Media, 3 Entrepreneurship, 4 Economy & Investment, 5 Health, 6–7 "to be confirmed" | Owner to supply the mapping and the two missing corners |
 | D-18 | Control booth omitted (F-8) | Confirm, or provide its intended position relative to the M1 museum |
 | D-19 | Entertainment zone location (F-11) | Owner to confirm location/footprint; keep provisional until then |
+| D-20 | Booth scale (F-3, see GATE 2 above) | (c) confirm real dimensions; keep plan sizes meanwhile |
+| D-21 | Seating type (F-12): stone tiers + lounge row (design render) vs loose chairs (masterplan aerial) | Keep the design render's tiers |
+| D-22 | Producing the remaining models: code kit vs designer GLBs (GATE 2 table) | Code kit for shells and scenery; designer/CC0 for complex props (stadium miniature, arcade games) |
 | D-14 | Third-party logos (Bupa, adidas, EA FC, broadcasters) | Replace with neutral placeholders unless rights confirmed |
 
 ## 10. Update log
 | Date | Change |
 |---|---|
 | 2026-10-12 | v0.1 created after read-only discovery (M0). |
+| 2026-10-12 | v0.4: M2 approved. Layout tweak (south row set back). M3 implemented: model-slot frames + GLB swap, stage & amphitheatre, booth kit, Media corner, static batching. Findings F-12…F-14, decisions D-20…D-22, GATE 2 table added. |
 | 2026-10-12 | v0.3: M1 approved. M2 implemented: full masterplan layout, 10 selectable areas, placeholders, panel/bottom sheet, pins, fullscreen, obstacle-aware flights. Findings F-8…F-11 and decisions D-15 (closed), D-17…D-19 added; museum anchor relocated (stage occupies the M1 standpoint). |
 | 2026-10-12 | v0.2: owner decisions recorded (10 selectable areas; close fidelity; Hero untouched). M1 implemented; stack finalised (drei dropped, postprocessing added); section 4.2 now as-built; F-7, D-15 and the corner-identity question (R-3) added; D-1/D-2/D-10 closed; D-3 deferred. |
