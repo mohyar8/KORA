@@ -1,0 +1,256 @@
+/* 3D exhibition section. All selectors are scoped under .exh-* so nothing
+   here can affect the Hero or other sections. */
+
+.exh {
+  position: relative;
+  padding: clamp(64px, 8vw, 120px) 0 clamp(48px, 6vw, 96px);
+  background: var(--color-ink);
+}
+
+.exh-stage {
+  position: relative;
+  isolation: isolate;
+  height: clamp(560px, 86svh, 920px);
+  margin-top: clamp(28px, 4vw, 48px);
+  overflow: hidden;
+  background:
+    radial-gradient(120% 80% at 50% 0%, rgb(44 52 112 / 55%), transparent 70%),
+    linear-gradient(180deg, #121a42, #0b1030);
+  border-block: 1px solid rgb(236 239 245 / 12%);
+}
+
+.exh-loader,
+.exh-canvas-root,
+.exh-canvas {
+  position: absolute;
+  inset: 0;
+}
+
+/* Vertical swipes keep scrolling the page; horizontal drags look around. */
+.exh-canvas-root,
+.exh-canvas canvas {
+  touch-action: pan-y;
+}
+.exh-canvas-root { outline: none; }
+.exh-canvas-root:focus-visible { box-shadow: inset 0 0 0 2px var(--color-coral); }
+.exh-canvas-root[data-state="anchored"] { cursor: grab; }
+.exh-canvas-root[data-state="anchored"]:active { cursor: grabbing; }
+.exh-canvas-root[data-hover="true"] { cursor: pointer; }
+
+.exh-veil {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background: #0b1030;
+  transition: opacity 1.1s ease;
+}
+.exh-veil[data-ready="true"] { opacity: 0; }
+
+.exh-ui {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+}
+.exh-ui > * { pointer-events: auto; }
+
+.exh-placeholder-note {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-content: center;
+  gap: 14px;
+  padding: 24px;
+  text-align: center;
+  color: rgb(236 239 245 / 62%);
+  font-size: 14px;
+}
+
+/* ---------- Controls ---------- */
+
+.exh-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: 10px 18px;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--color-paper);
+  background: rgb(14 20 53 / 88%);
+  border: 1px solid rgb(236 239 245 / 26%);
+  transition: background .25s ease, color .25s ease, border-color .25s ease;
+}
+.exh-btn:hover { background: var(--color-paper); color: var(--color-ink); }
+.exh-btn:focus-visible { outline: 2px solid var(--color-coral); outline-offset: 3px; }
+.exh-btn-primary { background: var(--color-coral); border-color: var(--color-coral); }
+
+.exh-btn-back {
+  position: absolute;
+  top: 18px;
+  inset-inline-start: 18px;
+}
+
+.exh-overview-cta {
+  position: absolute;
+  bottom: 26px;
+  left: 50%;
+  translate: -50% 0;
+  display: grid;
+  justify-items: center;
+  gap: 10px;
+  text-align: center;
+}
+.exh-overview-cta p {
+  color: rgb(236 239 245 / 78%);
+  font-size: 13px;
+  text-shadow: 0 1px 8px rgb(0 0 0 / 60%);
+}
+
+.exh-concept-note {
+  position: absolute;
+  bottom: 14px;
+  inset-inline-end: 16px;
+  color: rgb(236 239 245 / 55%);
+  font-size: 11px;
+  letter-spacing: .02em;
+  pointer-events: none !important;
+}
+
+.exh-look-hint {
+  position: absolute;
+  bottom: 22px;
+  left: 50%;
+  translate: -50% 0;
+  padding: 6px 12px;
+  color: rgb(236 239 245 / 80%);
+  font-size: 12px;
+  background: rgb(14 20 53 / 70%);
+  pointer-events: none !important;
+  animation: exh-hint 5s 1.2s ease both;
+}
+@keyframes exh-hint {
+  0% { opacity: 0; }
+  12%, 80% { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+.exh-hover-chip {
+  position: absolute;
+  z-index: 3;
+  display: grid;
+  gap: 2px;
+  padding: 7px 12px;
+  color: var(--color-ink);
+  background: var(--color-paper);
+  border-inline-start: 3px solid var(--color-coral);
+  translate: -50% calc(-100% - 16px);
+  pointer-events: none !important;
+  white-space: nowrap;
+}
+.exh-hover-chip span { font-size: 14px; font-weight: 700; }
+.exh-hover-chip small { font-size: 11px; opacity: .7; }
+
+/* ---------- Area card ---------- */
+
+.exh-card {
+  position: absolute;
+  top: 64%;
+  left: 50%;
+  width: min(540px, calc(100% - 32px));
+  translate: -50% -50%;
+  padding: clamp(20px, 2.4vw, 30px) clamp(20px, 2.6vw, 34px);
+  color: var(--color-paper);
+  background: rgb(12 17 46 / 92%);
+  border: 1px solid rgb(236 239 245 / 14%);
+  border-top: 3px solid var(--color-coral);
+  box-shadow: 0 24px 60px -20px rgb(0 0 0 / 70%);
+}
+.exh-card[data-motion="full"] { animation: exh-card-in .6s cubic-bezier(.16, 1, .3, 1) both; }
+@keyframes exh-card-in {
+  from { opacity: 0; transform: translateY(14px); }
+  to { opacity: 1; transform: none; }
+}
+.exh-card-eyebrow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--color-coral);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: .12em;
+}
+.exh-card-rule { width: 22px; height: 1px; background: currentColor; }
+.exh-card-title {
+  margin-top: 10px;
+  font-size: clamp(26px, 3vw, 38px);
+  font-weight: 800;
+  line-height: 1.15;
+  outline: none;
+}
+.exh-card-teaser {
+  margin-top: 12px;
+  color: rgb(236 239 245 / 80%);
+  font-size: clamp(14px, 1.15vw, 16px);
+  line-height: 1.85;
+}
+.exh-card-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 16px;
+}
+.exh-card-tags li {
+  padding: 5px 11px;
+  font-size: 12px;
+  border: 1px solid rgb(236 239 245 / 22%);
+}
+.exh-card-provisional {
+  margin-top: 14px;
+  color: rgb(236 239 245 / 45%);
+  font-size: 11px;
+}
+
+/* ---------- Text list (screen readers; visible when 3D is unavailable) ---------- */
+
+.exh-list {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+.exh:has(.exh-loader[data-status="failed"], .exh-loader[data-status="unsupported"], .exh-loader[data-status="deferred"]) .exh-list {
+  position: static;
+  width: auto;
+  height: auto;
+  overflow: visible;
+  clip-path: none;
+  white-space: normal;
+  margin-top: 32px;
+}
+.exh-list h3 { font-size: 20px; font-weight: 700; }
+.exh-list ul { display: grid; gap: 18px; margin-top: 16px; }
+.exh-list strong { display: block; font-size: 17px; }
+.exh-list p { margin-top: 4px; color: rgb(236 239 245 / 72%); line-height: 1.8; }
+
+@media (max-width: 767px) {
+  .exh-stage { height: clamp(520px, 80svh, 760px); }
+  .exh-card {
+    top: auto;
+    bottom: 18px;
+    translate: -50% 0;
+    max-height: 56%;
+    overflow-y: auto;
+  }
+  .exh-card-tags li:nth-child(n + 3) { display: none; }
+  .exh-btn-back { top: 12px; inset-inline-start: 12px; }
+  .exh-concept-note { top: 24px; bottom: auto; inset-inline-end: 12px; max-width: 40%; }
+  .exh-look-hint { bottom: auto; top: 66px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .exh-veil { transition: none; }
+}
