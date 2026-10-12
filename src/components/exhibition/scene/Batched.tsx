@@ -61,8 +61,9 @@ export function Batched({ children, delay = 0 }: { children: ReactNode; delay?: 
       const buckets = new Map<string, THREE.Mesh[]>();
       root.traverse((o) => {
         if (o === root || !batchable(o)) return;
-        // Skip anything inside a hidden branch.
-        for (let p: THREE.Object3D | null = o; p && p !== root; p = p.parent) if (!p.visible) return;
+        // Skip anything inside a hidden branch or a LOD (Detail) group.
+        for (let p: THREE.Object3D | null = o; p && p !== root; p = p.parent)
+          if (!p.visible || p.userData.noBatch) return;
         const key = signature(o);
         const list = buckets.get(key) ?? [];
         list.push(o);

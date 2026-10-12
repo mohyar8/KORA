@@ -79,8 +79,11 @@ export const CORNER_IDS: readonly CornerId[] = [
 ];
 export const BOOTH_HEIGHT = 3;
 
-/** Corners with a code-kit model (M3: the Media corner, GATE 2 benchmark). */
-const MODELLED_CORNERS = new Set<CornerId>(["corner-2"]);
+/**
+ * Corners with a code-kit model (Media in M3; Technology, Entrepreneurship,
+ * Economy and Health in M4). Slots 6–7 stay placeholders until identified.
+ */
+const MODELLED_CORNERS = new Set<CornerId>(["corner-1", "corner-2", "corner-3", "corner-4", "corner-5"]);
 
 function cornerArea(id: CornerId, slot: CornerSlot, index: number): AreaConfig {
   // Side corners are viewed almost head-on, turned slightly towards the open
@@ -97,7 +100,7 @@ function cornerArea(id: CornerId, slot: CornerSlot, index: number): AreaConfig {
     frame: { position: [slot.x, 0, slot.z], rotationY },
     placementNote: "توزيع الأركان على المواقع مبدئي",
     anchor: {
-      target: [slot.x, 1.35, slot.z],
+      target: [slot.x, 1.6, slot.z],
       azimuth,
       elevation: 0.16,
       distance: 7.2,
@@ -187,7 +190,7 @@ export const AREAS: Record<AreaId, AreaConfig> = {
   entertainment: {
     id: "entertainment",
     kind: "entertainment",
-    model: "placeholder",
+    model: "modelled",
     frame: { position: [entMidX, 0, entMidZ], rotationY: 0 },
     placementNote: "الموقع تقريبي — المخطط يشير إلى الاتجاه فقط",
     content: {
@@ -218,6 +221,7 @@ export const AREAS: Record<AreaId, AreaConfig> = {
     ],
     // Floats above the passage so it reads over the stage from the plaza.
     labelAt: [PASSAGE.x, 12, PASSAGE.signZ - 4],
+    cardAt: [entMidX, 0.5, ENTERTAINMENT.maxZ - 3],
   },
   ...corners,
 };
@@ -239,3 +243,17 @@ export const OVERVIEW = {
 };
 
 export const isCorner = (id: AreaId): id is CornerId => id.startsWith("corner-");
+
+/**
+ * World point an area's card is pinned to. Default: on the line from the
+ * subject towards its viewpoint, a little below the subject, so in the
+ * arrival view the card sits under the subject — and, being in the world,
+ * it slides away with the scene when the visitor looks around.
+ */
+export function cardAnchor(area: AreaConfig): Vec3 {
+  if (area.cardAt) return area.cardAt;
+  const { target, azimuth, elevation, distance } = area.anchor;
+  const t = 0.4;
+  const h = Math.cos(elevation) * distance * t;
+  return [target[0] + Math.cos(azimuth) * h, Math.max(0.2, target[1] - 1.1), target[2] + Math.sin(azimuth) * h];
+}

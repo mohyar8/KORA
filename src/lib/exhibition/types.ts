@@ -70,4 +70,9 @@ export type AreaConfig = {
   hitBoxes: readonly Box[];
   /** Where the in-scene label pin sits. */
   labelAt: Vec3;
+  /**
+   * World point the information card is pinned to (card centre). Defaults to
+   * a point in front of and slightly below the subject (see `cardAnchor`).
+   */
+  cardAt?: Vec3;
 };

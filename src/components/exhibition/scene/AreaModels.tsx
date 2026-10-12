@@ -6,7 +6,10 @@ import { AREA_ORDER, AREAS } from "@/lib/exhibition/areas";
 import type { AreaId } from "@/lib/exhibition/types";
 import { Batched } from "./Batched";
 import { Museum } from "./Museum";
+import { EntertainmentZone } from "./models/EntertainmentZone";
+import { EntrepreneurshipCorner, HealthCorner } from "./models/FrameCorners";
 import { MediaCorner } from "./models/MediaCorner";
+import { EconomyCorner, TechnologyCorner } from "./models/NavyShellCorners";
 import { StageModel } from "./models/Stage";
 
 /**
@@ -19,7 +22,12 @@ import { StageModel } from "./models/Stage";
 const KIT: Partial<Record<AreaId, ComponentType>> = {
   museum: Museum,
   stage: StageModel,
+  entertainment: EntertainmentZone,
+  "corner-1": TechnologyCorner,
   "corner-2": MediaCorner,
+  "corner-3": EntrepreneurshipCorner,
+  "corner-4": EconomyCorner,
+  "corner-5": HealthCorner,
 };
 
 /** Areas that currently render a real model (kit or GLB) instead of a placeholder. */
@@ -76,7 +84,7 @@ export function AreaModels({ overrides = {} }: { overrides?: Partial<Record<Area
         if (!Kit && !url) return null;
         const { position, rotationY } = AREAS[id].frame;
         const kit = Kit ? (
-          <Batched key="kit">
+          <Batched key="kit" delay={1200}>
             <Kit />
           </Batched>
         ) : null;

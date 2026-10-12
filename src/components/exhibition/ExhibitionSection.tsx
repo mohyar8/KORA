@@ -25,6 +25,10 @@ export function ExhibitionSection({ deferMs }: { deferMs?: number }) {
 
       <div className="exh-stage">
         <ExhibitionLoader deferMs={deferMs} />
+        <noscript>
+          <p className="exh-placeholder-note">العرض ثلاثي الأبعاد يتطلب تفعيل JavaScript. تجد وصف مناطق المعرض أدناه.</p>
+          <style>{`.exh-loading-note{display:none}.exh .exh-list{position:static;width:auto;height:auto;overflow:visible;clip-path:none;white-space:normal}`}</style>
+        </noscript>
       </div>
       <div id="exhibition-after" tabIndex={-1} />
 

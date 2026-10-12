@@ -192,15 +192,28 @@ function amphitheatre() {
     const r0 = SEATING.innerRadius;
     platform.push(sector(r0, r0 + band, from, to, 0.12, cx, cz));
     strips.push(tubeAlong(arcPoints(cx, cz, r0 - 0.02, from, to, 0.06, 20), 0.02));
+    // Regular lounge groups (chair · chair · side table) centred on the arc,
+    // with equal gaps; every piece turned to face the stage centre.
     const rc = r0 + band * 0.5;
     const arcLen = (to - from) * rc;
-    const n = Math.floor(arcLen / 1.05);
-    for (let i = 0; i < n; i++) {
-      const a = from + ((i + 0.5) / n) * (to - from);
-      const p: V3 = [cx + Math.cos(a) * rc, 0.12, cz + Math.sin(a) * rc];
-      const face = Math.atan2(-p[0], -p[2]); // towards the deck centre
-      if (i % 3 === 2) tables.push({ p, r: face });
-      else chairs.push({ p, r: face });
+    const pattern: ("chair" | "table")[] = ["chair", "chair", "table"];
+    const widths = { chair: 0.8, table: 0.5 };
+    const SP = 0.12;
+    const groupW = pattern.reduce((w, k) => w + widths[k], 0) + SP * (pattern.length - 1);
+    const gap = 0.4;
+    const groups = Math.max(1, Math.floor((arcLen - 0.4 + gap) / (groupW + gap)));
+    const used = groups * groupW + (groups - 1) * gap;
+    let s = (arcLen - used) / 2;
+    for (let g = 0; g < groups; g++) {
+      for (const kind of pattern) {
+        const mid = s + widths[kind] / 2;
+        const a = from + mid / rc;
+        const p: V3 = [cx + Math.cos(a) * rc, 0.12, cz + Math.sin(a) * rc];
+        const face = Math.atan2(-p[0], -p[2]); // towards the stage centre (frame origin)
+        (kind === "chair" ? chairs : tables).push({ p, r: face });
+        s += widths[kind] + SP;
+      }
+      s += gap - SP;
     }
     // Bands 1–4: stone tiers rising away from the stage.
     for (let b = 1; b < bands; b++) {

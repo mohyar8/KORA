@@ -7,7 +7,7 @@ import type { FacadeLine } from "@/lib/exhibition/museumFacade";
  * downloaded texture assets.
  */
 
-function canvas(w: number, h: number) {
+export function canvas(w: number, h: number) {
   const c = document.createElement("canvas");
   c.width = w;
   c.height = h;
@@ -27,7 +27,7 @@ export function rng(seed: number) {
   };
 }
 
-function finish(c: HTMLCanvasElement, opts: { srgb?: boolean; repeat?: boolean; aniso?: number } = {}) {
+export function finish(c: HTMLCanvasElement, opts: { srgb?: boolean; repeat?: boolean; aniso?: number } = {}) {
   const t = new THREE.CanvasTexture(c);
   if (opts.srgb !== false) t.colorSpace = THREE.SRGBColorSpace;
   if (opts.repeat) t.wrapS = t.wrapT = THREE.RepeatWrapping;
@@ -276,7 +276,7 @@ export function brandFontFamily() {
   return cachedFamily;
 }
 
-function loadImage(src: string) {
+export function loadImage(src: string) {
   return new Promise<HTMLImageElement>((resolve, reject) => {
     const img = new Image();
     img.onload = () => resolve(img);
@@ -381,7 +381,7 @@ export async function passageSignTexture() {
 }
 
 /** Deep navy LED field with diagonal light rays (stage screens in the render). */
-function drawRays(ctx: CanvasRenderingContext2D, w: number, h: number, seed: number, strength = 1) {
+export function drawRays(ctx: CanvasRenderingContext2D, w: number, h: number, seed: number, strength = 1) {
   const g = ctx.createLinearGradient(0, 0, 0, h);
   g.addColorStop(0, "#0b1438");
   g.addColorStop(1, "#060b22");
@@ -411,7 +411,7 @@ function drawRays(ctx: CanvasRenderingContext2D, w: number, h: number, seed: num
 }
 
 /** Composes the official bilingual lockup: "KORA" · ball · "كورة" (render layout). */
-async function drawLockup(ctx: CanvasRenderingContext2D, cx: number, cy: number, height: number, stacked = false) {
+export async function drawLockup(ctx: CanvasRenderingContext2D, cx: number, cy: number, height: number, stacked = false) {
   const [ball, en, ar] = await Promise.all([
     loadImage("/assets/brand/kora-lockup-ball.png"),
     loadImage("/assets/brand/kora-lockup-en.png"),

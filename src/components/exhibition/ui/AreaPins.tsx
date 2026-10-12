@@ -10,13 +10,20 @@ import type { AreaId } from "@/lib/exhibition/types";
 /**
  * In-scene labels as real DOM buttons (focusable, screen-reader named,
  * keyboard operable), positioned every rendered frame from 3D anchor points.
- * Pins are hidden when behind a building, behind the camera, under the
- * area card, or overlapping a higher-priority pin.
+ * Pins are hidden when behind a building, behind the camera, or overlapping a
+ * higher-priority pin. They draw above the area card so neighbouring areas
+ * always stay reachable.
+ *
+ * The same pass positions the world-anchored area card: it follows its world
+ * point (so it stays with the area when the visitor looks around), is kept
+ * inside the viewport while that point is in view, and hides when it is not.
  */
 
 export type PinRegistry = {
   pins: Map<AreaId, HTMLButtonElement>;
+  /** The open area card (world-anchored) and its world anchor. */
   card: HTMLElement | null;
+  cardAt: readonly [number, number, number] | null;
 };
 
 const PRIORITY: readonly AreaId[] = ["museum", "stage", "entertainment", ...CORNER_IDS];
@@ -33,6 +40,28 @@ const OCCLUDERS = [
 ];
 
 type Rect = { x0: number; y0: number; x1: number; y1: number };
+
+const cardV = new THREE.Vector3();
+const MARGIN = 12;
+
+/** Positions the world-anchored card for this frame (see PinRegistry). */
+function placeCard(reg: PinRegistry, camera: THREE.Camera, size: { width: number; height: number }) {
+  const el = reg.card;
+  if (!el || !reg.cardAt) return;
+  cardV.set(reg.cardAt[0], reg.cardAt[1], reg.cardAt[2]).project(camera);
+  // In view = anchor in front of the camera and within the frame (+ a little slack).
+  const inView = cardV.z < 1 && Math.abs(cardV.x) <= 1.1 && Math.abs(cardV.y) <= 1.15;
+  const w = el.offsetWidth;
+  const h = el.offsetHeight;
+  let x = ((cardV.x + 1) / 2) * size.width - w / 2;
+  // The card hangs below its world point (top edge at the anchor), so the
+  // subject above the anchor stays visible on every aspect ratio.
+  let y = ((1 - cardV.y) / 2) * size.height + 8;
+  x = Math.min(Math.max(x, MARGIN), size.width - w - MARGIN);
+  y = Math.min(Math.max(y, 64), size.height - h - MARGIN);
+  el.style.transform = `translate(${x.toFixed(1)}px, ${y.toFixed(1)}px)`;
+  el.dataset.inview = inView ? "true" : "false";
+}
 const overlaps = (a: Rect, b: Rect) => a.x0 < b.x1 && a.x1 > b.x0 && a.y0 < b.y1 && a.y1 > b.y0;
 
 /** Runs inside the Canvas: projects pins after the camera rig has moved. */
@@ -45,13 +74,8 @@ export function PinProjector({ registry, current }: { registry: RefObject<PinReg
   useFrame(({ camera, size }) => {
     const reg = registry.current;
     if (!reg) return;
+    placeCard(reg, camera, size);
     const placed: Rect[] = [];
-    let card: Rect | null = null;
-    if (reg.card) {
-      const r = reg.card.getBoundingClientRect();
-      const host = reg.card.offsetParent?.getBoundingClientRect();
-      if (host) card = { x0: r.left - host.left, y0: r.top - host.top, x1: r.right - host.left, y1: r.bottom - host.top };
-    }
     for (const id of PRIORITY) {
       const el = reg.pins.get(id);
       if (!el) continue;
@@ -76,7 +100,7 @@ export function PinProjector({ registry, current }: { registry: RefObject<PinReg
         const h = el.offsetHeight;
         // Collision box slightly smaller than the pin: neighbours may touch.
         const rect = { x0: x - w / 2 + 5, y0: y - h + 5, x1: x + w / 2 - 5, y1: y - 3 };
-        if ((card && overlaps(rect, card)) || placed.some((p) => overlaps(p, rect))) hidden = true;
+        if (placed.some((p) => overlaps(p, rect))) hidden = true;
         else placed.push(rect);
       }
       el.style.transform = `translate(${x.toFixed(1)}px, ${y.toFixed(1)}px)`;

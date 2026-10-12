@@ -3,7 +3,7 @@
 import { Canvas, invalidate, type RootState } from "@react-three/fiber";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Vector3, type WebGLRenderer } from "three";
-import { AREA_ORDER, AREAS } from "@/lib/exhibition/areas";
+import { AREA_ORDER, AREAS, cardAnchor } from "@/lib/exhibition/areas";
 import type { AreaId } from "@/lib/exhibition/types";
 import { CameraRig, type LookInput } from "./camera/CameraRig";
 import { OBSTACLES } from "./camera/obstacles";
@@ -14,6 +14,7 @@ import { HitTargets, CLICK_SLOP } from "./scene/HitTargets";
 import { Effects, Lighting } from "./scene/Lighting";
 import { AreaModels } from "./scene/AreaModels";
 import { Placeholders } from "./scene/Placeholders";
+import { Scenery } from "./scene/Scenery";
 import { QualityContext, detectQuality, type Quality } from "./scene/quality";
 import { Surroundings } from "./scene/Surroundings";
 import { AreaCard } from "./ui/AreaCard";
@@ -36,7 +37,7 @@ const KEY_STEP = 0.12;
  * The interactive 3D exhibition: canvas + DOM overlays. Loaded lazily by
  * ExhibitionLoader, never server-rendered.
  */
-export default function ExhibitionExperience({ onFail }: { onFail: () => void }) {
+export default function ExhibitionExperience({ onFail, onReady }: { onFail: () => void; onReady?: () => void }) {
   const [quality] = useState<Quality>(() => detectQuality());
   const [reducedMotion, setReducedMotion] = useState(false);
   const [selected, setSelected] = useState<AreaId | null>(null);
@@ -49,9 +50,10 @@ export default function ExhibitionExperience({ onFail }: { onFail: () => void })
   const look = useRef<LookInput>({ yaw: 0, pitch: 0 });
   const drag = useRef<Drag | null>(null);
   const root = useRef<HTMLDivElement>(null);
-  const cardHeading = useRef<HTMLHeadingElement>(null);
+  const cardToggle = useRef<HTMLButtonElement>(null);
   const focusCardOnArrive = useRef(false);
-  const pins = useRef<PinRegistry>({ pins: new Map(), card: null });
+  const pins = useRef<PinRegistry>({ pins: new Map(), card: null, cardAt: null });
+  const [cardExpanded, setCardExpanded] = useState(true);
   const savedScroll = useRef(0);
   const menuTrigger = useRef<HTMLButtonElement>(null);
   const glRef = useRef<WebGLRenderer | null>(null);
@@ -100,6 +102,8 @@ export default function ExhibitionExperience({ onFail }: { onFail: () => void })
     setPanelOpen(false);
     setArrived(null);
     setSelected(id);
+    // Every arrival (including switching destination) shows the card expanded.
+    setCardExpanded(true);
   }, []);
 
   // Development-only inspection hook (stripped from production builds).
@@ -203,7 +207,7 @@ export default function ExhibitionExperience({ onFail }: { onFail: () => void })
 
   useEffect(() => {
     if (anchored && focusCardOnArrive.current) {
-      cardHeading.current?.focus({ preventScroll: true });
+      cardToggle.current?.focus({ preventScroll: true });
       focusCardOnArrive.current = false;
     }
   }, [anchored]);
@@ -290,6 +294,22 @@ export default function ExhibitionExperience({ onFail }: { onFail: () => void })
     pins.current.card = el;
     invalidate();
   }, []);
+  useEffect(() => {
+    pins.current.cardAt = area ? cardAnchor(area) : null;
+    invalidate();
+  }, [area]);
+
+  // Size changes while the card folds/unfolds: keep re-projecting for the
+  // length of the transition so it stays pinned to its world point.
+  const toggleCard = () => {
+    setCardExpanded((e) => !e);
+    const until = performance.now() + 450;
+    const tick = () => {
+      invalidate();
+      if (performance.now() < until) requestAnimationFrame(tick);
+    };
+    requestAnimationFrame(tick);
+  };
 
   return (
     <div
@@ -321,7 +341,14 @@ export default function ExhibitionExperience({ onFail }: { onFail: () => void })
             ev.preventDefault();
             onFail();
           });
-          requestAnimationFrame(() => requestAnimationFrame(() => setReady(true)));
+          requestAnimationFrame(() =>
+            requestAnimationFrame(() => {
+              setReady(true);
+              // Async signage textures land shortly after the first frames;
+              // let the loader's poster cover them before it fades out.
+              window.setTimeout(() => onReady?.(), 400);
+            }),
+          );
         }}
         aria-hidden
         tabIndex={-1}
@@ -333,6 +360,7 @@ export default function ExhibitionExperience({ onFail }: { onFail: () => void })
           <Surroundings />
           <AreaModels overrides={modelOverrides} />
           <Placeholders />
+          <Scenery />
           <HitTargets
             current={selected}
             onSelect={(id) => select(id)}
@@ -345,6 +373,21 @@ export default function ExhibitionExperience({ onFail }: { onFail: () => void })
       </Canvas>
 
       <div className="exh-veil" data-ready={ready} aria-hidden />
+
+      {/* World-anchored card layer: below the pins (neighbours stay clickable), above the canvas. */}
+      <div className="exh-card-layer">
+        {area && (
+          <AreaCard
+            key={area.id}
+            area={area}
+            expanded={cardExpanded}
+            onToggle={toggleCard}
+            toggleRef={cardToggle}
+            cardRef={registerCard}
+            reducedMotion={reducedMotion}
+          />
+        )}
+      </div>
 
       <AreaPins registry={pins} current={selected} overview={!selected} onSelect={(id) => select(id, true)} />
 
@@ -379,15 +422,6 @@ export default function ExhibitionExperience({ onFail }: { onFail: () => void })
 
         {!selected && <p className="exh-overview-hint">اختر منطقة من المشهد أو من «مناطق المعرض»</p>}
 
-        {area && (
-          <AreaCard
-            key={area.id}
-            area={area}
-            headingRef={cardHeading}
-            cardRef={registerCard}
-            reducedMotion={reducedMotion}
-          />
-        )}
 
         {anchored && <p className="exh-look-hint">اسحب للتلفّت · اضغط منطقة مجاورة للانتقال إليها</p>}
 

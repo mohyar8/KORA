@@ -50,13 +50,70 @@
 .exh-ui {
   position: absolute;
   inset: 0;
-  z-index: 2;
+  z-index: 4;
   pointer-events: none;
 }
 .exh-ui > * { pointer-events: auto; }
 
+/* ---------- Poster (loading + fallback) ---------- */
+
+.exh-poster {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  transition: opacity .9s ease;
+}
+.exh-poster picture,
+.exh-poster img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.exh-poster[data-hidden="true"] {
+  opacity: 0;
+  pointer-events: none;
+}
+/* Behind a fallback message the poster is dimmed so the text stays legible. */
+.exh-loader:is([data-status="failed"], [data-status="unsupported"], [data-status="deferred"]) .exh-poster::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: rgb(11 16 48 / 68%);
+}
+
+.exh-loading-note,
+.exh-poster-caption {
+  position: absolute;
+  z-index: 6;
+  pointer-events: none;
+}
+.exh-loading-note {
+  bottom: 22px;
+  left: 50%;
+  translate: -50% 0;
+  padding: 8px 16px;
+  border-radius: 999px;
+  white-space: nowrap;
+  font-size: 13px;
+  color: rgb(236 239 245 / 82%);
+  background: rgb(11 16 48 / 72%);
+  border: 1px solid rgb(236 239 245 / 14%);
+}
+.exh-poster-caption {
+  top: 22px;
+  inset-inline-end: 16px;
+  color: rgb(236 239 245 / 55%);
+  font-size: 11px;
+}
+
+/* Fullscreen is a fixed overlay inside the isolated stage: lift the whole
+   stage above the fixed topbar (z 60) and the noise overlay (z 90). */
+.exh-stage:has(.exh-canvas-root[data-fullscreen="true"]) { z-index: 100; }
+
 .exh-placeholder-note {
   position: absolute;
+  z-index: 6;
   inset: 0;
   display: grid;
   place-content: center;
@@ -144,7 +201,8 @@
 
 .exh-look-hint {
   position: absolute;
-  bottom: 22px;
+  /* Top centre: the world-anchored card usually sits in the lower half. */
+  top: 76px;
   left: 50%;
   translate: -50% 0;
   padding: 6px 12px;
@@ -178,24 +236,88 @@
 
 /* ---------- Area card ---------- */
 
+/* World-anchored: PinProjector writes the transform every frame. */
+.exh-card-layer {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  overflow: hidden;
+  pointer-events: none;
+}
 .exh-card {
   position: absolute;
-  top: 64%;
-  left: 50%;
-  width: min(540px, calc(100% - 32px));
-  translate: -50% -50%;
-  padding: clamp(20px, 2.4vw, 30px) clamp(20px, 2.6vw, 34px);
+  top: 0;
+  left: 0;
+  width: min(380px, calc(100% - 24px));
+  padding: 20px 22px 18px;
   color: var(--color-paper);
-  background: rgb(12 17 46 / 92%);
+  background: rgb(12 17 46 / 93%);
   border: 1px solid rgb(236 239 245 / 14%);
   border-top: 3px solid var(--color-coral);
   box-shadow: 0 24px 60px -20px rgb(0 0 0 / 70%);
+  pointer-events: auto;
+  transition: opacity .25s ease, visibility .25s;
 }
-.exh-card[data-motion="full"] { animation: exh-card-in .6s cubic-bezier(.16, 1, .3, 1) both; }
+.exh-card[data-inview="false"] { opacity: 0; visibility: hidden; pointer-events: none; }
+.exh-card[data-motion="full"] { animation: exh-card-in .5s cubic-bezier(.16, 1, .3, 1) both; }
 @keyframes exh-card-in {
-  from { opacity: 0; transform: translateY(14px); }
-  to { opacity: 1; transform: none; }
+  from { opacity: 0; scale: .96; }
+  to { opacity: 1; scale: 1; }
 }
+/* Expand / collapse. Collapsed = compact bar (name + chevron) at the same
+   world anchor; the folds animate via grid rows (0fr ↔ 1fr). */
+.exh-card { transition: opacity .25s ease, visibility .25s, width .32s cubic-bezier(.2, .8, .2, 1), padding .32s cubic-bezier(.2, .8, .2, 1); }
+.exh-card[data-expanded="false"] { width: min(250px, calc(100% - 24px)); padding: 8px 10px; border-top-width: 2px; }
+.exh-card-fold {
+  display: grid;
+  grid-template-rows: 1fr;
+  opacity: 1;
+  transition: grid-template-rows .32s cubic-bezier(.2, .8, .2, 1), opacity .22s ease;
+}
+.exh-card-fold > div { min-height: 0; overflow: hidden; }
+.exh-card[data-expanded="false"] .exh-card-fold { grid-template-rows: 0fr; opacity: 0; }
+.exh-card-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  width: 100%;
+  min-height: 40px;
+  font: inherit;
+  text-align: start;
+  color: inherit;
+  cursor: pointer;
+}
+.exh-card-toggle:focus-visible { outline: 2px solid var(--color-coral); outline-offset: 4px; }
+.exh-card-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.exh-card-chevron {
+  flex: none;
+  width: 30px;
+  height: 30px;
+  border: 1px solid rgb(236 239 245 / 22%);
+  position: relative;
+  transition: background .2s ease, border-color .2s ease;
+}
+.exh-card-chevron::before {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 8px;
+  height: 8px;
+  content: "";
+  /* Physical borders: the chevron must not mirror in RTL. */
+  border-right: 2px solid currentColor;
+  border-bottom: 2px solid currentColor;
+  translate: -50% -30%;
+  rotate: 225deg; /* expanded: points up (collapse) */
+  transition: rotate .32s cubic-bezier(.2, .8, .2, 1);
+}
+.exh-card[data-expanded="false"] .exh-card-chevron::before { rotate: 45deg; translate: -50% -70%; }
+.exh-card-toggle:hover .exh-card-chevron { background: rgb(236 239 245 / 10%); border-color: rgb(236 239 245 / 40%); }
+.exh-card[data-expanded="false"] .exh-card-title { margin-top: 0; font-size: 16px; }
+.exh-card[data-motion="reduced"],
+.exh-card[data-motion="reduced"] .exh-card-fold,
+.exh-card[data-motion="reduced"] .exh-card-chevron::before { transition: none; }
 .exh-card-eyebrow {
   display: flex;
   align-items: center;
@@ -207,17 +329,17 @@
 }
 .exh-card-rule { width: 22px; height: 1px; background: currentColor; }
 .exh-card-title {
-  margin-top: 10px;
-  font-size: clamp(26px, 3vw, 38px);
+  margin-top: 8px;
+  font-size: clamp(22px, 2.2vw, 30px);
   font-weight: 800;
   line-height: 1.15;
   outline: none;
 }
 .exh-card-teaser {
-  margin-top: 12px;
-  color: rgb(236 239 245 / 80%);
-  font-size: clamp(14px, 1.15vw, 16px);
-  line-height: 1.85;
+  margin-top: 10px;
+  color: rgb(236 239 245 / 82%);
+  font-size: 15px;
+  line-height: 1.8;
 }
 .exh-card-tags {
   display: flex;
@@ -349,7 +471,7 @@
 .exh-pins {
   position: absolute;
   inset: 0;
-  z-index: 2;
+  z-index: 3;
   overflow: hidden;
   pointer-events: none;
 }
@@ -453,22 +575,19 @@
     background: rgb(236 239 245 / 30%);
     border-radius: 2px;
   }
-  .exh-card {
-    top: auto;
-    bottom: 18px;
-    translate: -50% 0;
-    max-height: 56%;
-    overflow-y: auto;
-  }
-  .exh-card-tags li:nth-child(n + 3) { display: none; }
+  .exh-card { width: min(300px, calc(100% - 24px)); padding: 16px 16px 14px; }
+  .exh-card-teaser { font-size: 14px; line-height: 1.7; }
+  .exh-card-tags { display: none; }
   .exh-concept-note { top: auto; bottom: 16px; inset-inline-end: 12px; max-width: 40%; }
+  .exh-poster-caption { top: auto; bottom: 16px; inset-inline-end: 12px; }
+  .exh-loading-note { bottom: 52px; }
   .exh-concept-legend { display: none; }
-  .exh-canvas-root[data-fullscreen="true"] .exh-card { bottom: calc(18px + env(safe-area-inset-bottom)); }
-  .exh-look-hint { bottom: auto; top: 66px; }
+  .exh-look-hint { bottom: auto; top: 112px; max-width: 80%; text-align: center; }
 }
 
 @media (prefers-reduced-motion: reduce) {
   .exh-veil,
+  .exh-poster,
   .exh-panel,
   .exh-panel-scrim,
   .exh-pin { transition: none; }

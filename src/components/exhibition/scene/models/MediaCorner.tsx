@@ -7,7 +7,7 @@ import { useQuality } from "../quality";
 import { broadcastTexture, glowTitleTexture } from "../textures";
 import { useAsyncTexture } from "../useAsyncTexture";
 import { MEDIA_PINK, Plate, Screen, TripodCamera, beamLoop, chamferShape, octagon, onWall, wallBetween } from "../kit/booth";
-import { Instanced, glow, tubeAlong, useDispose, type Placement, type V3 } from "../kit/primitives";
+import { Detail, Instanced, glow, tubeAlong, useDispose, type Placement, type V3 } from "../kit/primitives";
 
 /**
  * Media corner "ركن الإعلام — من الملعب إلى العالم", after the preliminary
@@ -224,6 +224,7 @@ export function MediaCorner() {
         <meshStandardMaterial color="#1a161c" roughness={0.5} metalness={0.5} />
       </Instanced>
 
+      <Detail>
       {/* Portal screens over the control desk (section 02 "behind the broadcast"). */}
       <Screen texture={built.bcSplit} size={[0.6, 0.34]} position={[-0.33, 1.78, BACK + 0.22]} />
       <Screen texture={built.bcWide} size={[0.6, 0.34]} position={[0.33, 1.78, BACK + 0.22]} />
@@ -283,6 +284,7 @@ export function MediaCorner() {
           />
         );
       })()}
+      </Detail>
       {title && (
         <mesh position={[0, 3.42, 0.62]}>
           <planeGeometry args={[1.9, 0.48]} />

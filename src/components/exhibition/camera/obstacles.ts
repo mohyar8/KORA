@@ -1,6 +1,6 @@
 import * as THREE from "three";
 import { BOOTH_HEIGHT } from "@/lib/exhibition/areas";
-import { BUILDINGS, CORNER_SLOTS, GATE, MUSEUM, SEATING, STAGE } from "@/lib/exhibition/layout";
+import { BUILDINGS, CORNER_SLOTS, GATE, MUSEUM, PASSAGE, PLAZA, SEATING, STAGE } from "@/lib/exhibition/layout";
 
 /** Solid volumes camera flights must not pass through (with a safety margin). */
 const MARGIN = 0.8;
@@ -36,4 +36,10 @@ export const OBSTACLES: readonly THREE.Box3[] = [
     return box(s.x - sx / 2, 0, s.z - sz / 2, s.x + sx / 2, BOOTH_HEIGHT, s.z + sz / 2);
   }),
   box(GATE.minX, 0, GATE.minZ, GATE.maxX, GATE.height, GATE.maxZ),
+  // Scenery (M4): entrance arch, passage tunnel, photo booth, coffee kiosk, press wall.
+  box(-3.3, 0, PLAZA.entrance.z - 4.4, -1.9, 4.4, PLAZA.entrance.z + 4.4),
+  box(PASSAGE.minX, 0, -21, PASSAGE.maxX, 6.6, -3.8),
+  box(30.5, 0, -2.8, 32.3, 2.3, -1.0),
+  box(6.0, 0, 28.4, 8.8, 2.9, 30.8),
+  box(2.2, 0, 32.4, 6.6, 2.6, 32.8),
 ];

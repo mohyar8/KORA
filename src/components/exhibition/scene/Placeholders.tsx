@@ -135,7 +135,7 @@ const FOOTPRINTS: Rect[] = [
     const [w, d] = s.facing === "north" ? [s.w, s.d] : [s.d, s.w];
     return { x: s.x, z: s.z, w, d };
   }),
-  { x: ENT.x, z: ENT.z, w: ENT.w - 1.5, d: ENT.d - 1.5 },
+  ...(AREAS.entertainment.model === "placeholder" ? [{ x: ENT.x, z: ENT.z, w: ENT.w - 1.5, d: ENT.d - 1.5 }] : []),
 ];
 
 /** Dashed rectangles on the ground, as one LineSegments geometry. */
@@ -164,7 +164,8 @@ function normalise(g: THREE.BufferGeometry) {
 export function Placeholders() {
   const { fill, edges, foot } = useMemo(() => {
     const stageGhost = AREAS.stage.model === "placeholder" ? [...stageParts(), ...seatingParts()] : [];
-    const parts = [...stageGhost, ...cornerParts(), ...gateParts(), ...entertainmentParts()];
+    const entGhost = AREAS.entertainment.model === "placeholder" ? entertainmentParts() : [];
+    const parts = [...stageGhost, ...cornerParts(), ...gateParts(), ...entGhost];
     const fill = mergeGeometries(parts.map(normalise));
     const edges = mergeGeometries(parts.map((p) => new THREE.EdgesGeometry(p, 20)));
     parts.forEach((p) => p.dispose());

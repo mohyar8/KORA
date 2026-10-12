@@ -1,6 +1,6 @@
 # KORA Official Website — Interactive 3D Exhibition
 
-**Document status:** Approved product direction / implementation specification, v1.0 (2026-10-12)  
+**Document status:** Approved product direction / implementation specification, v1.2 (2026-10-12; §3.4 card rules amended twice by the product owner, see §11)  
 **Owner:** KORA website product planning  
 **Implementation agent:** Claude Code  
 **Scope:** The 3D exhibition section only; other homepage sections will be discussed later.
@@ -9,7 +9,7 @@
 
 Create a premium, visually compelling, realistic interactive 3D preview of the physical KORA event, *The Industry Behind the Game*, encouraging attendance rather than replacing the in-person experience. The section belongs immediately **after the existing homepage Hero**, not inside or instead of it. Visitors may ignore the 3D section and scroll normally to the rest of the website. The existing Hero is a protected asset: preserve its visuals, animations, interactions, responsiveness, loading behavior and perceived performance.
 
-**Primary visitor journey:** scroll past the existing Hero -> see an elevated overview of the entire exhibition -> choose any location -> cinematic camera transition to a controlled viewpoint facing that location -> prominent central information card communicates the concept without spoilers -> look left/right to see neighboring locations -> click a visible neighboring location, choose any location from the menu, or return to the overview -> scroll away whenever desired.
+**Primary visitor journey:** scroll past the existing Hero -> see an elevated overview of the entire exhibition -> choose any location -> cinematic camera transition to a controlled viewpoint facing that location -> an information card anchored to that location in the 3D world appears expanded and communicates the concept without spoilers (it can be collapsed to a compact name bar and expanded again) -> look left/right to see neighboring locations (the card stays with its location) -> click a visible neighboring location, choose any location from the menu, or return to the overview -> scroll away whenever desired.
 
 **Quality bar:** Cohesive, professional architectural visualization; believable geometry, materials, depth and evening lighting. No generic floating boxes or isolated booths against empty backgrounds. Do not present unapproved preliminary designs as final built reality.
 
@@ -20,7 +20,7 @@ Create a premium, visually compelling, realistic interactive 3D preview of the p
 - Overview of the event layout, stage, museum and exhibition areas based on supplied references.
 - Clickable 3D locations and alternative navigation panel.
 - Smooth cinematic transitions; constrained look-around camera at selected viewpoints.
-- Always-visible, prominent area information card when a location is selected; card content is teaser-level only.
+- World-anchored area information card that appears expanded when a location is reached and can be collapsed to a compact bar and expanded again; card content is teaser-level only.
 - Responsive desktop/mobile interaction; optional mobile fullscreen.
 - Replaceable 3D assets and configurable camera anchors, selectable regions, content and layout.
 - Night/evening architectural lighting and KORA-inspired environmental design.
@@ -62,13 +62,20 @@ Do not make the 3D hit targets the only navigation mechanism. Provide hover/focu
 - Interrupt/retrigger behavior, camera animation cancellation, and resize transitions must be robust.
 - Prefer explicit on-screen zoom controls only if needed; mouse wheel must remain page scrolling in embedded mode.
 
-### 3.4 Information card — content is primary
-- Automatically show a **prominent, centered** information card after camera arrival.
-- Keep the card present while looking around; **do not provide a hide-card action** in the approved design.
-- Card should identify the area and convey its idea, appeal, and reason to visit in a concise teaser; avoid disclosing full activities or surprises.
-- The selected booth/building remains recognizable behind the card; neighboring areas should remain visible and clickable where not covered by UI.
-- Change card on selection change; remove card in overview.
-- Card must adapt to mobile size, safe areas and legibility; preserve sufficient scene context.
+### 3.4 Information card — content is primary (amended 2026-10-12, v1.2)
+- The card is **anchored to its area in the 3D world** (a world-anchored HTML overlay positioned from a 3D point near the area), **not fixed to the camera viewport**. It never follows camera rotation.
+- It appears **expanded** on arrival at an area, and the **new area's card appears expanded** whenever the destination changes.
+- **Expand / collapse (no hide):**
+  - Collapsing turns the card into a **compact bar** showing the area's name and an expand indicator.
+  - The bar stays visible at the **same world-anchored position**.
+  - Clicking or tapping the bar expands the card again.
+  - Transitions are smooth and subtle (none under reduced motion).
+  - There is no separate "show information" button.
+- When the camera looks left or right, the card (expanded or collapsed) **stays with its area**: it moves with the world and leaves the frame with it.
+- Arabic text stays crisp and accessible: HTML, not text rendered into the 3D scene. The toggle follows the accordion pattern (heading + button with `aria-expanded` / `aria-controls`); collapsed content is not focusable.
+- Cards must **not obstruct navigation or interaction with neighbouring areas**: in-scene area labels stay clickable above the card, and the card is compact and placed below its subject.
+- Identify the area and convey its idea, appeal and reason to visit as a concise teaser; avoid disclosing full activities or surprises.
+- Remove the card in the overview. Adapt to mobile size, safe areas and legibility; preserve scene context.
 - Card text and final copy are not yet approved: use clearly marked provisional content until provided.
 
 ### 3.5 Mobile and accessibility
@@ -158,7 +165,7 @@ Claude Code also maintains `docs/3d-exhibition/3D_EXHIBITION_STATE.md` with comp
 1. Existing Hero remains visually and functionally unchanged, and its load/performance is not materially degraded.
 2. Exhibition appears immediately after Hero; visitor can bypass it with normal scrolling.
 3. Elevated overview, area selection, smooth transition, constrained look-around and three navigation paths work reliably.
-4. Area card is prominent, centered, persistent during look-around and teaser-focused; no hide-card control.
+4. Area card is world-anchored to its area in both expanded and collapsed states, appears expanded on every arrival, collapses to a compact name bar that expands again on click/tap, stays with its area during look-around, keeps Arabic text crisp and accessible, does not block neighbouring areas, and is teaser-focused.
 5. Mobile bottom sheet, optional fullscreen and natural page scrolling behave correctly.
 6. Museum exterior prototype has believable geometry and visually reflects the supplied preliminary reference, with explicit treatment of unverified sides/details.
 7. Evening lighting and KORA-inspired surroundings form a coherent, non-empty world.
@@ -178,3 +185,10 @@ Claude Code also maintains `docs/3d-exhibition/3D_EXHIBITION_STATE.md` with comp
 ## 10. Working agreement
 
 This specification governs product intent and approved UX decisions. Claude Code may propose engineering improvements and revise the roadmap, but must not change these product rules unilaterally. The current task is the **3D exhibition only**; planning the rest of the official website begins after this section is resolved.
+
+## 11. Change log
+
+| Date | Change | Approved by |
+|---|---|---|
+| 2026-10-12 | v1.2 — §1, §2, §3.4 and §8 item 4: the close/reopen behaviour is replaced by **expand/collapse**. Collapsed = compact bar (name + expand indicator) at the same world-anchored position; click/tap expands; smooth subtle animation; expanded on every new arrival; the separate "show information" button is removed. | Product owner |
+| 2026-10-12 | v1.1 — §1, §2, §3.4 and §8 item 4 amended: the information card is world-anchored instead of centred and camera-fixed; it opens automatically on arrival and on destination change, can be closed and reopened, stays with its area during look-around, uses crisp accessible HTML overlays, and must not obstruct neighbouring areas. Supersedes "prominent, centered card" and "no hide-card action". | Product owner |

@@ -1,5 +1,6 @@
 "use client";
 
+import { useFrame } from "@react-three/fiber";
 import { useEffect, useLayoutEffect, useMemo, useRef, type ReactNode } from "react";
 import * as THREE from "three";
 
@@ -146,5 +147,28 @@ export function useDispose(...items: { dispose: () => void }[]) {
     () => () => items.forEach((i) => i.dispose()),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     items,
+  );
+}
+
+/**
+ * Distance LOD for fine interior detail (screens, plates, props): rendered
+ * only while the camera is within `distance` metres of the group's origin.
+ * Shells, titles and landmarks stay outside so the overview keeps its
+ * silhouettes. Excluded from static batching so the toggle keeps working.
+ */
+export function Detail({ children, distance = 22 }: { children: ReactNode; distance?: number }) {
+  const ref = useRef<THREE.Group>(null);
+  const world = useMemo(() => new THREE.Vector3(), []);
+  useFrame(({ camera }) => {
+    const g = ref.current;
+    if (!g) return;
+    g.getWorldPosition(world);
+    const near = camera.position.distanceTo(world) < distance;
+    if (g.visible !== near) g.visible = near;
+  });
+  return (
+    <group ref={ref} userData={{ noBatch: true }}>
+      {children}
+    </group>
   );
 }

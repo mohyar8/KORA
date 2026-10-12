@@ -33,37 +33,54 @@ class Boundary extends Component<{ onError: () => void; children: ReactNode }, {
   }
 }
 
+/** Still frame of the overview, shown while the scene loads and as part of the fallback. */
+function Poster({ hidden }: { hidden: boolean }) {
+  return (
+    <div className="exh-poster" data-hidden={hidden} aria-hidden>
+      <picture>
+        <source media="(max-width: 767px)" srcSet="/exhibition/poster-mobile.webp" type="image/webp" />
+        <img src="/exhibition/poster.webp" alt="" decoding="async" fetchPriority="low" />
+      </picture>
+    </div>
+  );
+}
+
 /**
  * Decides whether and when the 3D experience loads: only near the viewport,
  * never before `deferMs` after page load (keeps the Hero intro untouched),
- * only with WebGL2, and on data-saver connections only on request. Any
- * failure leaves the server-rendered area list as the experience.
+ * only with WebGL2, and on data-saver connections only on request. Nothing
+ * (poster included) is requested before the section is near. Any failure —
+ * including a lost WebGL context — leaves the poster and the
+ * server-rendered area list as the experience.
  */
 export function ExhibitionLoader({ deferMs = 4500 }: { deferMs?: number }) {
   const [status, setStatus] = useState<Status>("waiting");
+  const [near, setNear] = useState(false);
+  const [ready, setReady] = useState(false);
   const host = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (!hasWebGL2()) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect -- capability check needs the DOM
-      setStatus("unsupported");
-      return;
-    }
-    if (prefersReducedData()) {
-      setStatus("deferred");
-      return;
-    }
     const el = host.current;
     if (!el) return;
+    const supported = hasWebGL2();
+    const reduced = supported && prefersReducedData();
+    if (!supported) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- capability check needs the DOM
+      setStatus("unsupported");
+    } else if (reduced) {
+      setStatus("deferred");
+    }
     let timer: number | undefined;
     const io = new IntersectionObserver(
       ([entry]) => {
         if (!entry.isIntersecting) return;
         io.disconnect();
+        setNear(true);
+        if (!supported || reduced) return;
         const wait = Math.max(0, deferMs - performance.now());
-        timer = window.setTimeout(() => setStatus("loading"), wait);
+        timer = window.setTimeout(() => setStatus((s) => (s === "waiting" ? "loading" : s)), wait);
       },
-      { rootMargin: "80% 0px" },
+      { rootMargin: "40% 0px" },
     );
     io.observe(el);
     return () => {
@@ -72,14 +89,35 @@ export function ExhibitionLoader({ deferMs = 4500 }: { deferMs?: number }) {
     };
   }, [deferMs]);
 
+  // The fallback list becomes visible and pushes the sections below down:
+  // re-measure their scroll-triggered animations (gsap is already a page dependency).
+  const listShown = status === "failed" || status === "unsupported" || status === "deferred";
+  useEffect(() => {
+    if (!listShown) return;
+    let cancelled = false;
+    import("@/lib/gsap").then(({ ScrollTrigger }) => {
+      if (!cancelled) ScrollTrigger.refresh();
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [listShown]);
+
+  const live = status === "loading" && ready;
+
   return (
-    <div ref={host} className="exh-loader" data-status={status}>
+    <div ref={host} className="exh-loader" data-status={status} data-ready={live}>
       {status === "loading" && (
         <Boundary onError={() => setStatus("failed")}>
-          <ExhibitionExperience onFail={() => setStatus("failed")} />
+          <ExhibitionExperience onFail={() => setStatus("failed")} onReady={() => setReady(true)} />
         </Boundary>
       )}
-      {status === "waiting" && <p className="exh-placeholder-note">جارٍ تجهيز المعرض ثلاثي الأبعاد…</p>}
+      {near && <Poster hidden={live} />}
+      {(status === "waiting" || (status === "loading" && !ready)) && (
+        <p className="exh-loading-note" role="status">
+          جارٍ تجهيز المعرض ثلاثي الأبعاد…
+        </p>
+      )}
       {status === "deferred" && (
         <div className="exh-placeholder-note">
           <p>العرض ثلاثي الأبعاد متوقف لتوفير البيانات.</p>
@@ -93,6 +131,7 @@ export function ExhibitionLoader({ deferMs = 4500 }: { deferMs?: number }) {
           تعذّر عرض المشهد ثلاثي الأبعاد على هذا الجهاز. تجد وصف مناطق المعرض أدناه.
         </p>
       )}
+      {near && !live && <p className="exh-poster-caption">صورة من التصور المبدئي للمعرض</p>}
     </div>
   );
 }
