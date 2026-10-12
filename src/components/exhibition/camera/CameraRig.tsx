@@ -5,7 +5,7 @@ import gsap from "gsap";
 import { useEffect, useLayoutEffect, useMemo, useRef, type RefObject } from "react";
 import * as THREE from "three";
 import type { AreaId } from "@/lib/exhibition/types";
-import { flightDuration, flightPoint, fovFor, poseFor, type Pose } from "./rig";
+import { flightDuration, flightPoint, fovFor, planLift, poseFor, type Pose } from "./rig";
 
 export type LookInput = { yaw: number; pitch: number };
 
@@ -35,6 +35,7 @@ export function CameraRig({ selected, look, reducedMotion, onArrive }: Props) {
     dest: selected,
     flying: false,
     from: null as Pose | null,
+    lift: 0,
     progress: { t: 0 },
     tween: null as gsap.core.Tween | null,
     yaw: 0,
@@ -81,6 +82,7 @@ export function CameraRig({ selected, look, reducedMotion, onArrive }: Props) {
       return;
     }
     s.from = from;
+    s.lift = planLift(from.position, to.position);
     s.flying = true;
     s.progress.t = 0;
     s.tween = gsap.to(s.progress, {
@@ -116,7 +118,7 @@ export function CameraRig({ selected, look, reducedMotion, onArrive }: Props) {
     const to = poseFor(s.dest, a);
     if (s.flying && s.from) {
       const t = s.progress.t;
-      flightPoint(s.from.position, to.position, t, pos);
+      flightPoint(s.from.position, to.position, s.lift, t, pos);
       // The gaze leads the body slightly, like a camera operator.
       const tt = Math.min(1, t * 1.12);
       target.copy(s.from.target).lerp(to.target, tt * tt * (3 - 2 * tt));

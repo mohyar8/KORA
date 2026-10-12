@@ -26,6 +26,7 @@ export function ExhibitionSection({ deferMs }: { deferMs?: number }) {
       <div className="exh-stage">
         <ExhibitionLoader deferMs={deferMs} />
       </div>
+      <div id="exhibition-after" tabIndex={-1} />
 
       <Container>
         <div className="exh-list">
@@ -33,7 +34,10 @@ export function ExhibitionSection({ deferMs }: { deferMs?: number }) {
           <ul>
             {AREA_ORDER.map((id) => (
               <li key={id}>
-                <strong>{AREAS[id].content.name}</strong>
+                <strong>
+                  {AREAS[id].content.name}
+                  {AREAS[id].model === "placeholder" && <small> — التصميم قيد الإعداد</small>}
+                </strong>
                 <p>{AREAS[id].content.teaser}</p>
               </li>
             ))}

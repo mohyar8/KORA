@@ -11,15 +11,27 @@ import type { AreaConfig } from "@/lib/exhibition/types";
 export function AreaCard({
   area,
   headingRef,
+  cardRef,
   reducedMotion,
 }: {
   area: AreaConfig;
   headingRef: RefObject<HTMLHeadingElement | null>;
+  cardRef?: (el: HTMLElement | null) => void;
   reducedMotion: boolean;
 }) {
   const { content } = area;
+  const notes = [
+    area.model === "placeholder" ? "التصميم قيد الإعداد — يظهر هنا نموذج مؤقت" : null,
+    area.placementNote ?? null,
+    content.provisional ? "نص مبدئي — بانتظار الاعتماد" : null,
+  ].filter(Boolean);
   return (
-    <article className="exh-card" data-motion={reducedMotion ? "reduced" : "full"} aria-labelledby={`exh-card-${area.id}`}>
+    <article
+      ref={cardRef}
+      className="exh-card"
+      data-motion={reducedMotion ? "reduced" : "full"}
+      aria-labelledby={`exh-card-${area.id}`}
+    >
       <p className="exh-card-eyebrow">
         <span aria-hidden className="exh-card-rule" />
         {content.eyebrow}
@@ -28,12 +40,14 @@ export function AreaCard({
         {content.name}
       </h3>
       <p className="exh-card-teaser">{content.teaser}</p>
-      <ul className="exh-card-tags">
-        {content.highlights.map((h) => (
-          <li key={h}>{h}</li>
-        ))}
-      </ul>
-      {content.provisional && <p className="exh-card-provisional">نص مبدئي — بانتظار الاعتماد</p>}
+      {content.highlights.length > 0 && (
+        <ul className="exh-card-tags">
+          {content.highlights.map((h) => (
+            <li key={h}>{h}</li>
+          ))}
+        </ul>
+      )}
+      {notes.length > 0 && <p className="exh-card-provisional">{notes.join(" · ")}</p>}
     </article>
   );
 }

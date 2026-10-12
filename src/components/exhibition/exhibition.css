@@ -86,32 +86,56 @@
 .exh-btn:focus-visible { outline: 2px solid var(--color-coral); outline-offset: 3px; }
 .exh-btn-primary { background: var(--color-coral); border-color: var(--color-coral); }
 
-.exh-btn-back {
+/* Toolbar at the RTL start corner: menu trigger, back, (mobile) fullscreen. */
+.exh-toolbar {
   position: absolute;
-  top: 18px;
-  inset-inline-start: 18px;
+  top: 16px;
+  inset-inline-start: 16px;
+  z-index: 6;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
 }
+.exh-menu-icon {
+  width: 14px;
+  height: 2px;
+  background: currentColor;
+  box-shadow: 0 -5px 0 currentColor, 0 5px 0 currentColor;
+}
+.exh-btn-fullscreen { display: none; }
 
-.exh-overview-cta {
+.exh-overview-hint {
   position: absolute;
-  bottom: 26px;
+  bottom: 22px;
   left: 50%;
   translate: -50% 0;
-  display: grid;
-  justify-items: center;
-  gap: 10px;
-  text-align: center;
-}
-.exh-overview-cta p {
-  color: rgb(236 239 245 / 78%);
+  padding: 7px 14px;
+  color: rgb(236 239 245 / 85%);
   font-size: 13px;
-  text-shadow: 0 1px 8px rgb(0 0 0 / 60%);
+  background: rgb(12 17 46 / 72%);
+  pointer-events: none !important;
+  white-space: nowrap;
 }
+
+.exh-skip {
+  position: absolute;
+  bottom: 14px;
+  inset-inline-start: 16px;
+  padding: 6px 4px;
+  color: rgb(236 239 245 / 75%);
+  font-size: 12px;
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+.exh-skip:hover { color: var(--color-paper); }
+.exh-skip:focus-visible { outline: 2px solid var(--color-coral); outline-offset: 2px; }
 
 .exh-concept-note {
   position: absolute;
-  bottom: 14px;
+  top: 22px;
   inset-inline-end: 16px;
+  max-width: 34%;
+  text-align: end;
   color: rgb(236 239 245 / 55%);
   font-size: 11px;
   letter-spacing: .02em;
@@ -236,8 +260,199 @@
 .exh-list strong { display: block; font-size: 17px; }
 .exh-list p { margin-top: 4px; color: rgb(236 239 245 / 72%); line-height: 1.8; }
 
+/* ---------- Location panel (RTL right drawer / mobile bottom sheet) ---------- */
+
+.exh-panel-scrim {
+  position: absolute;
+  inset: 0;
+  z-index: 4;
+  background: rgb(5 8 25 / 45%);
+  opacity: 0;
+  pointer-events: none !important;
+  transition: opacity .3s ease;
+}
+.exh-panel-scrim[data-open="true"] { opacity: 1; pointer-events: auto !important; }
+
+.exh-panel {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  inset-inline-start: 0;
+  z-index: 7;
+  width: min(360px, 88%);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 18px 16px 24px;
+  background: rgb(12 17 46 / 97%);
+  border-inline-end: 1px solid rgb(236 239 245 / 14%);
+  transform: translateX(105%);
+  transition: transform .38s cubic-bezier(.16, 1, .3, 1);
+}
+.exh-panel[data-open="true"] { transform: none; }
+.exh-panel-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 14px; }
+.exh-panel-grip { display: none; }
+.exh-panel-title { font-size: 17px; font-weight: 700; }
+.exh-panel-close {
+  min-height: 40px;
+  padding: 6px 12px;
+  font-size: 13px;
+  color: rgb(236 239 245 / 80%);
+  border: 1px solid rgb(236 239 245 / 22%);
+}
+.exh-panel-close:hover { color: var(--color-ink); background: var(--color-paper); }
+.exh-panel-legend { margin-bottom: 10px; color: rgb(236 239 245 / 55%); font-size: 12px; }
+.exh-panel-group { margin-top: 16px; }
+.exh-panel-group h4 {
+  margin-bottom: 6px;
+  color: var(--color-coral);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: .12em;
+}
+.exh-panel-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  min-height: 48px;
+  padding: 8px 10px;
+  text-align: start;
+  border-inline-start: 3px solid transparent;
+  transition: background .2s ease;
+}
+.exh-panel-item:hover { background: rgb(236 239 245 / 7%); }
+.exh-panel-item:focus-visible { outline: 2px solid var(--color-coral); outline-offset: -2px; }
+.exh-panel-item[aria-current] { border-inline-start-color: var(--color-coral); background: rgb(236 239 245 / 6%); }
+.exh-panel-badge {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 26px;
+  height: 26px;
+  font-size: 12px;
+  font-weight: 700;
+  border: 1px solid rgb(236 239 245 / 30%);
+  border-radius: 50%;
+}
+.exh-panel-name { display: grid; flex: 1; font-size: 15px; font-weight: 600; }
+.exh-panel-name small { color: rgb(236 239 245 / 50%); font-size: 11px; font-weight: 400; }
+.exh-panel-here {
+  padding: 2px 8px;
+  color: var(--color-ink);
+  font-size: 11px;
+  font-weight: 700;
+  background: var(--color-paper);
+}
+
+/* ---------- In-scene pins ---------- */
+
+.exh-pins {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  overflow: hidden;
+  pointer-events: none;
+}
+.exh-pin {
+  position: absolute;
+  top: 0;
+  left: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 30px;
+  padding: 4px 10px;
+  color: var(--color-paper);
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+  background: rgb(12 17 46 / 88%);
+  border: 1px solid rgb(236 239 245 / 32%);
+  translate: -50% calc(-100% - 8px);
+  pointer-events: auto;
+  transition: opacity .25s ease, background .2s ease, color .2s ease;
+}
+.exh-pin::after {
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  width: 1px;
+  height: 8px;
+  content: "";
+  background: rgb(236 239 245 / 55%);
+}
+.exh-pin[data-placeholder="true"] { border-style: dashed; }
+.exh-pin:hover,
+.exh-pin:focus-visible {
+  color: var(--color-ink);
+  background: var(--color-paper);
+  outline: 2px solid var(--color-coral);
+  outline-offset: 2px;
+  z-index: 1;
+}
+.exh-pin[data-hidden="true"],
+.exh-canvas-root[data-state="flying"] .exh-pin {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+.exh-pin-num {
+  display: grid;
+  place-items: center;
+  width: 18px;
+  height: 18px;
+  color: var(--color-paper);
+  font-size: 11px;
+  background: var(--color-coral);
+  border-radius: 50%;
+}
+/* Overview: corners are compact numbered markers; the name appears on hover/focus. */
+.exh-pins[data-mode="overview"] .exh-pin[data-kind="corner"] { padding: 4px 6px; }
+.exh-pins[data-mode="overview"] .exh-pin[data-kind="corner"] .exh-pin-label { display: none; }
+.exh-pins[data-mode="overview"] .exh-pin[data-kind="corner"]:hover .exh-pin-label,
+.exh-pins[data-mode="overview"] .exh-pin[data-kind="corner"]:focus-visible .exh-pin-label { display: inline; }
+
+/* ---------- Optional fullscreen ---------- */
+
+.exh-canvas-root[data-fullscreen="true"] {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  background: #0b1030;
+}
+.exh-canvas-root[data-fullscreen="true"],
+.exh-canvas-root[data-fullscreen="true"] .exh-canvas canvas {
+  touch-action: none;
+}
+
 @media (max-width: 767px) {
   .exh-stage { height: clamp(520px, 80svh, 760px); }
+  .exh-btn-fullscreen { display: inline-flex; }
+  .exh-toolbar { top: 12px; inset-inline-start: 12px; }
+  .exh-toolbar .exh-btn { min-height: 40px; padding: 8px 12px; font-size: 13px; }
+  .exh-overview-hint { bottom: 46px; font-size: 12px; }
+  .exh-panel {
+    top: auto;
+    inset-inline: 0;
+    width: auto;
+    max-height: 74%;
+    border-inline-end: 0;
+    border-top: 1px solid rgb(236 239 245 / 18%);
+    border-radius: 16px 16px 0 0;
+    padding-bottom: calc(20px + env(safe-area-inset-bottom));
+    transform: translateY(105%);
+  }
+  .exh-panel-grip {
+    position: absolute;
+    top: 7px;
+    left: 50%;
+    display: block;
+    width: 40px;
+    height: 4px;
+    translate: -50% 0;
+    background: rgb(236 239 245 / 30%);
+    border-radius: 2px;
+  }
   .exh-card {
     top: auto;
     bottom: 18px;
@@ -246,11 +461,15 @@
     overflow-y: auto;
   }
   .exh-card-tags li:nth-child(n + 3) { display: none; }
-  .exh-btn-back { top: 12px; inset-inline-start: 12px; }
-  .exh-concept-note { top: 24px; bottom: auto; inset-inline-end: 12px; max-width: 40%; }
+  .exh-concept-note { top: auto; bottom: 16px; inset-inline-end: 12px; max-width: 40%; }
+  .exh-concept-legend { display: none; }
+  .exh-canvas-root[data-fullscreen="true"] .exh-card { bottom: calc(18px + env(safe-area-inset-bottom)); }
   .exh-look-hint { bottom: auto; top: 66px; }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .exh-veil { transition: none; }
+  .exh-veil,
+  .exh-panel,
+  .exh-panel-scrim,
+  .exh-pin { transition: none; }
 }

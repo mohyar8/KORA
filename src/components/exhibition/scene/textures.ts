@@ -343,3 +343,39 @@ export async function wayfindingTexture(ar: string, en: string) {
   ctx.stroke();
   return finish(c);
 }
+
+/** Navy directional sign "إلى الساحة الترفيهية" (masterplan, passage mouth). */
+export async function passageSignTexture() {
+  const family = brandFontFamily();
+  try {
+    await document.fonts.load(`600 72px ${family}`, "إلى الساحة الترفيهية");
+  } catch {
+    /* fall back */
+  }
+  const { c, ctx } = canvas(1024, 448);
+  ctx.fillStyle = "#1c2552";
+  ctx.fillRect(0, 0, c.width, c.height);
+  ctx.strokeStyle = "rgba(236,239,245,0.35)";
+  ctx.lineWidth = 6;
+  ctx.strokeRect(14, 14, c.width - 28, c.height - 28);
+  ctx.fillStyle = "#eceff5";
+  ctx.textAlign = "center";
+  ctx.direction = "rtl";
+  ctx.font = `600 92px ${family}`;
+  ctx.fillText("إلى الساحة الترفيهية", 512, 170);
+  ctx.direction = "ltr";
+  ctx.font = `400 58px ${family}`;
+  ctx.fillText("To Entertainment Area", 512, 270);
+  // Arrow pointing ahead (up).
+  ctx.strokeStyle = "#f26557";
+  ctx.lineWidth = 12;
+  ctx.lineCap = "round";
+  ctx.beginPath();
+  ctx.moveTo(512, 400);
+  ctx.lineTo(512, 318);
+  ctx.moveTo(478, 350);
+  ctx.lineTo(512, 316);
+  ctx.lineTo(546, 350);
+  ctx.stroke();
+  return finish(c);
+}

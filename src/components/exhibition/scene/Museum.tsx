@@ -1,12 +1,13 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo } from "react";
 import * as THREE from "three";
 import { mergeGeometries } from "three/examples/jsm/utils/BufferGeometryUtils.js";
 import { MUSEUM } from "@/lib/exhibition/layout";
 import { FACADE_LINES, type FacadeFace, type FacadeLine } from "@/lib/exhibition/museumFacade";
 import { facadeWashTexture, museumSignTexture, radialTexture, wayfindingTexture } from "./textures";
 import { useQuality } from "./quality";
+import { useAsyncTexture } from "./useAsyncTexture";
 
 /**
  * Museum exterior after the preliminary render (references/…12.05.47 PM.jpeg).
@@ -173,26 +174,6 @@ function baseStripGeometry(spec: FaceSpec) {
     return g;
   });
   return mergeGeometries(parts);
-}
-
-function useAsyncTexture(factory: () => Promise<THREE.Texture>) {
-  const [tex, setTex] = useState<THREE.Texture | null>(null);
-  useEffect(() => {
-    let alive = true;
-    let made: THREE.Texture | null = null;
-    factory().then((t) => {
-      made = t;
-      if (alive) setTex(t);
-      else t.dispose();
-    });
-    return () => {
-      alive = false;
-      made?.dispose();
-    };
-    // Factories are module-level and stable.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-  return tex;
 }
 
 const warm = new THREE.Color("#ffb36b");

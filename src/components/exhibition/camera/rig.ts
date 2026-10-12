@@ -1,6 +1,7 @@
 import * as THREE from "three";
 import { AREAS, OVERVIEW } from "@/lib/exhibition/areas";
 import type { AreaId, CameraAnchor } from "@/lib/exhibition/types";
+import { OBSTACLES } from "./obstacles";
 
 export type Pose = { position: THREE.Vector3; target: THREE.Vector3 };
 
@@ -46,11 +47,10 @@ export function poseFor(id: AreaId | null, aspect: number): Pose {
 }
 
 const tmp = new THREE.Vector3();
+const probe = new THREE.Vector3();
 
-/** Quadratic Bézier position with a lifted midpoint so flights arc over obstacles. */
-export function flightPoint(from: THREE.Vector3, to: THREE.Vector3, t: number, out: THREE.Vector3) {
-  const span = from.distanceTo(to);
-  const lift = THREE.MathUtils.clamp(span * 0.22, 1.5, 14);
+/** Quadratic Bézier position with a midpoint lifted by `lift` metres. */
+export function flightPoint(from: THREE.Vector3, to: THREE.Vector3, lift: number, t: number, out: THREE.Vector3) {
   const mid = tmp.copy(from).lerp(to, 0.5);
   mid.y = Math.max(from.y, to.y) + lift;
   const a = (1 - t) * (1 - t);
@@ -61,6 +61,30 @@ export function flightPoint(from: THREE.Vector3, to: THREE.Vector3, t: number, o
     a * from.y + b * mid.y + c * to.y,
     a * from.z + b * mid.z + c * to.z,
   );
+}
+
+/**
+ * Smallest arc height (from a gentle default upwards) for which the flight
+ * path stays clear of every obstacle volume — so the camera never cuts
+ * through the stage, the buildings or a booth.
+ */
+export function planLift(from: THREE.Vector3, to: THREE.Vector3) {
+  let lift = THREE.MathUtils.clamp(from.distanceTo(to) * 0.22, 1.5, 14);
+  for (let attempt = 0; attempt < 12; attempt++) {
+    let clear = true;
+    for (let i = 1; i < 40 && clear; i++) {
+      flightPoint(from, to, lift, i / 40, probe);
+      for (const o of OBSTACLES) {
+        if (o.containsPoint(probe)) {
+          clear = false;
+          break;
+        }
+      }
+    }
+    if (clear) return lift;
+    lift *= 1.35;
+  }
+  return lift;
 }
 
 export function flightDuration(from: THREE.Vector3, to: THREE.Vector3) {

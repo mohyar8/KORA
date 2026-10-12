@@ -3,8 +3,18 @@
 import { useEffect, useLayoutEffect, useMemo, useRef } from "react";
 import * as THREE from "three";
 import { mergeGeometries } from "three/examples/jsm/utils/BufferGeometryUtils.js";
-import { BUILDINGS, MUSEUM, PLAZA } from "@/lib/exhibition/layout";
-import { concreteTexture, frondTexture, radialTexture, rng, windowTexture } from "./textures";
+import {
+  BUILDINGS,
+  ENTERTAINMENT,
+  MUSEUM,
+  MUSEUM_PATH_PLANTERS,
+  PASSAGE,
+  PLAZA,
+  SOUTH_PALMS,
+  WEST_PLANTERS,
+} from "@/lib/exhibition/layout";
+import { concreteTexture, frondTexture, passageSignTexture, radialTexture, rng, windowTexture } from "./textures";
+import { useAsyncTexture } from "./useAsyncTexture";
 import { useQuality } from "./quality";
 
 /**
@@ -227,6 +237,25 @@ function canopyGeometry(detail = 2) {
   return g;
 }
 
+/** A clipped hedge block (0.8 × 0.45 × 2 m) with a softly irregular surface. */
+function hedgeGeometry() {
+  const g = new THREE.BoxGeometry(0.8, 0.45, 2, 4, 3, 10);
+  const pos = g.attributes.position;
+  const r = rng(29);
+  const offsets = Array.from({ length: 64 }, () => (r() - 0.5) * 0.05);
+  for (let i = 0; i < pos.count; i++) {
+    const x = pos.getX(i);
+    const y = pos.getY(i);
+    const z = pos.getZ(i);
+    const n = offsets[Math.abs(Math.round(x * 7 + y * 13 + z * 5)) % 64];
+    // Rounded shoulders + leafy jitter.
+    const k = 1 - 0.12 * Math.max(0, y / 0.225) ** 2;
+    pos.setXYZ(i, x * k + n, y + n * 0.6 + 0.225, z + n * 0.3);
+  }
+  g.computeVertexNormals();
+  return g;
+}
+
 function palmCrownGeometry() {
   const fronds: THREE.BufferGeometry[] = [];
   const count = 16;
@@ -272,7 +301,10 @@ function treeBelt(count: number) {
     [-40, 110, 70, 84, 0.34],
     [86, 104, -30, 70, 0.26],
     [-46, -24, -10, 70, 0.22],
-    [-40, 110, -40, -30, 0.18],
+    // North belt, leaving the (provisional) entertainment zone open.
+    [-40, 6, -44, -30, 0.08],
+    [48, 110, -44, -30, 0.1],
+    [-40, 110, -72, -60, 0.12],
   ];
   for (const [x0, x1, z0, z1, share] of zones) {
     const n = Math.round(count * share);
@@ -290,28 +322,45 @@ function treeBelt(count: number) {
 const MX = MUSEUM.facadeX;
 const MZ = MUSEUM.northZ;
 
-const PALMS: [number, number][] = [
+/** Palms standing in their own square planters. */
+const POTTED_PALMS: [number, number][] = [
   // East edge behind the museum (masterplan right-hand palm row).
   ...Array.from({ length: 7 }, (_, i) => [MX + MUSEUM.depth + 3.2, MZ - 1 + i * 5] as [number, number]),
   // North edge between the plaza and Buildings 70/57.
   [4, -1.8], [14, -1.8], [36, -1.8], [44, -1.8],
-  // Forecourt south corner (kept clear of the facade sightlines).
-  [MX - 11, MZ + MUSEUM.length + 3.2],
-  // South edge.
-  [6, 38], [20, 38], [34, 38], [50, 38],
+  // South edge behind the corners (masterplan).
+  ...SOUTH_PALMS.xs.map((x) => [x, SOUTH_PALMS.z] as [number, number]),
 ];
 
-const PLANTERS: [number, number][] = PALMS;
+/** Palms growing out of the long planter strips (masterplan). */
+const STRIP_PALMS: [number, number][] = [
+  ...MUSEUM_PATH_PLANTERS.palms.map((z) => [MUSEUM_PATH_PLANTERS.x, z] as [number, number]),
+  ...WEST_PLANTERS.palms.map((z) => [WEST_PLANTERS.x, z] as [number, number]),
+];
+
+const PALMS: [number, number][] = [...POTTED_PALMS, ...STRIP_PALMS];
+const PLANTERS: [number, number][] = POTTED_PALMS;
+
+/** Long planter strips [x, z0, z1]: museum path column and the west column (gap = entrance). */
+const STRIPS: [number, number, number][] = [
+  ...MUSEUM_PATH_PLANTERS.runs.map(([z0, z1]) => [MUSEUM_PATH_PLANTERS.x, z0, z1] as [number, number, number]),
+  [WEST_PLANTERS.x, 0.5, PLAZA.entrance.z - 1.8],
+  [WEST_PLANTERS.x, PLAZA.entrance.z + 1.8, 34.5],
+];
 
 const DISC_LAMPS: [number, number][] = [
   [-6, 44], [6, 50], [18, 44], [30, 50], [42, 44], [54, 50], [66, 44],
   [-8, 10], [-8, 26], [68, 8], [68, 22], [70, 36], [12, 58], [36, 58], [60, 58],
+  // Around the (provisional) entertainment zone.
+  [9, -31], [27, -29.5], [45, -31], [9, -55], [27, -56.5], [45, -55],
 ];
 
 const BOLLARDS: [number, number][] = [
   ...[0, 6, 12, 18, 32, 38, 50, 56].map((x) => [x, -0.6] as [number, number]),
   ...Array.from({ length: 8 }, (_, i) => [MX + MUSEUM.depth + 1.6, MZ + i * 4] as [number, number]),
-  ...[2, 10, 18, 26, 42, 50].map((x) => [x, 37] as [number, number]),
+  ...[2, 10, 17.5, 22, 27, 32, 50].map((x) => [x, 38.7] as [number, number]),
+  // Lanterns along the museum-path planter strip (masterplan).
+  ...[4.5, 9, 13.5, 21, 26, 30.5].map((z) => [MUSEUM_PATH_PLANTERS.x + 0.9, z] as [number, number]),
 ];
 
 const BENCHES: Placement[] = [
@@ -354,6 +403,8 @@ export function Surroundings() {
       palmTrunk: palmTrunkGeometry(),
       crown: palmCrownGeometry(),
       planter: new THREE.BoxGeometry(1.6, 0.7, 1.6).translate(0, 0.35, 0),
+      strip: new THREE.BoxGeometry(1.0, 0.55, 1).translate(0, 0.275, 0),
+      hedge: hedgeGeometry(),
       shrub: canopyGeometry(2),
       pole: new THREE.CylinderGeometry(0.06, 0.08, 1, 8).translate(0, 0.5, 0),
       disc: new THREE.CylinderGeometry(0.5, 0.42, 0.1, 24),
@@ -409,11 +460,18 @@ export function Surroundings() {
         return { p: [x + Math.cos(-a) * lean, 0.7 + h, z + Math.sin(-a) * lean], r: a };
       }),
       planters: PLANTERS.map<Placement>(([x, z]) => ({ p: [x, 0, z] })),
-      shrubs: PLANTERS.map<Placement>(([x, z], i) => ({
-        p: [x + 0.15, 0.95, z - 0.1],
-        s: [0.75, 0.5, 0.75],
-        r: i,
-      })),
+      strips: STRIPS.map<Placement>(([x, z0, z1]) => ({ p: [x, 0, (z0 + z1) / 2], s: [1, 1, z1 - z0] })),
+      // Trimmed hedge in ~2 m segments (instanced, slightly varied).
+      stripHedges: STRIPS.flatMap<Placement>(([x, z0, z1]) => {
+        const n = Math.max(1, Math.round((z1 - z0) / 2));
+        const seg = (z1 - z0) / n;
+        return Array.from({ length: n }, (_, i): Placement => ({
+          p: [x, 0.55, z0 + seg * (i + 0.5)],
+          s: [1, 0.9 + (i % 3) * 0.08, seg / 2],
+          r: i % 2 ? Math.PI : 0,
+        }));
+      }),
+      shrubs: PLANTERS.map<Placement>(([x, z], i) => ({ p: [x, 0.7, z], s: [1.5, 0.8, 0.75], r: (i % 4) * (Math.PI / 2) })),
       poles: DISC_LAMPS.map<Placement>(([x, z]) => ({ p: [x, 0, z], s: [1, 4.6, 1] })),
       discs: DISC_LAMPS.map<Placement>(([x, z]) => ({ p: [x, 4.62, z] })),
       discGlow: DISC_LAMPS.map<Placement>(([x, z]) => ({ p: [x, 4.56, z] })),
@@ -462,7 +520,13 @@ export function Surroundings() {
       <Instances geometry={geo.planter} items={items.planters} castShadow>
         <meshStandardMaterial color="#4a4a50" roughness={0.85} />
       </Instances>
-      <Instances geometry={geo.shrub} items={items.shrubs}>
+      <Instances geometry={geo.strip} items={items.strips}>
+        <meshStandardMaterial color="#4a4a50" roughness={0.85} />
+      </Instances>
+      <Instances geometry={geo.hedge} items={items.stripHedges}>
+        <meshStandardMaterial color="#26351f" roughness={0.95} envMapIntensity={0.4} />
+      </Instances>
+      <Instances geometry={geo.hedge} items={items.shrubs}>
         <meshStandardMaterial color="#2f4128" roughness={0.95} />
       </Instances>
       <Instances geometry={geo.palmTrunk} items={items.palmTrunks} castShadow>
@@ -549,6 +613,8 @@ export function Surroundings() {
         <meshStandardMaterial color="#6f6f73" roughness={0.9} />
       </mesh>
       <PlazaEdge />
+      <EntertainmentGround />
+      <PassageSign />
     </group>
   );
 }
@@ -561,5 +627,46 @@ function PlazaEdge() {
       <boxGeometry args={[b.maxX - b.minX, 0.2, 0.3]} />
       <meshStandardMaterial color="#8e877b" roughness={0.9} />
     </mesh>
+  );
+}
+
+/** Paving for the (provisional) entertainment zone north of the passage. */
+function EntertainmentGround() {
+  const w = ENTERTAINMENT.maxX - ENTERTAINMENT.minX + 8;
+  const d = ENTERTAINMENT.maxZ - ENTERTAINMENT.minZ + 6;
+  return (
+    <mesh
+      rotation-x={-Math.PI / 2}
+      position={[(ENTERTAINMENT.minX + ENTERTAINMENT.maxX) / 2, 0.004, (ENTERTAINMENT.minZ + ENTERTAINMENT.maxZ) / 2 + 1]}
+      receiveShadow
+    >
+      <planeGeometry args={[w, d]} />
+      <meshStandardMaterial color="#5e5a55" roughness={0.9} />
+    </mesh>
+  );
+}
+
+/** Directional sign at the passage mouth, as drawn on the masterplan. */
+function PassageSign() {
+  const tex = useAsyncTexture(passageSignTexture);
+  return (
+    <group position={[PASSAGE.x, 0, PASSAGE.signZ]}>
+      {[-1.15, 1.15].map((x) => (
+        <mesh key={x} position={[x, 1.1, 0]} castShadow>
+          <boxGeometry args={[0.08, 2.2, 0.08]} />
+          <meshStandardMaterial color="#1b1c22" roughness={0.5} metalness={0.6} />
+        </mesh>
+      ))}
+      <mesh position={[0, 1.75, 0]}>
+        <boxGeometry args={[2.5, 1.1, 0.06]} />
+        <meshStandardMaterial color="#141a3a" roughness={0.6} />
+      </mesh>
+      {tex && (
+        <mesh position={[0, 1.75, 0.035]}>
+          <planeGeometry args={[2.44, 1.06]} />
+          <meshStandardMaterial map={tex} emissive="#ffffff" emissiveMap={tex} emissiveIntensity={0.35} roughness={0.6} />
+        </mesh>
+      )}
+    </group>
   );
 }

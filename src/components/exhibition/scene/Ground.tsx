@@ -2,12 +2,13 @@
 
 import { useEffect, useMemo } from "react";
 import * as THREE from "three";
-import { MUSEUM, PLAZA } from "@/lib/exhibition/layout";
+import { MUSEUM, MUSEUM_PATH_PLANTERS, PLAZA } from "@/lib/exhibition/layout";
 import { apronTexture, plazaTexture } from "./textures";
 import { useQuality } from "./quality";
 
 const apronDims = {
-  x0: MUSEUM.facadeX - 9,
+  // Between the museum-path planter strip and the facade (masterplan).
+  x0: MUSEUM_PATH_PLANTERS.x + 0.8,
   x1: MUSEUM.facadeX + MUSEUM.portal.recess + 0.4,
   z0: MUSEUM.northZ - 2,
   z1: MUSEUM.northZ + MUSEUM.length + 2,
@@ -81,7 +82,6 @@ export function Ground() {
       {/* In-ground linear lights parallel to the facade (render). */}
       {[
         [fx - 3.4, MUSEUM.northZ + MUSEUM.portal.u1 + 0.6, MUSEUM.northZ + MUSEUM.length],
-        [fx - 8.2, apronDims.z0 + 0.4, apronDims.z1 - 0.4],
       ].map(([x, z0, z1]) => (
         <mesh key={x} position={[x, 0.012, (z0 + z1) / 2]}>
           <boxGeometry args={[0.05, 0.01, z1 - z0]} />

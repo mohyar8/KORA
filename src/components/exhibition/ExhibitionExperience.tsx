@@ -2,19 +2,23 @@
 
 import { Canvas, invalidate, type RootState } from "@react-three/fiber";
 import { useCallback, useEffect, useRef, useState } from "react";
-import type { WebGLRenderer } from "three";
-import { AREAS } from "@/lib/exhibition/areas";
+import { Vector3, type WebGLRenderer } from "three";
+import { AREA_ORDER, AREAS } from "@/lib/exhibition/areas";
 import type { AreaId } from "@/lib/exhibition/types";
 import { CameraRig, type LookInput } from "./camera/CameraRig";
-import { fovFor } from "./camera/rig";
+import { OBSTACLES } from "./camera/obstacles";
+import { flightPoint, fovFor, planLift, poseFor } from "./camera/rig";
 import { Atmosphere } from "./scene/Atmosphere";
 import { Ground } from "./scene/Ground";
 import { HitTargets, CLICK_SLOP } from "./scene/HitTargets";
 import { Effects, Lighting } from "./scene/Lighting";
 import { Museum } from "./scene/Museum";
+import { Placeholders } from "./scene/Placeholders";
 import { QualityContext, detectQuality, type Quality } from "./scene/quality";
 import { Surroundings } from "./scene/Surroundings";
 import { AreaCard } from "./ui/AreaCard";
+import { AreaPanel, AreaPanelTrigger } from "./ui/AreaPanel";
+import { AreaPins, PinProjector, type PinRegistry } from "./ui/AreaPins";
 
 type Drag = {
   id: number;
@@ -23,7 +27,7 @@ type Drag = {
   yaw: number;
   pitch: number;
   touch: boolean;
-  axis: "x" | "y" | null;
+  axis: "x" | "y" | "free" | null;
 };
 
 const KEY_STEP = 0.12;
@@ -40,11 +44,16 @@ export default function ExhibitionExperience({ onFail }: { onFail: () => void })
   const [hover, setHover] = useState<{ id: AreaId; x: number; y: number } | null>(null);
   const [visible, setVisible] = useState(true);
   const [ready, setReady] = useState(false);
+  const [panelOpen, setPanelOpen] = useState(false);
+  const [fullscreen, setFullscreen] = useState(false);
   const look = useRef<LookInput>({ yaw: 0, pitch: 0 });
   const drag = useRef<Drag | null>(null);
   const root = useRef<HTMLDivElement>(null);
   const cardHeading = useRef<HTMLHeadingElement>(null);
   const focusCardOnArrive = useRef(false);
+  const pins = useRef<PinRegistry>({ pins: new Map(), card: null });
+  const savedScroll = useRef(0);
+  const menuTrigger = useRef<HTMLButtonElement>(null);
   const glRef = useRef<WebGLRenderer | null>(null);
   const getRef = useRef<(() => RootState) | null>(null);
   const [instant, setInstant] = useState(false);
@@ -66,6 +75,20 @@ export default function ExhibitionExperience({ onFail }: { onFail: () => void })
     return () => io.disconnect();
   }, []);
 
+  // Optional fullscreen: a fixed overlay (works on iOS, unlike element
+  // fullscreen); page scroll is locked meanwhile and restored on exit.
+  useEffect(() => {
+    if (!fullscreen) return;
+    const html = document.documentElement;
+    savedScroll.current = window.scrollY;
+    const prev = html.style.overflow;
+    html.style.overflow = "hidden";
+    return () => {
+      html.style.overflow = prev;
+      window.scrollTo(0, savedScroll.current);
+    };
+  }, [fullscreen]);
+
   const anchored = arrived !== null && arrived === selected;
   const area = anchored ? AREAS[arrived] : null;
 
@@ -73,6 +96,7 @@ export default function ExhibitionExperience({ onFail }: { onFail: () => void })
     focusCardOnArrive.current = viaKeyboard;
     look.current = { yaw: 0, pitch: 0 };
     setHover(null);
+    setPanelOpen(false);
     setArrived(null);
     setSelected(id);
   }, []);
@@ -85,9 +109,32 @@ export default function ExhibitionExperience({ onFail }: { onFail: () => void })
       select: (id: AreaId | null) => select(id),
       state: () => getRef.current?.(),
       instant: (on = true) => setInstant(on),
+      panel: (open = true) => setPanelOpen(open),
+      fullscreen: (on = true) => setFullscreen(on),
       look: (yaw: number, pitch = 0) => {
         look.current = { yaw, pitch };
         invalidate();
+      },
+      /** Checks every overview/area flight pair against the obstacle volumes. */
+      checkFlights: (aspect = 16 / 9) => {
+        const ids: (AreaId | null)[] = [null, ...AREA_ORDER];
+        const out: string[] = [];
+        const p = new Vector3();
+        for (const a of ids)
+          for (const b of ids) {
+            if (a === b) continue;
+            const from = poseFor(a, aspect).position;
+            const to = poseFor(b, aspect).position;
+            const lift = planLift(from, to);
+            for (let i = 0; i <= 40; i++) {
+              flightPoint(from, to, lift, i / 40, p);
+              if (OBSTACLES.some((o) => o.containsPoint(p))) {
+                out.push(`${a ?? "overview"}→${b ?? "overview"} @${i}`);
+                break;
+              }
+            }
+          }
+        return out;
       },
       /** Render n frames synchronously; returns mean CPU+GPU ms per frame. */
       bench: (n = 20) => {
@@ -103,7 +150,7 @@ export default function ExhibitionExperience({ onFail }: { onFail: () => void })
         }
         return (performance.now() - t0) / n;
       },
-      /** Settle and render, then open the frame as an image in a blob URL. */
+      /** Settle and render, then return the frame as a blob URL. */
       snap: (frames = 12) => {
         const get = getRef.current;
         if (!get) return null;
@@ -154,14 +201,18 @@ export default function ExhibitionExperience({ onFail }: { onFail: () => void })
   // ----- Look-around gestures (only once anchored) -----------------------
   const onPointerDown = (e: React.PointerEvent) => {
     if (!anchored || e.button > 0) return;
+    // Controls, pins, the card and the panel keep their own pointer behaviour.
+    if ((e.target as HTMLElement).closest("button, a, nav, .exh-card")) return;
+    const touch = e.pointerType === "touch";
     drag.current = {
       id: e.pointerId,
       x: e.clientX,
       y: e.clientY,
       yaw: look.current.yaw,
       pitch: look.current.pitch,
-      touch: e.pointerType === "touch",
-      axis: e.pointerType === "touch" ? null : "x",
+      touch,
+      // Embedded touch: decide the axis first (vertical = page scroll).
+      axis: !touch || fullscreen ? "free" : null,
     };
   };
   const onPointerMove = (e: React.PointerEvent) => {
@@ -169,9 +220,8 @@ export default function ExhibitionExperience({ onFail }: { onFail: () => void })
     if (!d || d.id !== e.pointerId) return;
     const dx = e.clientX - d.x;
     const dy = e.clientY - d.y;
-    if (d.touch && d.axis === null) {
+    if (d.axis === null) {
       if (Math.hypot(dx, dy) < 9) return;
-      // Vertical intent belongs to page scrolling (touch-action: pan-y).
       d.axis = Math.abs(dx) > Math.abs(dy) * 1.2 ? "x" : "y";
       if (d.axis === "y") {
         drag.current = null;
@@ -185,7 +235,7 @@ export default function ExhibitionExperience({ onFail }: { onFail: () => void })
     const h = (e.currentTarget as HTMLElement).clientHeight || 1;
     const hfov = 2 * Math.atan(Math.tan(((fovFor(width / h) * Math.PI) / 180) / 2) * (width / h));
     const k = (hfov / width) * 0.9;
-    look.current = clampLook(d.yaw + dx * k, d.touch ? d.pitch : d.pitch + dy * k);
+    look.current = clampLook(d.yaw + dx * k, d.axis === "x" ? d.pitch : d.pitch + dy * k);
     invalidate();
   };
   const endDrag = (e: React.PointerEvent) => {
@@ -193,12 +243,16 @@ export default function ExhibitionExperience({ onFail }: { onFail: () => void })
   };
 
   const onKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === "Escape" && selected) {
+    if (e.key === "Escape") {
+      // Innermost first: panel, then fullscreen, then the selection.
+      if (panelOpen) setPanelOpen(false);
+      else if (fullscreen) setFullscreen(false);
+      else if (selected) select(null, true);
+      else return;
       e.preventDefault();
-      select(null, true);
       return;
     }
-    if (!anchored) return;
+    if (!anchored || e.target !== e.currentTarget) return;
     const map: Record<string, [number, number]> = {
       ArrowLeft: [KEY_STEP, 0],
       ArrowRight: [-KEY_STEP, 0],
@@ -213,6 +267,10 @@ export default function ExhibitionExperience({ onFail }: { onFail: () => void })
   };
 
   const flying = selected !== arrived;
+  const registerCard = useCallback((el: HTMLElement | null) => {
+    pins.current.card = el;
+    invalidate();
+  }, []);
 
   return (
     <div
@@ -220,6 +278,7 @@ export default function ExhibitionExperience({ onFail }: { onFail: () => void })
       className="exh-canvas-root"
       data-state={anchored ? "anchored" : flying ? "flying" : "overview"}
       data-hover={hover ? "true" : undefined}
+      data-fullscreen={fullscreen ? "true" : undefined}
       onPointerDown={onPointerDown}
       onPointerMove={onPointerMove}
       onPointerUp={endDrag}
@@ -227,7 +286,7 @@ export default function ExhibitionExperience({ onFail }: { onFail: () => void })
       onKeyDown={onKeyDown}
       tabIndex={0}
       role="group"
-      aria-label="المشهد ثلاثي الأبعاد. بعد اختيار منطقة استخدم الأسهم للتلفّت، و Escape للعودة إلى المنظر العام."
+      aria-label="المشهد ثلاثي الأبعاد. اختر منطقة من العلامات أو من قائمة مناطق المعرض. بعد الوصول استخدم الأسهم للتلفّت، و Escape للعودة إلى المنظر العام."
     >
       <Canvas
         className="exh-canvas"
@@ -254,45 +313,79 @@ export default function ExhibitionExperience({ onFail }: { onFail: () => void })
           <Ground />
           <Surroundings />
           <Museum />
+          <Placeholders />
           <HitTargets
-            onSelect={(id) => {
-              if (id !== selected) select(id);
-            }}
-            onHover={(id, x, y) => setHover(id && id !== selected ? { id, x: x ?? 0, y: y ?? 0 } : null)}
+            current={selected}
+            onSelect={(id) => select(id)}
+            onHover={(id, x, y) => setHover(id ? { id, x: x ?? 0, y: y ?? 0 } : null)}
           />
           <CameraRig selected={selected} look={look} reducedMotion={reducedMotion || instant} onArrive={handleArrive} />
+          <PinProjector registry={pins} current={selected} />
           <Effects />
         </QualityContext.Provider>
       </Canvas>
 
       <div className="exh-veil" data-ready={ready} aria-hidden />
 
+      <AreaPins registry={pins} current={selected} overview={!selected} onSelect={(id) => select(id, true)} />
+
       {hover && (
         <div className="exh-hover-chip" style={{ left: hover.x, top: hover.y }} aria-hidden>
           <span>{AREAS[hover.id].content.name}</span>
-          <small>اضغط للاستكشاف</small>
+          <small>اضغط للانتقال</small>
         </div>
       )}
 
       <div className="exh-ui">
-        <p className="exh-concept-note">تصور مبدئي — التصميم النهائي قد يختلف</p>
+        <p className="exh-concept-note">
+          تصور مبدئي<span className="exh-concept-legend"> · الكتل الشفافة تصاميم قيد الإعداد</span>
+        </p>
 
-        {selected ? (
-          <button type="button" className="exh-btn exh-btn-back" onClick={() => select(null, true)}>
-            <span aria-hidden>→</span> المنظر العام
-          </button>
-        ) : (
-          <div className="exh-overview-cta">
-            <p>اختر مبنى في المشهد أو ابدأ من هنا</p>
-            <button type="button" className="exh-btn exh-btn-primary" onClick={() => select("museum", true)}>
-              استكشف المتحف
+        <div className="exh-toolbar">
+          <AreaPanelTrigger open={panelOpen} onOpenChange={setPanelOpen} triggerRef={menuTrigger} />
+          {selected && (
+            <button type="button" className="exh-btn exh-btn-back" onClick={() => select(null, true)}>
+              <span aria-hidden>→</span> المنظر العام
             </button>
-          </div>
+          )}
+          <button
+            type="button"
+            className="exh-btn exh-btn-fullscreen"
+            aria-pressed={fullscreen}
+            onClick={() => setFullscreen((f) => !f)}
+          >
+            {fullscreen ? "إغلاق ملء الشاشة" : "ملء الشاشة"}
+          </button>
+        </div>
+
+        {!selected && <p className="exh-overview-hint">اختر منطقة من المشهد أو من «مناطق المعرض»</p>}
+
+        {area && (
+          <AreaCard
+            key={area.id}
+            area={area}
+            headingRef={cardHeading}
+            cardRef={registerCard}
+            reducedMotion={reducedMotion}
+          />
         )}
 
-        {area && <AreaCard key={area.id} area={area} headingRef={cardHeading} reducedMotion={reducedMotion} />}
+        {anchored && <p className="exh-look-hint">اسحب للتلفّت · اضغط منطقة مجاورة للانتقال إليها</p>}
 
-        {anchored && <p className="exh-look-hint">اسحب يمينًا أو يسارًا للتلفّت حولك</p>}
+        <AreaPanel
+          open={panelOpen}
+          onOpenChange={setPanelOpen}
+          current={selected}
+          onSelect={(id) => select(id, true)}
+          onOverview={() => select(null, true)}
+          triggerRef={menuTrigger}
+        />
+
+        {!fullscreen && (
+          <a className="exh-skip" href="#exhibition-after">
+            تخطَّ المعرض <span aria-hidden>↓</span>
+          </a>
+        )}
       </div>
 
       <p className="sr-only" aria-live="polite">

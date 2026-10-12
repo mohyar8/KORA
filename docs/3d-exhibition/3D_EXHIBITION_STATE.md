@@ -2,67 +2,96 @@
 
 _Resume here. Read the spec, then the roadmap, then this file. Keep this file short; update after every milestone._
 
-**Last updated:** 2026-10-12 · **Branch:** `newV` · **Committed:** no (all exhibition work is uncommitted)
+**Last updated:** 2026-10-12 · **Branch:** `newV` · **Committed:** M1 (`f7aabfa "M 1"`); M2 changes uncommitted
 
 ## Milestones
 | ID | Name | Status |
 |---|---|---|
 | M0 | Discovery & planning | ✅ Done |
-| M1 | Foundation + museum quality prototype (GATE 1) | ✅ Implemented — **stopped for visual-quality review** |
-| M2 | Spatial layout + interaction system | ⏸ Blocked on GATE 1 approval + R-3 / D-15 |
-| M3 | Stage + booth kit + first corner (GATE 2) | Not started |
+| M1 | Foundation + museum quality prototype (GATE 1) | ✅ Approved by owner 2026-10-12 |
+| M2 | Spatial layout + interaction system | ✅ Implemented — **stopped for review** |
+| M3 | Stage + booth kit + first corner (GATE 2) | ⏸ Waiting for M2 review |
 | M4 | Remaining areas + world completion | Not started |
 | M5 | Homepage integration & fallback | Not started |
 | M6 | Perf / a11y / device QA → release | Not started |
 
-**Next:** owner reviews `/lab/exhibition` (run `npm run dev`, open `http://localhost:3000/lab/exhibition`). After approval → M2.
+**Next:** owner reviews `/lab/exhibition` (`npm run dev`, open `http://localhost:3000/lab/exhibition`). After approval → M3.
 
-## M1 — what exists
-- Isolated route `/lab/exhibition` (noindex), filler above/below to emulate the homepage flow. Homepage untouched.
-- Museum exterior (west facade traced from the render, portal with KORA sign from official PNGs, bilingual wayfinding, exit, coloured polygon linework, warm base strip, lobby behind glass, forecourt light spill), plaza paving, Buildings 70/57, palms/planters, disc lamps, bollards, benches, tree belts, dusk sky + procedural environment lighting, restrained bloom.
-- Interaction slice: overview → (3D click on the museum **or** "استكشف المتحف" button) → cinematic flight → constrained look-around (mouse drag / horizontal touch drag / arrow keys) → centred provisional card → "المنظر العام" (or Escape) back. Reduced motion → instant cuts.
-- Loader: WebGL2 check, Save-Data opt-in, near-viewport + `deferMs`, error boundary, context-loss → text fallback.
+## M2 — what exists
+- **Layout from the masterplan** (`layout.ts`, measured/inferred tags): stage 12×5 m, two seating blocks around a 2 m aisle, 7 corner slots, gate, planter strips with palms and lanterns, passage sign "إلى الساحة الترفيهية", entertainment zone (provisional location, north of the passage).
+- **10 selectable areas** (`areas.ts`): museum (modelled), stage, entertainment and corners 1–7 (all **translucent placeholders**: pale fill, outline, dashed footprint; one shared legend «الكتل الشفافة تصاميم قيد الإعداد»). Slot ↔ corner mapping is provisional; slots 6–7 are "ركن قيد التأكيد". Cards say "التصميم قيد الإعداد" and, where relevant, "توزيع الأركان على المواقع مبدئي" or "الموقع تقريبي".
+- **Three navigation paths:**
+  - 3D click on hit volumes (buildings block picks through walls). Neighbours are clickable while anchored.
+  - "مناطق المعرض" panel: an RTL right drawer on desktop, a bottom sheet under 768 px. Closed by default; picking a location closes it and flies there.
+  - "المنظر العام" button, the panel entry, or Escape.
+- **Pins:** DOM buttons that are focusable and named. In the overview, corners show as numbered markers that reveal their names on hover or focus. Pins hide when occluded, under the card, or colliding with another pin.
+- **Camera:**
+  - Flights choose the lowest arc that clears every obstacle; interrupting mid-flight starts from the current view.
+  - Look-around stays clamped per area.
+  - Corner cameras for the side slots are angled diagonally so they stand clear of the neighbouring booths.
+- **Input & accessibility:**
+  - Click vs drag: anything over 6 px of movement is a look-drag, not a click.
+  - Touch: embedded mode decides the axis first (vertical = page scroll); fullscreen allows free drag.
+  - Keyboard: arrow keys only when the stage itself has focus.
+  - Escape order: panel → fullscreen → selection.
+- **Optional fullscreen** (mobile only): fixed overlay, page scroll locked, scroll position restored on exit.
+- **Skip link:** "تخطَّ المعرض ↓" jumps to `#exhibition-after`.
+- **Museum anchor moved:** the M1 standpoint is now behind the stage, so the camera stands in the open strip north-east of it with a similar three-quarter view (portal + linework). The museum's design is unchanged.
 
 ## Verified results (2026-10-12)
 | Check | Result |
 |---|---|
 | `npx tsc --noEmit` | ✅ clean |
-| `npx eslint` (repo) | ✅ no new problems; only the pre-existing `Departments.tsx:19` error |
-| `npm run build` | ✅ succeeds; `/lab/exhibition` static |
-| Homepage initial JS | 824 KB raw / 265 KB gz (baseline 824 / 263; chunk-split noise). **No three/R3F code in any homepage chunk** (grepped). |
-| Exhibition lazy chunk | 1,042 KB raw / **275 KB gz** (budget ≤ 300) |
-| Desktop tier, 1581×815 px canvas | ≈123 draw calls, ≈244 k triangles, ≈20–26 ms/frame incl. sync readback (this machine) |
-| Mobile tier, 375×812 emulated | ≈125 calls, ≈140 k triangles, ≈8 ms/frame |
-| `git diff` Hero / page.tsx / layout.tsx / globals.css / public | ✅ empty |
-| Views captured | Overview (desktop + mobile), museum anchor (desktop + mobile, with card), max look-around yaw |
+| `npx eslint` (repo) | ✅ no new problems (only pre-existing `Departments.tsx:19`) |
+| `npm run build` | ✅ |
+| Homepage initial JS | 824 KB raw / 265 KB gz — unchanged; no three/R3F in homepage chunks |
+| Exhibition lazy chunk | 1,060 KB raw / **281 KB gz** (budget ≤ 300); dev hook absent from production chunk |
+| Flight clearance (`__exh.checkFlights`) | ✅ 0 collisions for all 110 area pairs at aspects 2.4, 16:9, 0.8, 0.46 |
+| 3D click (synthetic pointer events) | ✅ hover chip names the area; click selects; a 40 px drag rotates the view and does **not** select; a still click on a visible neighbour selects it |
+| Pins / panel / keyboard | ✅ pin click selects; panel opens with focus on the first item, marks «أنت هنا», closes on choice; Escape order verified |
+| Fullscreen | ✅ covers the viewport, `overflow:hidden` on html, `touch-action:none`; exit restores scroll Y exactly |
+| Mobile tier (375×812) | overview ≈134 draw calls / 171 k tris; anchored ≈104 calls; ≈9 ms/frame |
+| Desktop tier | ≈ M1 + 3 ghost draws; triangles ≈ 280 k |
+| Hero / page.tsx / layout.tsx / globals.css / public | ✅ unchanged (`git diff` empty) |
+| Views captured | overview (desktop, tablet, mobile), museum, stage, entertainment, corners 1 & 4, panel (tablet + mobile sheet) |
 
-**Not yet verified (needs a visible browser / real devices, planned for M2 + M6):** real mouse click on the 3D hit target and live drag feel (logic exercised via the same code path as the button), animated flight timing (the built-in pane was hidden, so `requestAnimationFrame` was paused; frames were rendered synchronously for inspection), iOS/Android touch scrolling, Lighthouse.
+**Not yet verified:** live animated flights and interrupting a flight at real speed. The browser pane was hidden, so `requestAnimationFrame`/GSAP were paused and views were checked with instant poses. Real touch gestures on iOS/Android and a VoiceOver/NVDA pass are also outstanding (M6).
 
-## GATE 1 — review points for the owner
-1. **Similarity:** anchor view reproduces the render's 3/4 composition, polygon linework and colours, KORA portal, entrance/exit signage, warm base and in-ground strips. Lobby interior is simpler than the render.
-2. **Atmosphere:** periwinkle dusk sky, satin (not wet) forecourt, warm lamp pools, restrained bloom.
-3. **Provisional:** museum 28 × 10 × 5.6 m (inferred); north face partly from the render, south/east faces authored (D-13); entrance at the north end per the render (conflicts with masterplan arrows, F-7 / D-15).
-4. **Known weaknesses:** trees are stylised low-poly clusters; the south plaza is empty until M2 (corners, stage); no people (D-7).
-5. **Production cost outlook:** the museum needed no external 3D assets. Booths (M3) will be harder; decide on designer/Blender involvement at GATE 2.
+**Known deviations:**
+- **Mobile draw calls:** 104–134 against a proposed ≤ 100. Carried to M3/M6: merge static museum/building meshes per material.
+- **Hidden pins:** the overview may hide 1–2 colliding corner pins at some sizes. Those areas are still reachable through 3D click and the panel.
 
-## Open blockers / questions
-- **R-3:** which are the 7 corners? Images exist for Technology, Media, Entrepreneurship, Economy & Investment and Health. Engineering has no image, and it's unclear whether "Futuristic Sports, Tech & Economy" is a separate corner.
-- **D-15 / F-7:** museum entrance end.
-- R-1/R-2: full PDF / museum plan and unseen sides (the folder still holds only the 18 images).
+## Open questions (need owner input)
+- **D-17 / R-3 / R-5:** which corner goes in which slot, and which are corners 6–7 (Engineering? the "Futuristic Sports, Tech & Economy" render?).
+- **D-18:** the control booth is omitted because it would stand in front of the M1 portal (F-8).
+- **D-19:** where the entertainment zone actually is, and its footprint (F-11).
+- R-8 (stage background mismatch) and R-12 (third-party logos) are needed before M3.
 
 ## Decisions taken (not inferable from code)
-- 2026-10-12: Selectable = 7 corners + museum + stage + entertainment zone; all else scenery. Close fidelity to preliminary designs. Hero untouched.
-- Deps: three 0.186.1, @react-three/fiber 9.8.1, @react-three/postprocessing 3.2.0, postprocessing 6.39.5, @types/three. drei removed (unused). Spline deps left untouched.
-- No downloaded assets: all textures, sky and environment are procedural; signage uses `public/assets/brand/kora-lockup-ball.png` + `kora-lockup-en.png`; text uses Alexandria (Ghroob is not web-licensed).
-- Buildings 70/57 set back to z = −7 so their podiums do not overlap the plaza edge.
-- Dev-only `window.__exh` hook (`select`, `instant`, `look`, `info`, `bench`, `snap`, `state`) exists only when `NODE_ENV=development`. Use it for inspection when the browser pane is hidden.
+- 2026-10-12:
+  - Selectable = 7 corners + museum + stage + entertainment zone; all else is scenery.
+  - Close fidelity to the preliminary designs; the Hero stays untouched.
+  - The M1 museum orientation is kept for now.
+  - No invented corner designs.
+- Placeholder language: translucent massing with outline and dashed footprint, merged into 3 draw calls. Booth shells are neutral (back + side walls + header), not a design proposal.
+- Corner slots 1–7 numbered west-top, west-bottom, south-left, south-centre, south-right, east-top, east-bottom.
+- Masterplan palms at z ≈ 5.7 / 17.5 on the museum-path strip moved to the strip ends (F-10).
+- Deps unchanged since M1 (three 0.186.1, R3F 9.8.1, @react-three/postprocessing 3.2.0, postprocessing 6.39.5).
+- Dev-only `window.__exh`:
+  - `select`, `instant`, `look`, `panel`, `fullscreen`: drive the scene directly.
+  - `info`, `bench`: frame statistics and timing.
+  - `snap`, `state`: capture a frame; read the R3F state.
+  - `checkFlights`: flight clearance check.
+
+  Exists only with `NODE_ENV=development`.
+- Browser-pane quirk: at 1.25 device pixel ratio, screenshots capture about 640 CSS px of width. Use the tablet preset (768) or narrower for full-width UI captures.
 
 ## Assumptions log
-- Reference images → spec names: see roadmap §3.1.
-- Site frame: origin = masterplan NW plaza corner; +X east, +Z south; scale averaged (dimension strings disagree).
-- Museum: length/depth scaled from the plan, height from the render's door proportions.
-- Facade linework: traced from the render, perspective-rectified (`museumFacade.ts`), approximate.
-- Buildings 70/57: 15 m / 17 m tall, 4 floors, generic precast grid from the Building 57 photos (no photos of 70).
+- Plan px → m: `x = (px − 80)/16.4`, `z = (py − 185)/14` on the 1056×1516 masterplan image; positions from the drawing, sizes from dimension strings.
+- Heights inferred: stage deck 1.0 m, screen 5.5 m, booths 3 m, gate 2.6 m, seating tiers 0.35–1.1 m.
+- Seating modelled as annular sectors (centre z = −4, r 16–25.5 m) to match the plan's row extents.
+- Museum: 28 × 10 × 5.6 m (inferred); facade linework traced from the render.
+- Buildings 70/57: 15 m / 17 m tall, generic precast grid.
 
 ## Hero protection check
-- Files touched outside the exhibition: `package.json`, `package-lock.json` only. Hero, homepage, layout, global CSS and public assets are unchanged.
+- Files outside the exhibition touched since M1: none. Hero, homepage, layout, global CSS and public assets are unchanged.

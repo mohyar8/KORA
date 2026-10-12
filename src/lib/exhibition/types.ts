@@ -3,7 +3,10 @@ export type Vec3 = readonly [number, number, number];
 /** Whether a value comes from a dimensioned drawing or was inferred from images. */
 export type Provenance = "measured" | "inferred";
 
-export type AreaId = "museum";
+export type CornerId = "corner-1" | "corner-2" | "corner-3" | "corner-4" | "corner-5" | "corner-6" | "corner-7";
+export type AreaId = "museum" | "stage" | "entertainment" | CornerId;
+
+export type AreaKind = "museum" | "stage" | "entertainment" | "corner";
 
 /**
  * A viewing anchor: the camera stands `distance` metres from `target`,
@@ -30,6 +33,8 @@ export type LookBounds = {
 
 export type AreaContent = {
   name: string;
+  /** Compact label for in-scene pins. */
+  shortName: string;
   eyebrow: string;
   teaser: string;
   highlights: readonly string[];
@@ -37,11 +42,32 @@ export type AreaContent = {
   provisional: boolean;
 };
 
+export type Box = { center: Vec3; size: Vec3 };
+
 export type AreaConfig = {
   id: AreaId;
+  kind: AreaKind;
   content: AreaContent;
+  /**
+   * "modelled": follows an approved preliminary design.
+   * "placeholder": design not yet modelled or not yet confirmed — rendered as
+   * a clearly marked translucent massing.
+   */
+  model: "modelled" | "placeholder";
+  /**
+   * Local model frame: kit models and replacement GLBs are authored in this
+   * frame (metres, +Z = open front / audience side), so swapping a model
+   * never touches anchors, hit volumes or content.
+   */
+  frame: { position: Vec3; rotationY: number };
+  /** Optional replacement model (GLB, authored in `frame`); overrides the code kit. */
+  modelUrl?: string;
+  /** Placement note shown in the card when the position itself is uncertain. */
+  placementNote?: string;
   anchor: CameraAnchor;
   look: LookBounds;
-  /** Axis-aligned click/hover proxy, independent of the visual model. */
-  hitBox: { center: Vec3; size: Vec3 };
+  /** Model-independent click/hover volumes. */
+  hitBoxes: readonly Box[];
+  /** Where the in-scene label pin sits. */
+  labelAt: Vec3;
 };

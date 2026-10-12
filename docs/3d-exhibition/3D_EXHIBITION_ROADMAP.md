@@ -1,6 +1,6 @@
 # KORA 3D Exhibition — Implementation Roadmap
 
-**Status:** v0.2 — approved; M1 implemented and awaiting GATE 1 visual review (2026-10-12)  
+**Status:** v0.3 — M1 approved (GATE 1 passed); M2 implemented, awaiting review before M3 (2026-10-12)  
 **Authoritative spec:** [`3D_EXHIBITION_SPEC.md`](./3D_EXHIBITION_SPEC.md) (v1.0, 2026-10-12). This roadmap never overrides it; where they conflict, the spec wins and the conflict is logged in §9.  
 **Progress tracker:** [`3D_EXHIBITION_STATE.md`](./3D_EXHIBITION_STATE.md)  
 **Owner of this file:** Claude Code (update on every material plan change; log it in §10).
@@ -16,6 +16,7 @@ A non-blocking, full-width 3D exhibition section placed **directly after the exi
 - **Selectable areas (10):** the **seven experience corners**, the **museum**, the **main stage** and the **entertainment zone**. Everything else (entrance arch, gate, press wall, coffee kiosk, photo booth, corridor/tunnel, control booth, Buildings 57/70, planters, lighting) is **environmental scenery**: rendered, never selectable, not in the menu.
 - **Fidelity:** follow the preliminary architectural designs closely, prioritising visual realism and quality.
 - **Hero:** preserved without modification (unchanged requirement).
+- **M2 instructions (2026-10-12):** keep the M1 museum entrance orientation; place areas from the masterplan and references; never invent missing corner designs or treat ambiguous references as confirmed (clearly marked placeholders instead); the full PDF is not required while the available references suffice.
 
 ### Explicit exclusions
 - Any change to the Hero (`src/components/sections/Hero.tsx`, its `.hero-*` / `.field-*` CSS, its assets, the topbar entrance timing).
@@ -94,6 +95,10 @@ Stage 12.0 m × 5.0 m; aisle between seating wedges 2.0 m; entrance-to-museum pa
 - **F-4** Masterplan aerial render shows the museum **with interior exhibits visible through the roof** (cutaway). We model the closed exterior only.
 - **F-5** Museum render's floor is mirror-reflective; spec forbids wet-looking ground → matte-to-satin pavers.
 - **F-6** "KORA" wordmark in booth renders (with red corner mark) differs from the repo's official lockups; we use repo files.
+- **F-8** The plan's **control booth** (≈ x 41–43, z 10–13 m) stands directly in front of the museum portal as composed in M1 (a knock-on of F-7). Its design is unknown and it is scenery, so it is **omitted** for now; revisit if the museum orientation changes.
+- **F-9** **Seven corner slots** are drawn in the "Corners / Experience Zones" block (2 squares west, 3 rectangles south, 2 squares east). Only the bottom-centre slot is dimensioned (4.0 × 2.5 m, 1.5 m gap); others are scaled from the drawing. **Which corner occupies which slot is not stated.**
+- **F-10** The masterplan's palms at ≈ z 5.7 and 17.5 m on the museum-path planter strip stood in the museum viewpoint's sightline; they are placed at the strip ends (z 3.5 and 22 m) instead.
+- **F-11** The **entertainment zone** is only an arrow on the plan ("To Entertainment Area", through the passage between Buildings 70 and 57). It is placed provisionally just north of the passage (x 11–43, z −54…−32 m), with that caveat shown in its card.
 - **F-7** Museum circulation conflict: the masterplan routes visitors **into the museum's south end** and out on the west side near the north end, while the exterior render shows **entrance and exit on the same long facade, entrance at the left (north) end**. M1 follows the exterior render (the architectural design); the masterplan arrows are treated as schematic. Needs owner confirmation before M2 (D-15).
 
 ---
@@ -144,7 +149,19 @@ src/lib/exhibition/
   museumFacade.ts            Facade linework per face (traced and perspective-rectified from the render).
 .claude/launch.json          Dev-server config for the built-in browser preview (tooling only).
 ```
-Planned later: `ui/AreaPanel.tsx` (RTL side panel / bottom sheet, M2), fullscreen control (M2), `public/exhibition/models/*.glb` (M3/M4).
+Added in M2:
+```
+  camera/obstacles.ts        Solid volumes (buildings+podiums, museum, stage, seating, booths, gate) used by flight planning.
+  camera/rig.ts              + planLift(): smallest arc height whose path clears every obstacle (sampled, 40 steps).
+  scene/Placeholders.tsx     Ghost massings (stage, seating, 7 booth shells, gate, entertainment perimeter), merged
+                             into 3 draw calls (fill, outline, dashed footprints).
+  scene/useAsyncTexture.ts   Shared async texture hook (moved out of Museum.tsx).
+  ui/AreaPanel.tsx           AreaPanelTrigger + AreaPanel: RTL right drawer (desktop) / bottom sheet (<768 px),
+                             closed by default, grouped list, "أنت هنا", focus management, Escape.
+  ui/AreaPins.tsx            DOM pin buttons projected each frame (PinProjector in-canvas); hidden when occluded by
+                             buildings/museum, off-screen, under the card, or colliding with a higher-priority pin.
+```
+Planned later: `public/exhibition/models/*.glb` (M3/M4).
 
 **Coordinate convention:** meters; origin at the plaza's masterplan bottom-left corner; +X right (toward museum), −Z up the plan (toward Buildings 70/57), Y up. Scale derived from the dimensioned 30.0 m path and 12.0 m stage. Each value in `layout.ts` tagged `measured | inferred`.
 
@@ -211,7 +228,7 @@ Outputs: ROADMAP + STATE. No code, no installs.
 - **Verification:** built-in browser pane at 1440×900 and 375×812; real phone via LAN dev server; DevTools Performance capture; `git diff --stat` audit.
 - **Risks:** facade-line glow looking cheap without bloom (mitigation: emissive + thin geometry + optional selective bloom); HDRI weight (use 1k–2k tone-mapped, KTX2); time sink in tracing polygons (author once as JSON).
 
-### M2 — Spatial layout + complete interaction system (lab route)
+### M2 — Spatial layout + complete interaction system (lab route) — implemented, awaiting review
 - **Objective:** Full site layout from the masterplan and every interaction rule in spec §3, independent of final booth art.
 - **Dependencies:** GATE 1 approved; D-5 (orientation), D-15 (museum circulation), R-3 (identity of the 7 corners); R-5/R-6 ideally.
 - **Selectable set:** 7 corners + museum + stage + entertainment zone (10 hit targets / menu entries). All other structures are non-interactive scenery.
@@ -221,9 +238,12 @@ Outputs: ROADMAP + STATE. No code, no installs.
 - **Verification:** scripted manual matrix (all transitions, interrupt mid-flight, resize mid-flight, rotate phone, reduced-motion on/off, keyboard-only pass, NVDA/VoiceOver spot-check), real iOS + Android touch tests.
 - **Risks:** iOS Safari gesture conflicts (`touch-action` + passive listeners); camera paths through stage truss (midpoint lift + per-pair overrides); masterplan orientation dispute.
 
+**M2 as built (summary):** all 10 selectable areas at masterplan positions with anchors, look bounds, hit volumes and pins; museum (modelled) + translucent placeholders for everything else; three navigation paths (3D click incl. visible neighbours, panel/bottom sheet, overview); obstacle-aware interruptible flights; keyboard, reduced motion, optional fullscreen with scroll restore; "skip the exhibition" link; dev-only flight clearance check (`__exh.checkFlights`). The M1 museum standpoint now lies behind the stage, so the museum anchor moved north-east of it (similar three-quarter view, slightly more oblique). Details and results: STATE.
+
 ### M3 — Stage & theater + booth kit + first corner — **GATE 2 (booth fidelity & production plan)**
 - **Objective:** Validate the second visual-quality class (event structures) and settle who produces the remaining models.
-- **Dependencies:** M2; R-8 confirmation; D-11 (which booth first — proposal: Media corner, cleanest design family); R-12 sponsor-mark policy.
+- **Dependencies:** M2 review; R-8 confirmation; D-11 (which booth first — proposal: Media corner, cleanest design family); R-12 sponsor-mark policy; ideally R-5 (slot ↔ corner mapping).
+- **Carry-over from M2:** mobile draw calls ≈104–134 vs proposed ≤100 — merge static museum/building meshes per material while touching these files (or in M6).
 - **Scope:** stage (12 × 5 m, truss, LED wall with official logo, steps, under-stage strip lights), seating wedges + front lounge row, control booth; parametric booth kit; first corner booth to final-candidate fidelity; replaceable GLB slot wiring (load a GLB per area if present, else kit model) proving model swap without code changes elsewhere.
 - **Acceptance:** stage and first booth match their references' design language; swapping a GLB for one area requires only config change; perf still within budget.
 - **Gate output:** recommendation per remaining area — code kit vs designer GLB — with effort estimates.
@@ -287,11 +307,15 @@ Available now: `npx tsc --noEmit`, `npx eslint` (baseline: 1 pre-existing error 
 | D-11 | First booth for GATE 2 | Media corner |
 | D-12 | Blender / 3D designer involvement | Decide after GATE 1 with evidence |
 | D-13 | Provisional unseen museum sides (R-2): restrained continuation of the front polygon language, dark volume, no invented signage. **Implemented this way in M1** (north face partly from the render; south/east dimmer, authored). | Confirm at GATE 1 |
-| D-15 | Museum circulation conflict F-7 (which end is the entrance) | Keep the render's composition (entrance at the north end of the west facade) |
+| D-15 | Museum circulation conflict F-7 (which end is the entrance) | **Decided 2026-10-12:** keep the M1 orientation for now | Closed (for now) |
+| D-17 | Slot ↔ corner mapping (F-9 / R-5). M2 provisional: 1 Technology, 2 Media, 3 Entrepreneurship, 4 Economy & Investment, 5 Health, 6–7 "to be confirmed" | Owner to supply the mapping and the two missing corners |
+| D-18 | Control booth omitted (F-8) | Confirm, or provide its intended position relative to the M1 museum |
+| D-19 | Entertainment zone location (F-11) | Owner to confirm location/footprint; keep provisional until then |
 | D-14 | Third-party logos (Bupa, adidas, EA FC, broadcasters) | Replace with neutral placeholders unless rights confirmed |
 
 ## 10. Update log
 | Date | Change |
 |---|---|
 | 2026-10-12 | v0.1 created after read-only discovery (M0). |
+| 2026-10-12 | v0.3: M1 approved. M2 implemented: full masterplan layout, 10 selectable areas, placeholders, panel/bottom sheet, pins, fullscreen, obstacle-aware flights. Findings F-8…F-11 and decisions D-15 (closed), D-17…D-19 added; museum anchor relocated (stage occupies the M1 standpoint). |
 | 2026-10-12 | v0.2: owner decisions recorded (10 selectable areas; close fidelity; Hero untouched). M1 implemented; stack finalised (drei dropped, postprocessing added); section 4.2 now as-built; F-7, D-15 and the corner-identity question (R-3) added; D-1/D-2/D-10 closed; D-3 deferred. |
