@@ -6,10 +6,10 @@ import { AREA_ORDER, AREAS } from "@/lib/exhibition/areas";
 import type { AreaId } from "@/lib/exhibition/types";
 import { Batched } from "./Batched";
 import { Museum } from "./Museum";
-import { EntertainmentZone } from "./models/EntertainmentZone";
 import { EntrepreneurshipCorner, HealthCorner } from "./models/FrameCorners";
 import { MediaCorner } from "./models/MediaCorner";
 import { EconomyCorner, TechnologyCorner } from "./models/NavyShellCorners";
+import { EntertainmentZone } from "./models/EntertainmentZone";
 import { StageModel } from "./models/Stage";
 
 /**
@@ -76,30 +76,42 @@ function Glb({ url }: { url: string }) {
 }
 
 export function AreaModels({ overrides = {} }: { overrides?: Partial<Record<AreaId, string>> }) {
+  const urlOf = (id: AreaId) => overrides[id] ?? AREAS[id].modelUrl;
+  const frame = (id: AreaId, children: ReactNode) => {
+    const { position, rotationY } = AREAS[id].frame;
+    return (
+      <group key={id} name={`area-${id}`} position={position} rotation-y={rotationY}>
+        {children}
+      </group>
+    );
+  };
+  // Kit models share one static batch, so identical materials merge across
+  // areas. It is keyed by its member set and rebuilds when a GLB takes a slot.
+  const kitIds = AREA_ORDER.filter((id) => KIT[id] && !urlOf(id));
+  const glbIds = AREA_ORDER.filter((id) => urlOf(id));
   return (
     <group>
-      {AREA_ORDER.map((id) => {
+      <Batched key={kitIds.join()} delay={1200}>
+        {kitIds.map((id) => {
+          const Kit = KIT[id]!;
+          return frame(id, <Kit />);
+        })}
+      </Batched>
+      {glbIds.map((id) => {
         const Kit = KIT[id];
-        const url = overrides[id] ?? AREAS[id].modelUrl;
-        if (!Kit && !url) return null;
-        const { position, rotationY } = AREAS[id].frame;
+        const url = urlOf(id)!;
         const kit = Kit ? (
-          <Batched key="kit" delay={1200}>
+          <Batched delay={1200}>
             <Kit />
           </Batched>
         ) : null;
-        return (
-          <group key={id} name={`area-${id}`} position={position} rotation-y={rotationY}>
-            {url ? (
-              <Fallback key={url} fallback={kit}>
-                <Suspense fallback={kit}>
-                  <Glb url={url} />
-                </Suspense>
-              </Fallback>
-            ) : (
-              kit
-            )}
-          </group>
+        return frame(
+          id,
+          <Fallback key={url} fallback={kit}>
+            <Suspense fallback={kit}>
+              <Glb url={url} />
+            </Suspense>
+          </Fallback>,
         );
       })}
     </group>

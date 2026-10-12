@@ -4,7 +4,7 @@ import { useMemo } from "react";
 import * as THREE from "three";
 import { mergeGeometries } from "three/examples/jsm/utils/BufferGeometryUtils.js";
 import { BRAND } from "@/lib/constants";
-import { PASSAGE, PLAZA } from "@/lib/exhibition/layout";
+import { ENTRANCE_ARCH as ARCH, PASSAGE } from "@/lib/exhibition/layout";
 import { Batched } from "./Batched";
 import { useAsyncTexture } from "./useAsyncTexture";
 import { Plate } from "./kit/booth";
@@ -14,8 +14,8 @@ import { Instanced, Struts, glow, tubeAlong, useDispose, type Placement, type Se
 /**
  * Non-selectable event scenery from the preliminary renders. Positions are
  * inferred (F-15): the masterplan does not place these items.
- *  - Entrance arch «كورة — الصناعة خلف اللعبة» (…12.05.49 PM (3)) at the
- *    west entrance gap.
+ *  - Entrance arch «كورة — الصناعة خلف اللعبة» (…12.05.49 PM (3)) on the
+ *    plan's west "Gate" footprint, which the owner identified as the entrance.
  *  - Octagonal light tunnel + banners (…(4)) through the passage to the
  *    entertainment zone; photo booth (…(4)) at the passage mouth.
  *  - Coffee kiosk, press/interview wall and stanchions (…(2)) beside the
@@ -23,8 +23,6 @@ import { Instanced, Struts, glow, tubeAlong, useDispose, type Placement, type Se
  */
 
 /* ---------------------------- Entrance arch ---------------------------- */
-
-const ARCH = { x: -2.6, z: PLAZA.entrance.z, rOut: 4.4, rIn: 3.1, depth: 1.4 };
 
 function EntranceArch() {
   const face = useAsyncTexture(() => archFaceTexture(BRAND.taglineAr));

@@ -6,6 +6,7 @@ import { useEffect, useLayoutEffect, useMemo, useRef, type RefObject } from "rea
 import * as THREE from "three";
 import type { AreaId } from "@/lib/exhibition/types";
 import { flightDuration, flightPoint, fovFor, planLift, poseFor, type Pose } from "./rig";
+import { planPassageRoute, planTunnelExit, type Route } from "./route";
 
 export type LookInput = { yaw: number; pitch: number };
 
@@ -38,6 +39,8 @@ export function CameraRig({ selected, look, reducedMotion, onArrive }: Props) {
     lift: 0,
     progress: { t: 0 },
     tween: null as gsap.core.Tween | null,
+    /** Spline route (passage / tunnel exit); null = ordinary arc. */
+    route: null as Route | null,
     yaw: 0,
     pitch: 0,
   });
@@ -82,13 +85,16 @@ export function CameraRig({ selected, look, reducedMotion, onArrive }: Props) {
       return;
     }
     s.from = from;
-    s.lift = planLift(from.position, to.position);
+    // Passage route to the entertainment zone; a flight interrupted inside
+    // the tunnel leaves through a tunnel end; everything else is an arc.
+    s.route = (selected === "entertainment" ? planPassageRoute(from, to) : null) ?? planTunnelExit(from, to);
+    s.lift = s.route ? 0 : planLift(from.position, to.position);
     s.flying = true;
     s.progress.t = 0;
     s.tween = gsap.to(s.progress, {
       t: 1,
-      duration: flightDuration(from.position, to.position),
-      ease: "power2.inOut",
+      duration: s.route ? s.route.duration : flightDuration(from.position, to.position),
+      ease: s.route ? "power1.inOut" : "power2.inOut",
       onUpdate: () => invalidate(),
       onComplete: () => {
         s.flying = false;
@@ -116,7 +122,9 @@ export function CameraRig({ selected, look, reducedMotion, onArrive }: Props) {
     const s = st.current;
     const a = state.size.width / Math.max(1, state.size.height);
     const to = poseFor(s.dest, a);
-    if (s.flying && s.from) {
+    if (s.flying && s.route) {
+      s.route.sample(s.progress.t, to, pos, target);
+    } else if (s.flying && s.from) {
       const t = s.progress.t;
       flightPoint(s.from.position, to.position, s.lift, t, pos);
       // The gaze leads the body slightly, like a camera operator.

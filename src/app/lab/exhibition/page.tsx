@@ -1,10 +1,12 @@
 import type { Metadata } from "next";
+import { notFound } from "next/navigation";
 import { ExhibitionSection } from "@/components/exhibition/ExhibitionSection";
 
 /**
- * Temporary, isolated development route for the 3D exhibition (roadmap
- * M1–M4). Not linked, not in the sitemap, not indexed. Filler blocks above
- * and below stand in for the Hero and the following sections so page-scroll
+ * Isolated QA route for the 3D exhibition (loads immediately, no Hero).
+ * Not linked, not in the sitemap, not indexed — and a 404 in production
+ * builds unless built with EXHIBITION_LAB=1. Filler blocks above and below
+ * stand in for the Hero and the following sections so page-scroll
  * behaviour can be tested without touching the homepage.
  */
 export const metadata: Metadata = {
@@ -13,6 +15,7 @@ export const metadata: Metadata = {
 };
 
 export default function ExhibitionLab() {
+  if (process.env.NODE_ENV === "production" && process.env.EXHIBITION_LAB !== "1") notFound();
   return (
     <>
       <div className="grid h-[70svh] place-items-center border-b border-white/10 pt-[70px] text-center text-paper/50">

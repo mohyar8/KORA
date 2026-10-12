@@ -97,8 +97,21 @@ export const CORNER_SLOTS: readonly CornerSlot[] = [
   { x: 37.2, z: 31.2, w: 3, d: 3, facing: "west" },
 ];
 
-/** The "Gate" element on the plan's west side (design not supplied). */
-export const GATE = { minX: 6.1, maxX: 7.6, minZ: 11.4, maxZ: 21.2, height: m(2.6).value } as const;
+/**
+ * Entrance arch «كورة — الصناعة خلف اللعبة» (render …12.05.49 PM (3)). The
+ * owner identified the plan's west-side "Gate" footprint (x 6.1–7.6,
+ * z 11.4–21.2) as the real entrance (2026-10-12), so the arch stands there,
+ * centred on that footprint; its plane spans Z and visitors walk through
+ * along +X.
+ */
+export const ENTRANCE_ARCH = { x: 6.85, z: 16.3, rOut: 4.4, rIn: 3.1, depth: 1.4 } as const;
+
+/**
+ * Unidentified plan element ("Gate", design not supplied), shown as a ghost
+ * massing. Swapped with the arch (owner, 2026-10-12): same 1.5 × 9.8 m
+ * footprint, now centred where the arch stood (x −2.6, z 24.2).
+ */
+export const GATE = { minX: -3.35, maxX: -1.85, minZ: 19.3, maxZ: 29.1, height: m(2.6).value } as const;
 
 /** Planter strip between the audience and the museum path (plan), with its palms. */
 export const MUSEUM_PATH_PLANTERS = {

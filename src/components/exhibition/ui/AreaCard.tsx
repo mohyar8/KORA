@@ -1,7 +1,10 @@
 "use client";
 
 import type { RefObject } from "react";
-import type { AreaConfig } from "@/lib/exhibition/types";
+import { AREAS, tourNeighbours } from "@/lib/exhibition/areas";
+import type { AreaConfig, AreaId } from "@/lib/exhibition/types";
+
+export type CardNav = "prev" | "next" | "overview";
 
 /**
  * Teaser card for the current area, pinned to a point in the 3D world
@@ -13,6 +16,9 @@ import type { AreaConfig } from "@/lib/exhibition/types";
  * whole bar is the toggle. It expands automatically on every new arrival.
  * Accordion pattern: the heading contains the toggle button, which controls
  * the collapsible body (aria-expanded / aria-controls).
+ *
+ * Below the body, Previous / Back to overview / Next (TOUR_ORDER) stay
+ * visible and focusable in both states, so the tour also works collapsed.
  */
 export function AreaCard({
   area,
@@ -21,6 +27,7 @@ export function AreaCard({
   toggleRef,
   cardRef,
   reducedMotion,
+  onNavigate,
 }: {
   area: AreaConfig;
   expanded: boolean;
@@ -28,7 +35,9 @@ export function AreaCard({
   toggleRef: RefObject<HTMLButtonElement | null>;
   cardRef?: (el: HTMLElement | null) => void;
   reducedMotion: boolean;
+  onNavigate: (id: AreaId | null, control: CardNav) => void;
 }) {
+  const { prev, next } = tourNeighbours(area.id);
   const { content } = area;
   const bodyId = `exh-card-body-${area.id}`;
   const notes = [
@@ -79,6 +88,31 @@ export function AreaCard({
           {notes.length > 0 && <p className="exh-card-provisional">{notes.join(" · ")}</p>}
         </div>
       </div>
+      <nav className="exh-card-nav" aria-label="التنقّل بين المناطق">
+        <button
+          type="button"
+          className="exh-card-nav-btn"
+          data-nav="prev"
+          aria-label={`السابق: ${AREAS[prev].content.name}`}
+          title={AREAS[prev].content.name}
+          onClick={() => onNavigate(prev, "prev")}
+        >
+          <span aria-hidden>→</span> السابق
+        </button>
+        <button type="button" className="exh-card-nav-btn" data-nav="overview" onClick={() => onNavigate(null, "overview")}>
+          المنظر العام
+        </button>
+        <button
+          type="button"
+          className="exh-card-nav-btn"
+          data-nav="next"
+          aria-label={`التالي: ${AREAS[next].content.name}`}
+          title={AREAS[next].content.name}
+          onClick={() => onNavigate(next, "next")}
+        >
+          التالي <span aria-hidden>←</span>
+        </button>
+      </nav>
     </article>
   );
 }

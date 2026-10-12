@@ -1,6 +1,6 @@
 # KORA Official Website — Interactive 3D Exhibition
 
-**Document status:** Approved product direction / implementation specification, v1.2 (2026-10-12; §3.4 card rules amended twice by the product owner, see §11)  
+**Document status:** Approved product direction / implementation specification, v1.3 (2026-10-12; §3.1, §3.3, §3.4 refined by the product owner, see §11)  
 **Owner:** KORA website product planning  
 **Implementation agent:** Claude Code  
 **Scope:** The 3D exhibition section only; other homepage sections will be discussed later.
@@ -41,7 +41,7 @@ Create a premium, visually compelling, realistic interactive 3D preview of the p
 ### 3.1 Section and overview
 - Place the exhibition section directly after the current Hero, while preserving normal document flow.
 - Use a large, responsive full-width scene, not a mandatory page takeover.
-- Initially show the entire exhibition from an elevated overview angle.
+- Initially show the entire exhibition from an elevated overview angle **from the entrance side** (behind and above the entrance arch, looking into the event), with the main stage, museum and exhibition areas clearly framed on desktop and mobile.
 - All major areas should be discoverable via 3D click targets and an accessible list.
 - Do not autoplay a mandatory route between locations.
 - Keep a visible means to scroll onward, and ensure the scene does not trap mouse wheel or vertical touch gestures.
@@ -58,6 +58,7 @@ Do not make the 3D hit targets the only navigation mechanism. Provide hover/focu
 - After arrival, permit constrained **look-around from a stable viewpoint**, primarily horizontal yaw and modest vertical pitch, to see neighboring areas and select them. This is NOT a full orbit around a building.
 - Limit rotation to authored, safe bounds and keep the card readable while the 3D scene moves behind it.
 - Clicking another visible area triggers a new cinematic transition and changes the active area/card.
+- Flights to the entertainment zone may travel briefly through the passage between the buildings (light tunnel, banners, photo booth) before arriving; the passage is never a stop or a selectable destination, and reduced motion keeps the instant cut.
 - Returning to overview restores the overview camera and removes the selected-area card.
 - Interrupt/retrigger behavior, camera animation cancellation, and resize transitions must be robust.
 - Prefer explicit on-screen zoom controls only if needed; mouse wheel must remain page scrolling in embedded mode.
@@ -75,6 +76,7 @@ Do not make the 3D hit targets the only navigation mechanism. Provide hover/focu
 - Arabic text stays crisp and accessible: HTML, not text rendered into the 3D scene. The toggle follows the accordion pattern (heading + button with `aria-expanded` / `aria-controls`); collapsed content is not focusable.
 - Cards must **not obstruct navigation or interaction with neighbouring areas**: in-scene area labels stay clickable above the card, and the card is compact and placed below its subject.
 - Identify the area and convey its idea, appeal and reason to visit as a concise teaser; avoid disclosing full activities or surprises.
+- **Card navigation (v1.3):** three compact controls below the card — Previous, Back to overview, Next — follow one defined tour order of the selectable areas, trigger the normal cinematic transitions, stay visible and accessible when the card is collapsed, and never restrict free navigation (scene, labels, area list).
 - Remove the card in the overview. Adapt to mobile size, safe areas and legibility; preserve scene context.
 - Card text and final copy are not yet approved: use clearly marked provisional content until provided.
 
@@ -190,5 +192,6 @@ This specification governs product intent and approved UX decisions. Claude Code
 
 | Date | Change | Approved by |
 |---|---|---|
+| 2026-10-12 | v1.3 — Entrance arch placed on the plan's west "Gate" footprint (swapped with that placeholder); §3.1 overview from the entrance side; §3.3 optional passage route to the entertainment zone; §3.4 Previous / Back to overview / Next card controls. | Product owner (requested) |
 | 2026-10-12 | v1.2 — §1, §2, §3.4 and §8 item 4: the close/reopen behaviour is replaced by **expand/collapse**. Collapsed = compact bar (name + expand indicator) at the same world-anchored position; click/tap expands; smooth subtle animation; expanded on every new arrival; the separate "show information" button is removed. | Product owner |
 | 2026-10-12 | v1.1 — §1, §2, §3.4 and §8 item 4 amended: the information card is world-anchored instead of centred and camera-fixed; it opens automatically on arrival and on destination change, can be closed and reopened, stays with its area during look-around, uses crisp accessible HTML overlays, and must not obstruct neighbouring areas. Supersedes "prominent, centered card" and "no hide-card action". | Product owner |

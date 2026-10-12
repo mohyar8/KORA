@@ -1,11 +1,11 @@
 # KORA 3D Exhibition — State (resume here)
 
-**Last updated:** 2026-10-12 · **Branch:** `newV` · **Spec:** v1.2 · **Roadmap:** v0.7
+**Last updated:** 2026-10-12 · **Branch:** `newV` · **Spec:** v1.3 · **Roadmap:** v0.9
 
 A new session should read, in order:
 1. This file.
 2. [`3D_EXHIBITION_SPEC.md`](./3D_EXHIBITION_SPEC.md): product rules. Authoritative; never change it without the owner.
-3. [`3D_EXHIBITION_ROADMAP.md`](./3D_EXHIBITION_ROADMAP.md): findings, architecture, decisions, M5/M6 plan.
+3. [`3D_EXHIBITION_ROADMAP.md`](./3D_EXHIBITION_ROADMAP.md): findings, architecture, decisions, M6 result and release readiness.
 4. The repo `AGENTS.md`: this Next.js version differs from training data, so read `node_modules/next/dist/docs/` before writing Next code.
 
 ---
@@ -20,15 +20,16 @@ A new session should read, in order:
 | M3 Stage, booth kit, Media corner, model slots (GATE 2) | ✅ approved |
 | M4 Remaining corners, entertainment zone, scenery, world-anchored cards, chairs | ✅ approved |
 | Card expand/collapse change (spec v1.2) | ✅ done and verified (see §3) |
-| M5 Homepage integration & fallback | ✅ implemented and verified — **awaiting owner review** |
-| **M6 Hardening → release** | **NEXT.** Do not start without the owner's go-ahead after the M5 review. |
+| M5 Homepage integration & fallback | ✅ approved |
+| M6 Hardening → release | ✅ implemented and verified (owner review pending) |
+| **Post-M6 refinements R1–R4** (entrance swap, entrance-side overview, card Previous/Next/Overview, passage route) | ✅ implemented and verified — **awaiting owner review.** Not declared production-ready; nothing committed or deployed. |
 
 **Git:**
-- Committed by the owner: M1 `f7aabfa`, M2 `264fa21`, M3 `b0dc63e`.
-- **Uncommitted:** all M4 work, the expand/collapse change, all M5 work, and the doc updates. Don't commit unless the owner asks.
+- Committed by the owner: M1 `f7aabfa`, M2 `264fa21`, M3 `b0dc63e`, M4 + M5 `5a1b6cf`.
+- **Uncommitted:** all M6 work, the post-M6 refinements (roadmap §6) and the doc updates. Don't commit or deploy unless the owner asks.
 - `.serena/` (tool folder, untracked) is not ours and should be left alone.
 
-**Where the exhibition runs today:** on the homepage, directly after the Hero (`src/app/page.tsx`, default `deferMs` 4500), and on the lab route `/lab/exhibition` (noindex, `deferMs` 0; kept for M6 QA, remove/gate in M6).
+**Where the exhibition runs today:** on the homepage, directly after the Hero (`src/app/page.tsx`, default `deferMs` 4500), and on the lab route `/lab/exhibition` (noindex, `deferMs` 0) in development only — production builds return 404 there unless built with `EXHIBITION_LAB=1`.
 
 ## 2. What exists (summary; full file map in roadmap §4.1)
 
@@ -54,7 +55,55 @@ A new session should read, in order:
 - **Loading / fallback (M5):** nothing requested before the section is within 40% of a viewport; then the poster (`public/exhibition/poster.webp`, `poster-mobile.webp` ≤ 767 px) shows with «جارٍ تجهيز المعرض…» and caption «صورة من التصور المبدئي للمعرض», and cross-fades out ~400 ms after the scene's first frames. No WebGL2 / error / context loss / Save-Data → dimmed poster + message, area list revealed below (ScrollTrigger refreshed). No JS → `<noscript>` message + list.
 - **Fullscreen:** the stage is raised to z 100 while fullscreen, so the overlay covers the topbar.
 
-## 3. Last verification (2026-10-12, M5)
+## 3. Last verification (2026-10-12, post-M6 refinements)
+
+| Check | Result |
+|---|---|
+| `tsc` / `eslint` / `next build` | ✅ / ✅ only pre-existing `Departments.tsx:19` / ✅ |
+| Homepage JS | 269.3 KB gz, unchanged; no three/R3F. Hero / page / layout / globals / navbar / brand: `git diff` empty |
+| Exhibition JS | ≈306 KB gz (+1 KB) |
+| Entrance placement | ✅ arch rendered on the former gate footprint (x 6.85, z 16.3), face towards the overview camera; gate ghost at x −2.6, z 24.2 (visible in the portrait overview) |
+| Overview framing | ✅ renders at 2.4 : 1, 16 : 9 and portrait 0.6: museum facade, stage, seating, booths, ghosts and arch all in frame; posters re-captured |
+| Draw calls | overview 141; anchored 83–117 (sampled: entertainment 83, museum 89, stage 94, corner-1 117) |
+| Collision sweep (`checkFlights`, 200 samples/flight) | ✅ 0 collisions at 2.4 / 16:9 / 1.2 / 0.8 / 0.58 / 0.46 — 110 pairs each; passage route used from all 10 origins; 66 tunnel-exit cases per aspect (3 tunnel points × 2 headings × 11 targets) clear |
+| Passage route, real GSAP time (`step`) | ✅ overview → entertainment arrives in 6.0 s, ≤ 0.81 m/frame; frames show descent → mouth with photo booth and sign → tunnel with banners → zone; card expanded |
+| Interrupt inside the tunnel | ✅ switched to corner 3 at z −11.3: continued north, left the tunnel at y ≈ 4.7, climbed and arced; ≤ 0.71 m/frame; correct card |
+| Card navigation | ✅ Next ×10 from corner 1: 1→2→3→4→5→6→7→museum→stage→entertainment→1 (wraps); Previous wraps back; focus stays on Next/Previous in the new card; collapsed bar 250 × 109 with all three 34 px controls (not inert); Next from collapsed → next card expanded; Overview → overview, card removed, focus on the scene |
+| Mobile 375 × 812 | ✅ card 300 wide inside the stage, no horizontal overflow |
+
+**Not verifiable here:** same list as M6 (real devices, screen readers, Lighthouse, visible-window frame rate). The preview pane served stale/zoomed captures for some mobile/tablet screenshots — DOM metrics were used instead.
+
+## 3c. M6 verification (2026-10-12)
+
+**Actually tested** (dev server + `next start` in the built-in preview pane; integrated AMD Radeon GPU, Windows):
+
+| Check | Result |
+|---|---|
+| `npx tsc --noEmit` / `npx eslint` / `npm run build` | ✅ / ✅ only pre-existing `Departments.tsx:19` / ✅ |
+| Homepage initial JS | 832 KB raw / 269.3 KB gz — unchanged since M5; no three/R3F |
+| Exhibition JS (served compressed, `next start`) | 305.2 KB (budget 300 → D-27) |
+| At rest on `/` (prod, 6 s, no scroll) | ✅ no exhibition JS, no poster requested |
+| `/lab/exhibition` in prod | ✅ 404 |
+| Draw calls (desktop, dev) | overview **144** (was 188); anchored 72–119 (was 84–126); triangles ≈319 k unchanged |
+| Visual parity after batching changes | ✅ pixel diff vs M5 poster frame: mean 0.002/255, 0.001 % px > 24/255 — posters still valid |
+| Real GSAP flights via `__exh.step` (60 fps steps) | ✅ overview→museum arrives frame 190 (3.2 s), overview→Health 140; max 1.3 m/frame; card expanded with the right name on arrival |
+| Interruptions | ✅ stage→entertainment at frame 40 and overview→Media at frame 30: no jump (≤ 0.9 m/frame), lands on the new target, new card expanded |
+| Resize mid-flight (16:9 → 0.58) | ✅ re-fits (1.6 m step at the resize frame), card inside the stage; return to overview lands on the exact overview pose and removes the card |
+| Flight clearance (`checkFlights`) | ✅ 0 collisions at 2.4 / 16:9 / 0.8 / 0.46 |
+| Gestures (synthetic pointer events) | ✅ mouse drag +10.4° yaw; touch horizontal −10.4°; touch vertical 0° (left to the page); drag release does not select; wheel never `preventDefault`ed; `touch-action: pan-y`; ArrowLeft +6.9° |
+| Card | ✅ expanded on arrival → collapse → 250 × 58 bar, body `inert`, `aria-controls` set; follows look horizontally (x 309 → 516 → 19) at constant y |
+| Focus order (anchored) | scene → **skip link** (moved, M6) → card toggle → visible neighbour pins → «مناطق المعرض» → back; no focusable target < 24 px |
+| Contrast (worst case over bright paving) | ✅ all ≥ 4.5:1 after fixes (provisional label 6.2, concept note 4.99, skip link 5.06, look hint 5.52) |
+| Mobile 375 × 812 | ✅ mobile tier (DPR 1.25), anchored 81 calls, no horizontal overflow, card inside, RTL toolbar, bottom sheet with 40 px+ items |
+| Tablet (prod) | ✅ overview with pins, RTL toolbar, backed concept note |
+| Adaptive DPR | ✅ 1260×823 at 23 ms holds 1.25; 1920×1080 at 87 ms steps 1.25 → 0.75 (32 ms); small stage recovers to 1.25; survives panel/selection re-renders |
+| Frame time (warm, dev, 1260×823) | 19–26 ms at DPR 1–1.25, 30 ms at 1.5 (the 70–80 ms first readings were shader warm-up) |
+| GPU memory | ✅ 261 → 356 geometries / 56 → 91 textures on the first full tour (LOD detail uploads), identical after a second tour (no leak) |
+| Hero / layout / globals / navbar / brand assets | ✅ `git diff` empty |
+
+**Could not be tested here:** real iOS Safari / Android Chrome devices and real touch; NVDA / VoiceOver; Lighthouse (not installed); throttled network; frame rate in a visible window; `prefers-reduced-motion` and Save-Data emulation (the preview pane has no media emulation and page-level stubs are lost on a full navigation — code reviewed; the reduced-motion camera path is the same `instant` branch that was exercised above).
+
+## 3b. M5 verification (2026-10-12)
 
 | Check | Result |
 |---|---|
@@ -94,12 +143,10 @@ A new session should read, in order:
 
 ## 4. Next steps
 
-1. **Owner review of M5.** If the scene changes visibly, re-capture the posters (method in §7).
-2. **M6 (after the go-ahead):**
-   - Lighthouse `/` before/after on a real machine (baseline: build with `page.tsx` reverted).
-   - Bring overview draw calls ≤ 150 (texture atlas for signage; merge the surroundings' instanced sets).
-   - Bring JS ≤ 300 KB (lazy-load the entertainment zone and scenery).
-   - Device and accessibility QA; remove or gate the lab route; Spline deps (D-9).
+1. **Owner review of M6** (roadmap §6 "M6 — Result").
+2. **Before release (owner-side or with devices):** Lighthouse `/` before/after on a real machine (baseline: build at `b0dc63e`); iOS Safari + Android Chrome touch and fullscreen; NVDA / VoiceOver pass; one visible-window frame-rate check on a typical integrated-GPU laptop.
+3. **Owner decisions:** D-27 (JS budget 305 vs 300 KB), D-9 (remove unused Spline deps), whether to ship provisional content (R-10, D-17, D-19).
+4. If the scene changes visibly, re-capture the posters (method in §7).
 
 ## 5. Open questions for the owner
 - **D-17:** which corners occupy which slots, and what corners 6–7 are, with their designs.
@@ -108,6 +155,8 @@ A new session should read, in order:
 - **D-20:** real booth dimensions. The renders read ~8–12 m wide against 3–4 m plan slots.
 - **F-15 / F-16:** confirm the inferred scenery positions and the neutral partner placeholders, or supply approved partner artwork.
 - **R-10:** approved teaser copy. M5 ships the provisional copy, labelled as provisional.
+- **D-27:** accept the exhibition JS at 305 KB (budget 300) or raise the budget; the overage is three.js/R3F/postprocessing, not app code.
+- **D-9:** approve removing the unused `@splinetool/*` dependencies (untouched so far).
 
 ## 6. Decisions to respect (details in roadmap §1 and §9)
 - 10 selectable areas; everything else is scenery.
@@ -140,7 +189,8 @@ A new session should read, in order:
 | `bench(n)` | Average ms per frame over n frames. |
 | `snap(frames)` | Render frames and return a blob URL of the canvas. |
 | `state()` | The R3F state. |
-| `checkFlights(aspect)` | List flights that collide with obstacles (expect `[]`). |
+| `checkFlights(aspect)` | `{ collisions, passageRouteFrom, tunnelExitProblems }` — all flights (arcs and spline routes) and tunnel exits sampled against the obstacles; expect `collisions: []`, 10 routed origins, `tunnelExitProblems: []`. |
+| `step(ms)` | Advance GSAP's root clock by `ms` and render one frame — drives real flights while the pane is hidden. |
 | `swapModel(id, url?)` / `clearModels()` | GLB swap proof; `url` omitted = export the kit to GLB. |
 
 **Browser-pane quirks seen in this environment:**
@@ -150,6 +200,11 @@ A new session should read, in order:
 - **Hot reload can corrupt meshes:** Fast Refresh can mis-reconcile meshes after structural JSX edits (seen once: a material ended up with `opacity:0`). Do a full reload before judging visuals.
 - **Black frame:** a fully black frame means NaN pixels spread by bloom (e.g. `pow()` of a tiny negative number). Bisect by hiding `area-*` groups and sampling with `readPixels`.
 - **Synthetic 3D clicks:** dispatch `pointermove` before `pointerdown` → `pointerup` → `click` on the canvas.
+- **Timers are throttled when hidden:** `await setTimeout` loops crawl; yield with a `MessageChannel` tick instead and keep each tool call short (store results on `window` and poll).
+- **Flights:** `instant(false)`, `select(id)`, then call `step(1000/60)` per frame (lower the DPR first to speed it up).
+- **`setDpr` from the console is temporary:** R3F re-applies the Canvas `dpr` prop on every Canvas render (adaptive DPR lives in React state for that reason).
+- **Hot reload during a scripted test** can remount or fail the scene — full reload before re-running.
+- **Several live WebGL tabs** made captures come back blank or offset; close extra tabs and switch the viewport preset once to recover.
 
 **Homepage chunk audit after `npm run build`:**
 - Parse the `/_next/static/...js` script tags in `.next/server/app/index.html`.
@@ -164,7 +219,7 @@ From M5 on, the only allowed change in that set is the section insertion in `pag
 
 **Production preview:** `.claude/launch.json` → `kora-prod` (`next start -p 3100`, after `npm run build`). Port 3000 may be held by another session's dev server; navigating the pane to `http://localhost:3000` still works.
 
-**Re-capturing the posters:** on the lab route, set `.exh-stage` to 1280×720 (desktop) or 480×802 (portrait), `__exh.state().setDpr(1.5 | 2)`, dispatch `resize`, advance ~40 frames, then `toDataURL('image/png')` in the same task. The pane blocks uploads to `127.0.0.1` and CORS-preflighted bodies: POST to a local `http://localhost:<port>` receiver as a `text/plain` Blob. Encode with sharp (bundled with Next): `flatten` → resize 1600 / 720 → WebP q72.
+**Re-capturing the posters:** on the lab route, set `.exh-stage` to 1280×720 (desktop) or 480×802 (portrait), `__exh.state().setDpr(1.5 | 2)` (immediately before capturing — see the `setDpr` note), dispatch `resize`, advance ~40 frames, then `toDataURL('image/png')` in the same task. The pane blocks uploads to `127.0.0.1` and CORS-preflighted bodies: POST to a local `http://localhost:<port>` receiver as a `text/plain` Blob. Encode with sharp (bundled with Next): `flatten` → resize 1600 / 720 → WebP q72.
 
 ## 8. Assumptions log
 - Museum 28 × 10 × 5.6 m; its south/east faces are authored.

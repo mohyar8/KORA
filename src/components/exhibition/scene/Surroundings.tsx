@@ -501,13 +501,12 @@ export function Surroundings() {
   const roadSodium = new THREE.Color("#ffb35c").multiplyScalar(2.4);
 
   return (
-    <group>
-      <Batched>
-        <AcademicBuilding {...BUILDINGS.b70} seed={70} concrete={tex.concrete} />
-        <AcademicBuilding {...BUILDINGS.b57} seed={57} concrete={tex.concrete} />
-        <PlazaEdge />
-        <EntertainmentGround />
-      </Batched>
+    // One batch for the whole context: buildings plus the small instanced sets (lamps, bollards, benches, planters).
+    <Batched>
+      <AcademicBuilding {...BUILDINGS.b70} seed={70} concrete={tex.concrete} />
+      <AcademicBuilding {...BUILDINGS.b57} seed={57} concrete={tex.concrete} />
+      <PlazaEdge />
+      <EntertainmentGround />
 
       {/* Tree belt (dense evergreen screen seen in the site photos). */}
       <Instances geometry={geo.trunk} items={items.trunks}>
@@ -618,7 +617,7 @@ export function Surroundings() {
         <meshStandardMaterial color="#6f6f73" roughness={0.9} />
       </mesh>
       <PassageSign />
-    </group>
+    </Batched>
   );
 }
 

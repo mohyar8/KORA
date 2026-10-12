@@ -1,6 +1,6 @@
 import * as THREE from "three";
 import { BOOTH_HEIGHT } from "@/lib/exhibition/areas";
-import { BUILDINGS, CORNER_SLOTS, GATE, MUSEUM, PASSAGE, PLAZA, SEATING, STAGE } from "@/lib/exhibition/layout";
+import { BUILDINGS, CORNER_SLOTS, ENTRANCE_ARCH, GATE, MUSEUM, PASSAGE, SEATING, STAGE } from "@/lib/exhibition/layout";
 
 /** Solid volumes camera flights must not pass through (with a safety margin). */
 const MARGIN = 0.8;
@@ -37,8 +37,21 @@ export const OBSTACLES: readonly THREE.Box3[] = [
   }),
   box(GATE.minX, 0, GATE.minZ, GATE.maxX, GATE.height, GATE.maxZ),
   // Scenery (M4): entrance arch, passage tunnel, photo booth, coffee kiosk, press wall.
-  box(-3.3, 0, PLAZA.entrance.z - 4.4, -1.9, 4.4, PLAZA.entrance.z + 4.4),
-  box(PASSAGE.minX, 0, -21, PASSAGE.maxX, 6.6, -3.8),
+  box(
+    ENTRANCE_ARCH.x - ENTRANCE_ARCH.depth / 2,
+    0,
+    ENTRANCE_ARCH.z - ENTRANCE_ARCH.rOut,
+    ENTRANCE_ARCH.x + ENTRANCE_ARCH.depth / 2,
+    ENTRANCE_ARCH.rOut,
+    ENTRANCE_ARCH.z + ENTRANCE_ARCH.rOut,
+  ),
+  // Light tunnel as a hollow shell (side frames + roof with the banners), so
+  // the entertainment route can fly through its centre (≈2.6 m clear corridor below 4.4 m).
+  box(PASSAGE.minX, 0, -20.1, PASSAGE.minX + 0.7, 6.6, -3.9),
+  box(PASSAGE.maxX - 0.7, 0, -20.1, PASSAGE.maxX, 6.6, -3.9),
+  box(PASSAGE.minX, 5.2, -20.1, PASSAGE.maxX, 6.6, -3.9),
+  // Passage sign at the mouth (boards to 2.3 m).
+  box(PASSAGE.x - 1.25, 0, PASSAGE.signZ - 0.05, PASSAGE.x + 1.25, 2.3, PASSAGE.signZ + 0.05),
   box(30.5, 0, -2.8, 32.3, 2.3, -1.0),
   box(6.0, 0, 28.4, 8.8, 2.9, 30.8),
   box(2.2, 0, 32.4, 6.6, 2.6, 32.8),

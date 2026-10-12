@@ -229,6 +229,21 @@ export const AREAS: Record<AreaId, AreaConfig> = {
 /** Menu / reading order. */
 export const AREA_ORDER: readonly AreaId[] = ["museum", "stage", "entertainment", ...CORNER_IDS];
 
+/**
+ * Previous / Next order on the area card: a walk from the entrance arch —
+ * the corners in number order (west pair 1–2, south row 3–5, east pair
+ * 6–7), then the museum, the stage, and through the passage to the
+ * entertainment zone. It wraps around at both ends. Free navigation (scene,
+ * pins, area list) is independent of it; edit this list to change the tour.
+ */
+export const TOUR_ORDER: readonly AreaId[] = [...CORNER_IDS, "museum", "stage", "entertainment"];
+
+export function tourNeighbours(id: AreaId): { prev: AreaId; next: AreaId } {
+  const n = TOUR_ORDER.length;
+  const i = TOUR_ORDER.indexOf(id);
+  return { prev: TOUR_ORDER[(i - 1 + n) % n], next: TOUR_ORDER[(i + 1) % n] };
+}
+
 export const AREA_GROUPS: readonly { title: string; ids: readonly AreaId[] }[] = [
   { title: "المعالم الرئيسية", ids: ["museum", "stage", "entertainment"] },
   { title: "الأركان", ids: CORNER_IDS },
@@ -236,8 +251,10 @@ export const AREA_GROUPS: readonly { title: string; ids: readonly AreaId[] }[] =
 
 /** Elevated overview of the whole site. Pulled back automatically on narrow viewports. */
 export const OVERVIEW = {
-  position: [-4, 30, 66] as Vec3,
-  target: [28, 0, 16] as Vec3,
+  // From the entrance (west) side, behind and above the arch: the museum's
+  // lit plaza facade faces the camera, the stage is seen three-quarter on.
+  position: [-13, 35, 38] as Vec3,
+  target: [28, 0, 19] as Vec3,
   /** Width (metres) that must stay in frame at the target distance. */
   fitWidth: 58,
 };

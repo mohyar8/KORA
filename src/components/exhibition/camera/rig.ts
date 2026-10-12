@@ -72,8 +72,10 @@ export function planLift(from: THREE.Vector3, to: THREE.Vector3) {
   let lift = THREE.MathUtils.clamp(from.distanceTo(to) * 0.22, 1.5, 14);
   for (let attempt = 0; attempt < 12; attempt++) {
     let clear = true;
-    for (let i = 1; i < 40 && clear; i++) {
-      flightPoint(from, to, lift, i / 40, probe);
+    // Dense sampling: low anchors (museum, booths) sit close to obstacle
+    // corners, where a coarse probe can step over a clip.
+    for (let i = 1; i < 240 && clear; i++) {
+      flightPoint(from, to, lift, i / 240, probe);
       for (const o of OBSTACLES) {
         if (o.containsPoint(probe)) {
           clear = false;
@@ -81,7 +83,8 @@ export function planLift(from: THREE.Vector3, to: THREE.Vector3) {
         }
       }
     }
-    if (clear) return lift;
+    // A little headroom so the arc doesn't graze an obstacle between samples.
+    if (clear) return lift * 1.1;
     lift *= 1.35;
   }
   return lift;

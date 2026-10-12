@@ -1,6 +1,7 @@
 "use client";
 
 import { Canvas, invalidate, type RootState } from "@react-three/fiber";
+import gsap from "gsap";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Vector3, type WebGLRenderer } from "three";
 import { AREA_ORDER, AREAS, cardAnchor } from "@/lib/exhibition/areas";
@@ -8,16 +9,18 @@ import type { AreaId } from "@/lib/exhibition/types";
 import { CameraRig, type LookInput } from "./camera/CameraRig";
 import { OBSTACLES } from "./camera/obstacles";
 import { flightPoint, fovFor, planLift, poseFor } from "./camera/rig";
+import { planPassageRoute, planTunnelExit } from "./camera/route";
 import { Atmosphere } from "./scene/Atmosphere";
 import { Ground } from "./scene/Ground";
 import { HitTargets, CLICK_SLOP } from "./scene/HitTargets";
 import { Effects, Lighting } from "./scene/Lighting";
+import { AdaptiveResolution } from "./scene/AdaptiveResolution";
 import { AreaModels } from "./scene/AreaModels";
 import { Placeholders } from "./scene/Placeholders";
 import { Scenery } from "./scene/Scenery";
 import { QualityContext, detectQuality, type Quality } from "./scene/quality";
 import { Surroundings } from "./scene/Surroundings";
-import { AreaCard } from "./ui/AreaCard";
+import { AreaCard, type CardNav } from "./ui/AreaCard";
 import { AreaPanel, AreaPanelTrigger } from "./ui/AreaPanel";
 import { AreaPins, PinProjector, type PinRegistry } from "./ui/AreaPins";
 
@@ -39,6 +42,7 @@ const KEY_STEP = 0.12;
  */
 export default function ExhibitionExperience({ onFail, onReady }: { onFail: () => void; onReady?: () => void }) {
   const [quality] = useState<Quality>(() => detectQuality());
+  const [dpr, setDpr] = useState<number | [number, number]>(quality.dpr);
   const [reducedMotion, setReducedMotion] = useState(false);
   const [selected, setSelected] = useState<AreaId | null>(null);
   const [arrived, setArrived] = useState<AreaId | null>(null);
@@ -51,7 +55,8 @@ export default function ExhibitionExperience({ onFail, onReady }: { onFail: () =
   const drag = useRef<Drag | null>(null);
   const root = useRef<HTMLDivElement>(null);
   const cardToggle = useRef<HTMLButtonElement>(null);
-  const focusCardOnArrive = useRef(false);
+  // What to focus once the destination's card appears (keyboard / card-nav continuity).
+  const focusOnArrive = useRef<"toggle" | "prev" | "next" | null>(null);
   const pins = useRef<PinRegistry>({ pins: new Map(), card: null, cardAt: null });
   const [cardExpanded, setCardExpanded] = useState(true);
   const savedScroll = useRef(0);
@@ -96,7 +101,7 @@ export default function ExhibitionExperience({ onFail, onReady }: { onFail: () =
   const area = anchored ? AREAS[arrived] : null;
 
   const select = useCallback((id: AreaId | null, viaKeyboard = false) => {
-    focusCardOnArrive.current = viaKeyboard;
+    focusOnArrive.current = viaKeyboard ? "toggle" : null;
     look.current = { yaw: 0, pitch: 0 };
     setHover(null);
     setPanelOpen(false);
@@ -121,6 +126,16 @@ export default function ExhibitionExperience({ onFail, onReady }: { onFail: () =
         invalidate();
       },
       /**
+       * Advance animation time by `ms` without requestAnimationFrame (hidden
+       * preview panes pause it): steps GSAP's root clock, then renders one frame.
+       */
+      step: (ms = 1000 / 60) => {
+        const g = gsap as unknown as { _simT?: number };
+        g._simT = Math.max(g._simT ?? 0, gsap.ticker.time) + ms / 1000;
+        gsap.updateRoot(g._simT);
+        getRef.current?.().advance(performance.now());
+      },
+      /**
        * Model-swap proof: exports an area's current kit model to GLB in the
        * browser and loads it back through the GLB slot (or `url` if given).
        */
@@ -129,7 +144,7 @@ export default function ExhibitionExperience({ onFail, onReady }: { onFail: () =
           const root = getRef.current?.().scene.getObjectByName(`area-${id}`);
           if (!root) return "no model";
           const { GLTFExporter } = await import("three/examples/jsm/exporters/GLTFExporter.js");
-          const glb = (await new GLTFExporter().parseAsync(root.children[0], { binary: true })) as ArrayBuffer;
+          const glb = (await new GLTFExporter().parseAsync(root.children[0], { binary: true, onlyVisible: false })) as ArrayBuffer;
           url = URL.createObjectURL(new Blob([glb], { type: "model/gltf-binary" }));
           setModelOverrides((m) => ({ ...m, [id]: url }));
           return { bytes: glb.byteLength, url };
@@ -142,22 +157,52 @@ export default function ExhibitionExperience({ onFail, onReady }: { onFail: () =
       checkFlights: (aspect = 16 / 9) => {
         const ids: (AreaId | null)[] = [null, ...AREA_ORDER];
         const out: string[] = [];
+        const routed: string[] = [];
         const p = new Vector3();
         for (const a of ids)
           for (const b of ids) {
             if (a === b) continue;
-            const from = poseFor(a, aspect).position;
-            const to = poseFor(b, aspect).position;
-            const lift = planLift(from, to);
-            for (let i = 0; i <= 40; i++) {
-              flightPoint(from, to, lift, i / 40, p);
+            const fromPose = poseFor(a, aspect);
+            const toPose = poseFor(b, aspect);
+            const from = fromPose.position;
+            const to = toPose.position;
+            // Same choice as CameraRig: the passage route when it applies, else the arc.
+            const route = b === "entertainment" ? planPassageRoute(fromPose, toPose) : null;
+            if (route) routed.push(a ?? "overview");
+            const lift = route ? 0 : planLift(from, to);
+            const tgt = new Vector3();
+            for (let i = 0; i <= 200; i++) {
+              if (route) route.sample(i / 200, toPose, p, tgt);
+              else flightPoint(from, to, lift, i / 200, p);
               if (OBSTACLES.some((o) => o.containsPoint(p))) {
                 out.push(`${a ?? "overview"}→${b ?? "overview"} @${i}`);
                 break;
               }
             }
           }
-        return out;
+        // Flights interrupted inside the tunnel (both headings) to every destination.
+        const exits: string[] = [];
+        const tgt = new Vector3();
+        for (const z of [-5, -12, -19])
+          for (const dir of [-1, 1]) {
+            const from = { position: new Vector3(27, 3.1, z), target: new Vector3(27, 3.1, z + dir * 10) };
+            for (const b of ids) {
+              const toPose = poseFor(b, aspect);
+              const route = planTunnelExit(from, toPose);
+              if (!route) {
+                exits.push(`z${z}/${dir}→${b ?? "overview"}: no route`);
+                continue;
+              }
+              for (let i = 0; i <= 200; i++) {
+                route.sample(i / 200, toPose, p, tgt);
+                if (OBSTACLES.some((o) => o.containsPoint(p))) {
+                  exits.push(`z${z}/${dir}→${b ?? "overview"} @${i}`);
+                  break;
+                }
+              }
+            }
+          }
+        return { collisions: out, passageRouteFrom: routed, tunnelExitProblems: exits };
       },
       /** Render n frames synchronously; returns mean CPU+GPU ms per frame. */
       bench: (n = 20) => {
@@ -206,11 +251,27 @@ export default function ExhibitionExperience({ onFail, onReady }: { onFail: () =
   }, []);
 
   useEffect(() => {
-    if (anchored && focusCardOnArrive.current) {
-      cardToggle.current?.focus({ preventScroll: true });
-      focusCardOnArrive.current = false;
-    }
+    const want = focusOnArrive.current;
+    if (!anchored || !want) return;
+    focusOnArrive.current = null;
+    const el =
+      want === "toggle"
+        ? cardToggle.current
+        : pins.current.card?.querySelector<HTMLButtonElement>(`[data-nav="${want}"]`);
+    el?.focus({ preventScroll: true });
   }, [anchored]);
+
+  // Card Previous / Next / Overview: the same cinematic flights as any other
+  // selection. Focus follows to the same control on the next card, or to the
+  // scene itself when returning to the overview (the card unmounts).
+  const navigateFromCard = useCallback(
+    (id: AreaId | null, control: CardNav) => {
+      select(id);
+      if (control === "overview") root.current?.focus({ preventScroll: true });
+      else focusOnArrive.current = control;
+    },
+    [select],
+  );
 
   const clampLook = (yaw: number, pitch: number) => {
     const b = area?.look;
@@ -327,10 +388,18 @@ export default function ExhibitionExperience({ onFail, onReady }: { onFail: () =
       role="group"
       aria-label="المشهد ثلاثي الأبعاد. اختر منطقة من العلامات أو من قائمة مناطق المعرض. بعد الوصول استخدم الأسهم للتلفّت، و Escape للعودة إلى المنظر العام."
     >
+      {/* First stop after the scene in the tab order, so keyboard users can bypass it early. */}
+      {!fullscreen && (
+        <div className="exh-ui">
+          <a className="exh-skip" href="#exhibition-after">
+            تخطَّ المعرض <span aria-hidden>↓</span>
+          </a>
+        </div>
+      )}
       <Canvas
         className="exh-canvas"
         frameloop={visible ? "demand" : "never"}
-        dpr={quality.dpr}
+        dpr={dpr}
         shadows={quality.shadows ? "percentage" : false}
         gl={{ antialias: false, alpha: false, stencil: false, powerPreference: "high-performance" }}
         camera={{ fov: 40, near: 0.3, far: 2000, position: [0, 40, 80] }}
@@ -369,6 +438,7 @@ export default function ExhibitionExperience({ onFail, onReady }: { onFail: () =
           <CameraRig selected={selected} look={look} reducedMotion={reducedMotion || instant} onArrive={handleArrive} />
           <PinProjector registry={pins} current={selected} />
           <Effects />
+          <AdaptiveResolution max={quality.dpr[1]} onChange={setDpr} />
         </QualityContext.Provider>
       </Canvas>
 
@@ -385,6 +455,7 @@ export default function ExhibitionExperience({ onFail, onReady }: { onFail: () =
             toggleRef={cardToggle}
             cardRef={registerCard}
             reducedMotion={reducedMotion}
+            onNavigate={navigateFromCard}
           />
         )}
       </div>
@@ -434,11 +505,6 @@ export default function ExhibitionExperience({ onFail, onReady }: { onFail: () =
           triggerRef={menuTrigger}
         />
 
-        {!fullscreen && (
-          <a className="exh-skip" href="#exhibition-after">
-            تخطَّ المعرض <span aria-hidden>↓</span>
-          </a>
-        )}
       </div>
 
       <p className="sr-only" aria-live="polite">

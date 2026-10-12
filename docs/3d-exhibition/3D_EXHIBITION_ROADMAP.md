@@ -1,7 +1,7 @@
 # KORA 3D Exhibition — Implementation Roadmap
 
-**Status:** v0.7 (2026-10-12) — M0–M4 approved; M5 (homepage integration & fallback) **implemented and verified, awaiting owner review**; next: M6.
-**Authoritative spec:** [`3D_EXHIBITION_SPEC.md`](./3D_EXHIBITION_SPEC.md) **v1.2**. This roadmap never overrides it; conflicts are logged in §9.
+**Status:** v0.9 (2026-10-12) — M0–M5 approved; M6 implemented; **post-M6 refinements (R1–R4) implemented and verified, awaiting owner review** (§6 "Post-M6 refinements"). Not declared production-ready; nothing committed or deployed.
+**Authoritative spec:** [`3D_EXHIBITION_SPEC.md`](./3D_EXHIBITION_SPEC.md) **v1.3**. This roadmap never overrides it; conflicts are logged in §9.
 **Resume file:** [`3D_EXHIBITION_STATE.md`](./3D_EXHIBITION_STATE.md) (current state, verified results, how to verify).
 **Owner of this file:** Claude Code — update on every material plan change and log it in §10.
 
@@ -137,7 +137,7 @@ Everything else is inferred and tagged in `layout.ts`. Plan px → m: `x = (px �
 ### 4.1 Architecture
 ```
 src/app/page.tsx                     Homepage: <ExhibitionSection /> between <Hero /> and <Manifesto /> (M5, default deferMs 4500).
-src/app/lab/exhibition/page.tsx      Temporary noindex lab route (filler above/below, deferMs 0). Kept for M6 QA; remove/gate in M6.
+src/app/lab/exhibition/page.tsx      QA route (filler above/below, deferMs 0), noindex. 404 in production builds unless EXHIBITION_LAB=1 (M6).
 public/exhibition/poster.webp        Overview still, 1600×898 (16:9 overview pose), 77 KB.
 public/exhibition/poster-mobile.webp Overview still, 720×1200 (portrait overview pose), 40 KB.
 src/components/exhibition/
@@ -149,15 +149,19 @@ src/components/exhibition/
                            returns dimmed behind the fallback message. ScrollTrigger.refresh() when the list is revealed.
   ExhibitionExperience.tsx Canvas + overlays; selection state; gestures (drag look, touch axis-lock), keyboard,
                            Escape order (panel → fullscreen → selection), fullscreen, card expand state,
-                           dev-only window.__exh hook.
+                           adaptive DPR state, dev-only window.__exh hook (incl. step(ms) for GSAP time).
   exhibition.css           All styles, scoped .exh-*.
   camera/rig.ts            Poses (anchor/overview, aspect fit, portrait tilt), flightPoint + planLift.
   camera/CameraRig.tsx     Overview ⇄ anchored state machine, interruptible GSAP flights, damped clamped look.
-  camera/obstacles.ts      Solid volumes for flight clearance (buildings, museum, stage, seating, booths, gate, scenery).
+  camera/obstacles.ts      Solid volumes for flight clearance (buildings, museum, stage, seating, booths, gate, scenery);
+                           the light tunnel is a hollow shell (side frames + roof) and the passage sign is a volume.
+  camera/route.ts          Spline routes: passage route to the entertainment zone; tunnel exit for flights
+                           interrupted inside the tunnel. Collision-checked (1200 probes) with arc fallback.
   scene/quality.ts         Quality tiers (high / mobile).
   scene/textures.ts        Canvas textures, signage from official PNGs, lockups, plates, ray screens.
   scene/Atmosphere.tsx, Lighting.tsx, Ground.tsx, Surroundings.tsx   Sky/env, lights + bloom/AgX, paving, campus context.
   scene/AreaModels.tsx     Model slots: per-area frame; code kit or GLB (modelUrl / dev override), kit fallback.
+                           All kit models share one static batch (rebuilt when a GLB takes a slot).
   scene/Museum.tsx         Museum exterior (M1).
   scene/models/Stage.tsx                Stage + amphitheatre + lounge row.
   scene/models/MediaCorner.tsx          Slot 2.
@@ -167,12 +171,16 @@ src/components/exhibition/
   scene/Scenery.tsx        Entrance arch, passage tunnel + banners, photo booth, coffee kiosk, press wall, stanchions.
   scene/Placeholders.tsx   Ghost massings for unmodelled areas (now slots 6–7 + gate), 3 draw calls.
   scene/HitTargets.tsx     Raycast-only volumes per area + building blockers.
-  scene/Batched.tsx        Static batching of same-material meshes (delayed until async textures exist).
+  scene/Batched.tsx        Static batching: merges meshes whose materials match in all but base colour (colour
+                           baked into vertex colours) and expands small static instanced sets; runs only after
+                           every async texture has settled (M6).
+  scene/AdaptiveResolution.tsx  Lowers/raises the pixel ratio (0.75 … tier cap) from frame times sampled while moving (M6).
   scene/kit/primitives.tsx Struts/truss, Instanced, tubes/arcs, Detail (distance LOD), useDispose.
   scene/kit/booth.tsx      Booth kit: walls, on-wall placement, chamfer/octagon frames, Plate, Screen, TripodCamera.
   scene/kit/panels.ts      Own panel graphics (dashboard, map, funnels, infographic, playfields, arch face, skins).
-  scene/useAsyncTexture.ts Async texture hook.
-  ui/AreaCard.tsx          World-anchored card; expand/collapse (accordion pattern).
+  scene/useAsyncTexture.ts Async texture hook + pending counter (asyncTexturesSettled) used by Batched.
+  ui/AreaCard.tsx          World-anchored card; expand/collapse (accordion pattern); Previous / Overview / Next
+                           controls (TOUR_ORDER in areas.ts), visible in both states.
   ui/AreaPins.tsx          DOM pins + PinProjector (also positions the card each frame).
   ui/AreaPanel.tsx         Trigger + RTL drawer / mobile bottom sheet.
 src/lib/exhibition/
@@ -193,18 +201,20 @@ src/lib/exhibition/
   - **Collapse:** the whole title row is an `aria-expanded` toggle; the body and eyebrow fold away with a 0.32 s grid-rows animation, and the card narrows to a 250 px bar at the same anchor. Reduced motion → no animation. The body is `inert` while collapsed.
 - **Loading:** nothing (JS or poster) before near-viewport; 3D also not before `deferMs`; poster while loading; SSR text list always present; failure / context loss / no WebGL / Save-Data → dimmed poster + message + visible text list; `<noscript>` reveals the list.
 - **Fullscreen stacking:** while fullscreen, `.exh-stage` is lifted to z 100 (via `:has`) so the fixed overlay covers the topbar (z 60) and noise overlay (z 90); before M5 the isolated stage kept it below the topbar.
-- **Performance:** frameloop `demand` / `never` off-screen; DPR caps per tier; `Detail` LOD (booth interiors 22 m, entertainment 40 m); static batching; one-shot shadow map.
+- **Performance:** frameloop `demand` / `never` off-screen; DPR caps per tier plus adaptive DPR while moving (floor 0.75); `Detail` LOD (booth interiors 22 m, entertainment 40 m); cross-area static batching with colour baking; one-shot shadow map.
 
 ### 4.3 Performance budgets (proposed, D-6) and current values
 | Metric | Budget | Now | Status |
 |---|---|---|---|
 | Hero impact / homepage JS | ≈0 KB added | 832 KB raw / 269 KB gz (+8 / +4.3 KB for the client loader gate; no three/R3F) | ✅ (gate is unavoidable) |
 | Poster | — | 77 KB desktop / 40 KB mobile, only when near | ✅ |
-| Exhibition JS (gz, loaded with section) | ≤ 300 KB | ≈301 KB | ⚠ M6 |
-| Draw calls, overview (desktop) | ≤ 150 | ≈188 | ⚠ M6 |
-| Draw calls, anchored | ≤ 150 | 84–126 | ✅ |
-| Triangles (overview) | ≤ 600 k desktop / 300 k mobile | ≈320 k desktop / ≈200 k mobile | ✅ |
-| DPR | 1.5 desktop / 1.25 mobile | as budgeted | ✅ |
+| Exhibition JS (compressed, loaded with section) | ≤ 300 KB | ≈306 KB (305.2 measured on `next start` after M6; +1 KB for routes/card nav) | ⚠ +2 % — structural, see D-27 |
+| Draw calls, overview (desktop) | ≤ 150 | **141** (was 188; 144 after M6, new pose 141) | ✅ |
+| Draw calls, anchored | ≤ 150 | 72–119 (was 84–126) | ✅ |
+| Triangles (overview) | ≤ 600 k desktop / 300 k mobile | ≈320 k desktop (unchanged) / ≈200 k mobile | ✅ |
+| DPR | 1.5 desktop / 1.25 mobile | as budgeted; adaptive down to 0.75 on slow GPUs while moving | ✅ |
+| Frame time (integrated AMD Radeon Vega, 1260×823 buffer, dev build, warm) | ~16.7 ms ideal | 19–26 ms (≈40–50 fps); auto-steps down when > 25 ms | ⚠ real devices untested |
+| GPU resources after 2 full tours of all 10 areas | stable | 356 geometries / 91 textures, identical after the 2nd tour | ✅ |
 
 ---
 
@@ -233,8 +243,8 @@ Designer GLBs can replace any area through `AreaConfig.modelUrl` without other c
 | M2 | Masterplan layout + full interaction system | ✅ approved |
 | M3 | Stage + booth kit + Media corner, model slots (GATE 2) | ✅ approved |
 | M4 | Remaining corners, entertainment zone, scenery; world-anchored cards; chairs | ✅ approved (card behaviour since revised to expand/collapse, done) |
-| M5 | Homepage integration & fallback | ✅ implemented + verified — **awaiting owner review** |
-| **M6** | **Performance, accessibility, device QA → release** | **Next** (after M5 review) |
+| M5 | Homepage integration & fallback | ✅ approved |
+| **M6** | **Performance, accessibility, device QA → release** | ✅ implemented + verified — **awaiting owner review** (release not declared) |
 
 ### M5 — Homepage integration & fallback (done, awaiting review)
 - **Objective:** ship the section directly after the Hero with zero Hero regression.
@@ -275,6 +285,31 @@ Designer GLBs can replace any area through `AreaConfig.modelUrl` without other c
   - Final docs.
 - **Acceptance:** spec §8 item 10 with documented results.
 
+### M6 — Result (2026-10-12)
+**Changes made**
+- **Draw calls:** static batching now merges meshes that differ only in base colour (colour baked into vertex colours, identical shading), expands small static instanced sets (≤ 40 k vertices), and batches all kit models in one cross-area batch; Surroundings is batched as a whole. Overview 188 → 144, anchored 84–126 → 72–119, triangles unchanged. Pixel diff of the 16:9 overview against the M5 poster frame: mean 0.002/255, 0.001 % of pixels > 24/255 (edge noise).
+- **Bug found and fixed:** batching ran on a fixed delay; when an async texture (e.g. the coffee-kiosk skin) arrived later, the baked copy kept the fallback colour (seen as a navy face on the kiosk). Batching now waits for all async textures to settle (`asyncTexturesSettled`).
+- **Adaptive resolution:** `AdaptiveResolution` samples frame times only while the scene moves; median > 25 ms → pixel ratio × 0.8 (floor 0.75); < 17.5 ms twice → × 1.15 up to the tier cap. Fed through the Canvas `dpr` prop (R3F re-applies that prop on every Canvas render — found while testing). Verified: 1920×1080 stage at 87 ms steps 1.25 → 0.75 (32 ms); a small stage recovers to 1.25; the value survives re-renders.
+- **Accessibility:** skip link moved to directly after the scene in the focus order (was last, after every pin); contrast fixes — card «provisional» label 4.0 → 6.2:1; concept note, poster caption and skip link given a quiet navy backing (≥ 4.99:1 even over bright paving).
+- **Release:** lab route returns 404 in production builds unless `EXHIBITION_LAB=1`.
+- **Dev tooling:** `__exh.step(ms)` advances GSAP's root clock and renders a frame, so real flights can be verified with a hidden preview pane; `swapModel` exports with `onlyVisible: false` (batched originals are hidden).
+- **Tried and reverted:** lazy-loading the entertainment zone and scenery saved only 5.4 KB (3.1 + 2.3 KB gz) and added load-order complexity; the exhibition JS is dominated by three.js + R3F + postprocessing (D-27).
+
+**Remaining limitations (not verifiable here)**
+- Real iOS Safari / Android Chrome devices, real touch, NVDA/VoiceOver, Lighthouse, throttled network, frame rate in a visible window.
+- Emulated `prefers-reduced-motion` / Save-Data: the preview pane has no media emulation; code reviewed; the reduced-motion camera path is the same `instant` branch that was exercised.
+- Exhibition JS 305 KB vs 300 KB budget (D-27).
+- Product inputs still open: R-10 copy, D-17 corners 6–7 / slot mapping, D-19 entertainment zone, D-20 booth sizes, R-4, F-15/F-16.
+
+### Post-M6 refinements (2026-10-12, owner request) — done, awaiting review
+- **R1 Entrance placement:** `ENTRANCE_ARCH` (layout.ts) now stands on the plan's west "Gate" footprint (x 6.85, z 16.3, plane across Z as before, design unchanged); the gate ghost moved to the arch's former spot (x −2.6, z 24.2, same 1.5 × 9.8 m). Obstacles follow both. The planter gap, stanchions, coffee kiosk and press wall are unchanged.
+- **R2 Overview:** camera from the entrance side, behind/above the arch, looking east: the museum's lit plaza facade faces the camera, the stage is seen three-quarter on, booths and the arch in the foreground. Checked at 2.4, 16:9 and portrait (0.6); posters re-captured (85 KB / 43 KB).
+- **R3 Card navigation:** Previous / المنظر العام / Next below the card body, outside the collapsible part (so present and focusable when collapsed); `aria-label`s name the destination; focus stays on the same control in the next card, and moves to the scene on Back to overview. Order = `TOUR_ORDER` (D-31).
+- **R4 Passage route (implemented):** flights to the entertainment zone from anywhere on the plaza drop into the backstage strip, pass over the passage sign beside the photo booth, run through the tunnel under the banners at ≈3 m (half speed), then rise to the viewpoint (≈6 s total; ordinary flights ≤ 3 s). The tunnel obstacle became a hollow shell so the corridor is checkable; every route is sampled against all obstacles and falls back to the ordinary arc if not clear. Interrupting inside the tunnel continues to the tunnel end being faced, climbs out, then arcs (never through the roof). Reduced motion: instant cut, as before. Cost: ≈0.5 ms planning per flight, no per-frame overhead beyond a spline lookup; JS +1 KB.
+- **Also fixed:** denser collision sampling revealed hairline grazes on 2 museum ↔ corner arcs at landscape aspects (pre-existing, missed by the 40-probe `planLift`); `planLift` now probes 240 points and adds 10 % headroom.
+
+**Release readiness:** technically ready for owner review on the `newV` branch. Not declared production-ready: needs owner approval, real-device QA (list above) and a decision on shipping provisional content.
+
 ---
 
 ## 7. Hero protection rules (every milestone)
@@ -295,10 +330,10 @@ Designer GLBs can replace any area through `AreaConfig.modelUrl` without other c
 | D-3 | CC0 downloads | Not needed so far (all procedural) |
 | D-4 | gltf-transform + decoders | Only when designer GLBs arrive |
 | D-5 | Masterplan orientation over satellite | ✅ Applied |
-| D-6 | Performance budgets §4.3 | Provisional; 2 deviations → M6 |
+| D-6 | Performance budgets §4.3 | Provisional; 1 deviation left (JS, D-27) |
 | D-7 | No people | ✅ Approved |
 | D-8 | Rename references | Not applied (optional) |
-| D-9 | Remove unused Spline deps | M6, separate approval |
+| D-9 | Remove unused Spline deps | ⏳ Still awaiting separate approval (not touched in M6; dependency changes need sign-off) |
 | D-10 | 10 selectable areas | ✅ Approved |
 | D-11 | Media corner first | ✅ Done |
 | D-12 | Designer involvement | Optional; kit stand-ins in place |
@@ -314,10 +349,19 @@ Designer GLBs can replace any area through `AreaConfig.modelUrl` without other c
 | D-23 | Cards expand/collapse (spec v1.2) | ✅ Approved and implemented |
 | D-24 | Loader nearness margin 80% → 40% (on the homepage 80% would load the 3D 4.5 s after page load without any scroll, doing scene work while the Hero is on screen); poster covers the gap | ✅ Applied in M5 (routine) |
 | D-25 | Ship provisional copy on the homepage, labelled as provisional | ✅ Per owner's M5 instruction; final copy still R-10 |
+| D-26 | Adaptive DPR (floor 0.75) on slow GPUs while moving; capable devices unchanged | ✅ Applied in M6 (routine) |
+| D-27 | Exhibition JS budget: 305 KB vs 300 KB. three.js core + R3F (imports the whole THREE namespace) + postprocessing make up nearly all of it. Options: accept / raise the budget to 310 KB, or a large refactor away from R3F (not recommended) | ⏳ Owner decision |
+| D-28 | Lab route gated (404 in production unless EXHIBITION_LAB=1) rather than deleted, to keep a QA harness | ✅ Applied in M6 |
+| D-29 | Entrance = the plan's west "Gate" footprint; arch moved there, gate ghost moved to the arch's former spot (same footprints) | ✅ Owner instruction (R1) |
+| D-30 | Overview from the entrance side: position (−13, 35, 38) → target (28, 0, 19); portrait pulls back automatically | ✅ R2 (framing chosen after 5 renders) |
+| D-31 | Tour order: corners 1→7, museum, stage, entertainment; wraps at both ends | ✅ R3 (routine; one constant `TOUR_ORDER`) |
+| D-32 | Passage route implemented (optional R4): spline through the tunnel, collision-checked with arc fallback, tunnel-exit route for interruptions | ✅ R4 |
 
 ## 10. Update log
 | Date | Change |
 |---|---|
+| 2026-10-12 | v0.9: post-M6 refinements R1–R4 (arch ↔ gate swap, entrance-side overview + new posters, card Previous/Overview/Next, passage route to the entertainment zone with tunnel exit); planLift sampling densified (40 → 240 probes, +10 % headroom) after denser checks found grazes; spec v1.3. |
+| 2026-10-12 | v0.8: M5 approved; M6 implemented — batching with colour baking + cross-area batch (188 → 144 calls), async-texture batching fix, adaptive DPR, a11y fixes (skip-link order, contrast), lab route gated, real-flight verification via `__exh.step`. D-26–D-28 added. |
 | 2026-10-12 | v0.7: M5 implemented — section on the homepage after the Hero, posters, fallback hardening (poster + list, noscript, ScrollTrigger refresh), fullscreen stacking fix, loader margin 40% (D-24), provisional copy shipped (D-25). |
 | 2026-10-12 | v0.6: M4 approved. Cards changed from close/reopen to expand/collapse (spec v1.2); "معلومات المنطقة" button removed. Roadmap consolidated: stale statuses and superseded card rules removed, architecture and budgets brought to as-built, decisions register cleaned. |
 | 2026-10-12 | v0.5: M3 approved; spec v1.1 (world-anchored cards); chairs regularised; M4 implemented (corners 1, 3, 4, 5, entertainment zone, scenery, LOD). |
