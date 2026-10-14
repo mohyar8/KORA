@@ -127,7 +127,7 @@ function NavyShell({
 }
 
 /** Simplified stadium miniature (a stand-in for a designer model, see GATE 2). */
-function StadiumModel({ position, scale = 1, cutaway = false }: { position: V3; scale?: number; cutaway?: boolean }) {
+export function StadiumModel({ position, scale = 1, cutaway = false }: { position: V3; scale?: number; cutaway?: boolean }) {
   const theta = cutaway ? Math.PI : Math.PI * 2;
   const geo = useMemo(
     () => ({
@@ -153,7 +153,7 @@ function StadiumModel({ position, scale = 1, cutaway = false }: { position: V3; 
   );
 }
 
-function Panel({ heading, lines, size, position, rotationY = 0, accent }: { heading: string; lines: string[]; size: [number, number]; position: V3; rotationY?: number; accent?: string }) {
+export function Panel({ heading, lines, size, position, rotationY = 0, accent }: { heading: string; lines: string[]; size: [number, number]; position: V3; rotationY?: number; accent?: string }) {
   const tex = useAsyncTexture(async () => (await infoPanelTexture(heading, lines, { accent })).tex);
   return tex ? (
     <mesh position={position} rotation-y={rotationY}>
@@ -163,7 +163,7 @@ function Panel({ heading, lines, size, position, rotationY = 0, accent }: { head
   ) : null;
 }
 
-function Kiosk({ position, rotationY = 0, screen }: { position: V3; rotationY?: number; screen: THREE.Texture }) {
+export function Kiosk({ position, rotationY = 0, screen }: { position: V3; rotationY?: number; screen: THREE.Texture }) {
   return (
     <group position={position} rotation-y={rotationY}>
       <mesh position={[0, 0.42, 0]} castShadow>

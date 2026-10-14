@@ -1,6 +1,6 @@
 # KORA Official Website — Interactive 3D Exhibition
 
-**Document status:** Approved product direction / implementation specification, v1.3 (2026-10-12; §3.1, §3.3, §3.4 refined by the product owner, see §11)  
+**Document status:** Approved product direction / implementation specification, v1.5 (2026-10-13; §3.1, §3.3, §3.4 refined by the product owner, see §11)  
 **Owner:** KORA website product planning  
 **Implementation agent:** Claude Code  
 **Scope:** The 3D exhibition section only; other homepage sections will be discussed later.
@@ -41,7 +41,9 @@ Create a premium, visually compelling, realistic interactive 3D preview of the p
 ### 3.1 Section and overview
 - Place the exhibition section directly after the current Hero, while preserving normal document flow.
 - Use a large, responsive full-width scene, not a mandatory page takeover.
-- Initially show the entire exhibition from an elevated overview angle **from the entrance side** (behind and above the entrance arch, looking into the event), with the main stage, museum and exhibition areas clearly framed on desktop and mobile.
+- Initially show the entire exhibition from an elevated overview angle **from the entrance side** (behind and above the entrance arch, looking into the event): the entrance gate is the first thing seen, then the whole venue, on desktop and mobile.
+- A branded loading screen (the official logo assembling, with real progress) covers the stage until the 3D scene is ready.
+- An optional guided tour («ابدأ الجولة») plays the defined order of areas automatically; it never removes free navigation (any direct choice ends it).
 - All major areas should be discoverable via 3D click targets and an accessible list.
 - Do not autoplay a mandatory route between locations.
 - Keep a visible means to scroll onward, and ensure the scene does not trap mouse wheel or vertical touch gestures.
@@ -58,6 +60,7 @@ Do not make the 3D hit targets the only navigation mechanism. Provide hover/focu
 - After arrival, permit constrained **look-around from a stable viewpoint**, primarily horizontal yaw and modest vertical pitch, to see neighboring areas and select them. This is NOT a full orbit around a building.
 - Limit rotation to authored, safe bounds and keep the card readable while the 3D scene moves behind it.
 - Clicking another visible area triggers a new cinematic transition and changes the active area/card.
+- Leaving the overview for any area, the camera enters through the main entrance gate first, then continues to the area.
 - Flights to the entertainment zone may travel briefly through the passage between the buildings (light tunnel, banners, photo booth) before arriving; the passage is never a stop or a selectable destination, and reduced motion keeps the instant cut.
 - Returning to overview restores the overview camera and removes the selected-area card.
 - Interrupt/retrigger behavior, camera animation cancellation, and resize transitions must be robust.
@@ -90,11 +93,22 @@ Do not make the 3D hit targets the only navigation mechanism. Provide hover/focu
 
 ### 4.1 Fidelity priorities
 - **Buildings/booths/stage/museum:** follow the actual *preliminary designs* in the event design PDF and individual reference images. Do not replace them with generic invented booth designs.
-- **Spatial organization:** preserve the approximate distribution, orientation, adjacency and visitor pathways from the event masterplan; distinguish measured dimensions from inferred ones.
+- **Spatial organization:** follow the owner-directed venue layout in §4.4 (v1.4), which supersedes the masterplan's positions; keep measured dimensions where they exist and distinguish measured from inferred values.
 - **Surrounding world:** may be creatively authored as a realistic architectural environment inspired by KORA's brand and *The Industry Behind the Game*. This creative freedom applies to the **surroundings**, not to arbitrarily redesigning referenced booths.
 - **Lighting:** realistic evening/night with readable ambient fill, plausible architectural lighting, illuminated stage, believable materials, carefully restrained KORA accent colors. Avoid exaggerated neon, excessive glow, glassmorphism, wet-looking ground or unrelated fantasy imagery.
 - **Brand:** reuse the official KORA assets/identity actually found in the repository; do not redraw logos or invent patterns when official files exist. Follow the project's current brand sources, not speculative replacements.
 - **Architectural realism:** web-optimized, not a static image pretending to be 3D. 3D models need actual depth for side views and look-around. High-quality materials and composition matter more than expensive rendering effects.
+
+### 4.4 Revised venue layout (owner direction, 2026-10-13, v1.4)
+- **Main path** (6 m) runs east from the entrance arch at x 0 to the amphitheatre at x ≈ 96.
+- **Museum** to the left (north) of the entrance, x 20–48, long facade facing the path; portal at the west end, nearest the entrance.
+- **Corners (6)** in a U to the right (south), open towards the path: west arm Technology / Media (facing east), base Entrepreneurship / Economy & Investment (facing north), east arm Health / Engineering (facing west). The U spans ≈47 m along the path (x 9.5–56.5), comparable to the entrance-to-museum side. A walkway loops along the booth fronts and joins the main path at both arms.
+- **Passage** to the entertainment zone between Buildings 70 and 57 at x 56–62, just beyond the museum (not behind it), reached by a branch path; buildings, passage, tunnel and entertainment zone moved together as one block (relative geometry unchanged).
+- **Stage** closes the east end of the main path, facing west towards arriving visitors; amphitheatre in front of it with the path running into the 2 m aisle.
+- Ground ≈ 144 × 89 m paved (≈2.5× the masterplan-based layout); lawns with palms in the open quarters; branded wayfinding (banners, totems at the junctions, warm path-edge lines, pentagon canopy in the corner courtyard, lockup monolith at the passage branch).
+- **Six corners**, not seven. The sixth is **Engineering**: no design was supplied, so it is a provisional concept in the corners' design language, clearly marked as such in the scene and in its card — never presented as an approved design.
+- Booths are enlarged uniformly (×1.7) from their plan-slot design sizes, keeping each preliminary design's proportions (renders read 8–12 m wide).
+- Positions are owner-directed and provisional, not surveyed.
 
 ### 4.2 Reference hierarchy and uncertainty
 1. Approved design assets and verified 3D/architectural drawings, if available.
@@ -192,6 +206,8 @@ This specification governs product intent and approved UX decisions. Claude Code
 
 | Date | Change | Approved by |
 |---|---|---|
+| 2026-10-13 | v1.5 — overview from the entrance with the gate first; flights from the overview enter through the gate; guided tour «ابدأ الجولة»; branded loading screen; collapsed-card controls stay inside the bar; banners read correctly from the gate. | Product owner (requested) |
+| 2026-10-13 | v1.4 — §4.1 / §4.4: revised venue layout (museum left of the entrance, stage at the far end of the main path facing the entrance, passage beyond the museum, six corners in a U, expanded grounds, larger booths, branded wayfinding); sixth corner = Engineering (provisional concept). | Product owner (requested) |
 | 2026-10-12 | v1.3 — Entrance arch placed on the plan's west "Gate" footprint (swapped with that placeholder); §3.1 overview from the entrance side; §3.3 optional passage route to the entertainment zone; §3.4 Previous / Back to overview / Next card controls. | Product owner (requested) |
 | 2026-10-12 | v1.2 — §1, §2, §3.4 and §8 item 4: the close/reopen behaviour is replaced by **expand/collapse**. Collapsed = compact bar (name + expand indicator) at the same world-anchored position; click/tap expands; smooth subtle animation; expanded on every new arrival; the separate "show information" button is removed. | Product owner |
 | 2026-10-12 | v1.1 — §1, §2, §3.4 and §8 item 4 amended: the information card is world-anchored instead of centred and camera-fixed; it opens automatically on arrival and on destination change, can be closed and reopened, stays with its area during look-around, uses crisp accessible HTML overlays, and must not obstruct neighbouring areas. Supersedes "prominent, centered card" and "no hide-card action". | Product owner |

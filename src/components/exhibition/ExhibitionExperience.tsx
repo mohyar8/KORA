@@ -4,12 +4,13 @@ import { Canvas, invalidate, type RootState } from "@react-three/fiber";
 import gsap from "gsap";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Vector3, type WebGLRenderer } from "three";
-import { AREA_ORDER, AREAS, cardAnchor } from "@/lib/exhibition/areas";
+import { AREA_ORDER, AREAS, TOUR_ORDER, cardAnchor } from "@/lib/exhibition/areas";
+import { PASSAGE } from "@/lib/exhibition/layout";
 import type { AreaId } from "@/lib/exhibition/types";
 import { CameraRig, type LookInput } from "./camera/CameraRig";
 import { OBSTACLES } from "./camera/obstacles";
 import { flightPoint, fovFor, planLift, poseFor } from "./camera/rig";
-import { planPassageRoute, planTunnelExit } from "./camera/route";
+import { planGateExit, planRoute, planTunnelExit } from "./camera/route";
 import { Atmosphere } from "./scene/Atmosphere";
 import { Ground } from "./scene/Ground";
 import { HitTargets, CLICK_SLOP } from "./scene/HitTargets";
@@ -18,11 +19,16 @@ import { AdaptiveResolution } from "./scene/AdaptiveResolution";
 import { AreaModels } from "./scene/AreaModels";
 import { Placeholders } from "./scene/Placeholders";
 import { Scenery } from "./scene/Scenery";
+import { Venue } from "./scene/Venue";
+import { asyncTexturesSettled } from "./scene/useAsyncTexture";
 import { QualityContext, detectQuality, type Quality } from "./scene/quality";
 import { Surroundings } from "./scene/Surroundings";
 import { AreaCard, type CardNav } from "./ui/AreaCard";
 import { AreaPanel, AreaPanelTrigger } from "./ui/AreaPanel";
 import { AreaPins, PinProjector, type PinRegistry } from "./ui/AreaPins";
+
+/** How long the guided tour holds at each stop (reading time for the card). */
+const TOUR_DWELL_MS = 9000;
 
 type Drag = {
   id: number;
@@ -40,7 +46,16 @@ const KEY_STEP = 0.12;
  * The interactive 3D exhibition: canvas + DOM overlays. Loaded lazily by
  * ExhibitionLoader, never server-rendered.
  */
-export default function ExhibitionExperience({ onFail, onReady }: { onFail: () => void; onReady?: () => void }) {
+export default function ExhibitionExperience({
+  onFail,
+  onReady,
+  onProgress,
+}: {
+  onFail: () => void;
+  onReady?: () => void;
+  /** Loading stages for the loader's progress line: 0.5 code, 0.65 scene, 0.9 textures. */
+  onProgress?: (p: number) => void;
+}) {
   const [quality] = useState<Quality>(() => detectQuality());
   const [dpr, setDpr] = useState<number | [number, number]>(quality.dpr);
   const [reducedMotion, setReducedMotion] = useState(false);
@@ -97,10 +112,18 @@ export default function ExhibitionExperience({ onFail, onReady }: { onFail: () =
     };
   }, [fullscreen]);
 
+  // The code has loaded and the component is mounting.
+  useEffect(() => {
+    onProgress?.(0.5);
+    // Report once per mount.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   const anchored = arrived !== null && arrived === selected;
   const area = anchored ? AREAS[arrived] : null;
 
-  const select = useCallback((id: AreaId | null, viaKeyboard = false) => {
+  /** Moves to an area (or the overview) without touching the guided tour. */
+  const go = useCallback((id: AreaId | null, viaKeyboard = false) => {
     focusOnArrive.current = viaKeyboard ? "toggle" : null;
     look.current = { yaw: 0, pitch: 0 };
     setHover(null);
@@ -110,6 +133,60 @@ export default function ExhibitionExperience({ onFail, onReady }: { onFail: () =
     // Every arrival (including switching destination) shows the card expanded.
     setCardExpanded(true);
   }, []);
+
+  // ----- Guided tour (owner request, 2026-10-13) ---------------------------
+  // «ابدأ الجولة» plays TOUR_ORDER: fly to each stop, hold for DWELL while the
+  // card is read, then move on. The visitor stays free: choosing any area
+  // (scene, label, list) or the overview ends the tour; the card's Previous /
+  // Next move the tour along; looking around or folding the card restarts
+  // the hold; it pauses while the section is off-screen.
+  const [tour, setTour] = useState({ active: false, index: 0, paused: false });
+  const [dwellKey, setDwellKey] = useState(0);
+  const [tourNote, setTourNote] = useState("");
+  const holdTour = useCallback(() => setDwellKey((k) => k + 1), []);
+
+  /** Visitor-driven navigation: ends a running tour. */
+  const select = useCallback(
+    (id: AreaId | null, viaKeyboard = false) => {
+      setTour((t) => (t.active ? { ...t, active: false } : t));
+      go(id, viaKeyboard);
+    },
+    [go],
+  );
+
+  const startTour = useCallback(() => {
+    setTour({ active: true, index: 0, paused: false });
+    setTourNote("بدأت الجولة");
+    go(TOUR_ORDER[0]);
+  }, [go]);
+  const stopTour = useCallback(() => {
+    setTour((t) => ({ ...t, active: false }));
+    setTourNote("انتهت الجولة");
+  }, []);
+
+  useEffect(() => {
+    if (!tour.active || tour.paused || !visible) return;
+    if (arrived === null || arrived !== selected || selected !== TOUR_ORDER[tour.index]) return;
+    const timer = window.setTimeout(() => {
+      if (tour.index >= TOUR_ORDER.length - 1) {
+        setTour((t) => ({ ...t, active: false }));
+        setTourNote("انتهت الجولة");
+        return;
+      }
+      const next = tour.index + 1;
+      setTour((t) => ({ ...t, index: next }));
+      go(TOUR_ORDER[next]);
+    }, TOUR_DWELL_MS);
+    return () => window.clearTimeout(timer);
+  }, [tour, visible, arrived, selected, go, dwellKey]);
+
+  // Keep the world-anchored card clear of the tour bar at the bottom.
+  useEffect(() => {
+    // The bar is ~70 px tall, 16 px from the bottom (44 px on phones, above the skip link).
+    const narrow = (root.current?.clientWidth ?? 1024) < 768;
+    pins.current.bottomInset = tour.active ? (narrow ? 124 : 96) : 12;
+    invalidate();
+  }, [tour.active]);
 
   // Development-only inspection hook (stripped from production builds).
   useEffect(() => {
@@ -166,9 +243,9 @@ export default function ExhibitionExperience({ onFail, onReady }: { onFail: () =
             const toPose = poseFor(b, aspect);
             const from = fromPose.position;
             const to = toPose.position;
-            // Same choice as CameraRig: the passage route when it applies, else the arc.
-            const route = b === "entertainment" ? planPassageRoute(fromPose, toPose) : null;
-            if (route) routed.push(a ?? "overview");
+            // Same choice as CameraRig (gate / passage / exit routes, else the arc).
+            const route = planRoute(a, fromPose, toPose, b);
+            if (route) routed.push(`${a ?? "overview"}→${b ?? "overview"}`);
             const lift = route ? 0 : planLift(from, to);
             const tgt = new Vector3();
             for (let i = 0; i <= 200; i++) {
@@ -183,9 +260,10 @@ export default function ExhibitionExperience({ onFail, onReady }: { onFail: () =
         // Flights interrupted inside the tunnel (both headings) to every destination.
         const exits: string[] = [];
         const tgt = new Vector3();
-        for (const z of [-5, -12, -19])
+        for (const dz of [2, -5, -12])
           for (const dir of [-1, 1]) {
-            const from = { position: new Vector3(27, 3.1, z), target: new Vector3(27, 3.1, z + dir * 10) };
+            const z = PASSAGE.frontZ + dz;
+            const from = { position: new Vector3(PASSAGE.x, 3.1, z), target: new Vector3(PASSAGE.x, 3.1, z + dir * 10) };
             for (const b of ids) {
               const toPose = poseFor(b, aspect);
               const route = planTunnelExit(from, toPose);
@@ -202,7 +280,27 @@ export default function ExhibitionExperience({ onFail, onReady }: { onFail: () =
               }
             }
           }
-        return { collisions: out, passageRouteFrom: routed, tunnelExitProblems: exits };
+        // Flights interrupted under the entrance arch (both headings).
+        for (const dx of [-6, 0, 6])
+          for (const dir of [-1, 1]) {
+            const from = { position: new Vector3(dx, 1.8, 0), target: new Vector3(dx + dir * 10, 1.8, 0) };
+            for (const b of ids) {
+              const toPose = poseFor(b, aspect);
+              const route = planGateExit(from, toPose);
+              if (!route) {
+                exits.push(`gate x${dx}/${dir}→${b ?? "overview"}: no route`);
+                continue;
+              }
+              for (let i = 0; i <= 200; i++) {
+                route.sample(i / 200, toPose, p, tgt);
+                if (OBSTACLES.some((o) => o.containsPoint(p))) {
+                  exits.push(`gate x${dx}/${dir}→${b ?? "overview"} @${i}`);
+                  break;
+                }
+              }
+            }
+          }
+        return { collisions: out, routed, exitProblems: exits };
       },
       /** Render n frames synchronously; returns mean CPU+GPU ms per frame. */
       bench: (n = 20) => {
@@ -266,11 +364,16 @@ export default function ExhibitionExperience({ onFail, onReady }: { onFail: () =
   // scene itself when returning to the overview (the card unmounts).
   const navigateFromCard = useCallback(
     (id: AreaId | null, control: CardNav) => {
-      select(id);
+      // During the tour, Previous / Next move the tour; the overview ends it.
+      const step = id ? TOUR_ORDER.indexOf(id) : -1;
+      if (tour.active && control !== "overview" && step >= 0) {
+        setTour((t) => ({ ...t, index: step, paused: false }));
+        go(id);
+      } else select(id);
       if (control === "overview") root.current?.focus({ preventScroll: true });
       else focusOnArrive.current = control;
     },
-    [select],
+    [select, go, tour.active],
   );
 
   const clampLook = (yaw: number, pitch: number) => {
@@ -285,6 +388,7 @@ export default function ExhibitionExperience({ onFail, onReady }: { onFail: () =
   // ----- Look-around gestures (only once anchored) -----------------------
   const onPointerDown = (e: React.PointerEvent) => {
     if (!anchored || e.button > 0) return;
+    if (tour.active) holdTour();
     // Controls, pins, the card and the panel keep their own pointer behaviour.
     if ((e.target as HTMLElement).closest("button, a, nav, .exh-card")) return;
     const touch = e.pointerType === "touch";
@@ -364,6 +468,7 @@ export default function ExhibitionExperience({ onFail, onReady }: { onFail: () =
   // length of the transition so it stays pinned to its world point.
   const toggleCard = () => {
     setCardExpanded((e) => !e);
+    if (tour.active) holdTour();
     const until = performance.now() + 450;
     const tick = () => {
       invalidate();
@@ -406,6 +511,8 @@ export default function ExhibitionExperience({ onFail, onReady }: { onFail: () =
         onCreated={({ gl, get }) => {
           glRef.current = gl;
           getRef.current = get;
+          onProgress?.(0.65);
+          asyncTexturesSettled().then(() => onProgress?.(0.9));
           gl.domElement.addEventListener("webglcontextlost", (ev) => {
             ev.preventDefault();
             onFail();
@@ -430,6 +537,7 @@ export default function ExhibitionExperience({ onFail, onReady }: { onFail: () =
           <AreaModels overrides={modelOverrides} />
           <Placeholders />
           <Scenery />
+          <Venue />
           <HitTargets
             current={selected}
             onSelect={(id) => select(id)}
@@ -491,7 +599,43 @@ export default function ExhibitionExperience({ onFail, onReady }: { onFail: () =
           </button>
         </div>
 
-        {!selected && <p className="exh-overview-hint">اختر منطقة من المشهد أو من «مناطق المعرض»</p>}
+        {!selected && !tour.active && (
+          <div className="exh-overview-cta">
+            <button type="button" className="exh-btn exh-btn-primary exh-tour-start" onClick={startTour}>
+              <span aria-hidden>▶</span> ابدأ الجولة
+            </button>
+            <p className="exh-overview-hint">أو اختر منطقة من المشهد أو من «مناطق المعرض»</p>
+          </div>
+        )}
+
+        {tour.active && (
+          <div className="exh-tour" role="group" aria-label="الجولة الموجّهة">
+            <p className="exh-tour-step">
+              <span>
+                الجولة {tour.index + 1} / {TOUR_ORDER.length}
+              </span>
+              <strong>{AREAS[TOUR_ORDER[tour.index]].content.shortName}</strong>
+            </p>
+            <span className="exh-tour-progress" aria-hidden>
+              <i
+                key={`${tour.index}-${dwellKey}-${tour.paused}-${anchored}`}
+                data-run={anchored && !tour.paused ? "true" : "false"}
+                style={{ animationDuration: `${TOUR_DWELL_MS}ms` }}
+              />
+            </span>
+            <button
+              type="button"
+              className="exh-btn exh-tour-btn"
+              aria-pressed={tour.paused}
+              onClick={() => setTour((t) => ({ ...t, paused: !t.paused }))}
+            >
+              {tour.paused ? "متابعة" : "إيقاف مؤقت"}
+            </button>
+            <button type="button" className="exh-btn exh-tour-btn" onClick={stopTour}>
+              إنهاء الجولة
+            </button>
+          </div>
+        )}
 
 
         {anchored && <p className="exh-look-hint">اسحب للتلفّت · اضغط منطقة مجاورة للانتقال إليها</p>}
@@ -508,7 +652,7 @@ export default function ExhibitionExperience({ onFail, onReady }: { onFail: () =
       </div>
 
       <p className="sr-only" aria-live="polite">
-        {anchored && area ? `${area.content.name}: ${area.content.teaser}` : flying ? "جارٍ الانتقال…" : ""}
+        {anchored && area ? `${area.content.name}: ${area.content.teaser}` : flying ? "جارٍ الانتقال…" : tourNote}
       </p>
     </div>
   );

@@ -4,7 +4,7 @@ import { useFrame } from "@react-three/fiber";
 import { useMemo, type RefObject } from "react";
 import * as THREE from "three";
 import { AREA_ORDER, AREAS, CORNER_IDS, isCorner } from "@/lib/exhibition/areas";
-import { BUILDINGS, MUSEUM } from "@/lib/exhibition/layout";
+import { BUILDINGS, MUSEUM, MUSEUM_BOUNDS } from "@/lib/exhibition/layout";
 import type { AreaId } from "@/lib/exhibition/types";
 
 /**
@@ -24,6 +24,8 @@ export type PinRegistry = {
   /** The open area card (world-anchored) and its world anchor. */
   card: HTMLElement | null;
   cardAt: readonly [number, number, number] | null;
+  /** Space kept free at the bottom of the stage (e.g. for the tour bar). */
+  bottomInset?: number;
 };
 
 const PRIORITY: readonly AreaId[] = ["museum", "stage", "entertainment", ...CORNER_IDS];
@@ -34,8 +36,8 @@ const OCCLUDERS = [
     (b) => new THREE.Box3(new THREE.Vector3(b.minX, 0, b.minZ), new THREE.Vector3(b.maxX, b.height, b.maxZ + 3.5)),
   ),
   new THREE.Box3(
-    new THREE.Vector3(MUSEUM.facadeX, 0, MUSEUM.northZ),
-    new THREE.Vector3(MUSEUM.facadeX + MUSEUM.depth, MUSEUM.height, MUSEUM.northZ + MUSEUM.length),
+    new THREE.Vector3(MUSEUM_BOUNDS.minX, 0, MUSEUM_BOUNDS.minZ),
+    new THREE.Vector3(MUSEUM_BOUNDS.maxX, MUSEUM.height, MUSEUM_BOUNDS.maxZ),
   ),
 ];
 
@@ -58,7 +60,7 @@ function placeCard(reg: PinRegistry, camera: THREE.Camera, size: { width: number
   // subject above the anchor stays visible on every aspect ratio.
   let y = ((1 - cardV.y) / 2) * size.height + 8;
   x = Math.min(Math.max(x, MARGIN), size.width - w - MARGIN);
-  y = Math.min(Math.max(y, 64), size.height - h - MARGIN);
+  y = Math.min(Math.max(y, 64), size.height - h - (reg.bottomInset ?? MARGIN));
   el.style.transform = `translate(${x.toFixed(1)}px, ${y.toFixed(1)}px)`;
   el.dataset.inview = inView ? "true" : "false";
 }

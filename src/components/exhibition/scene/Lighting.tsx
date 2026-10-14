@@ -5,7 +5,7 @@ import { Bloom, EffectComposer, ToneMapping, Vignette } from "@react-three/postp
 import { ToneMappingMode } from "postprocessing";
 import { useEffect, useRef } from "react";
 import * as THREE from "three";
-import { MUSEUM } from "@/lib/exhibition/layout";
+import { MAIN_PATH } from "@/lib/exhibition/layout";
 import { useQuality } from "./quality";
 
 /**
@@ -17,7 +17,8 @@ export function Lighting() {
   const q = useQuality();
   const get = useThree((s) => s.get);
   const key = useRef<THREE.DirectionalLight>(null);
-  const focus = new THREE.Vector3(MUSEUM.facadeX + 4, 0, MUSEUM.northZ + MUSEUM.length / 2);
+  // Centre of the venue (the main path between the museum and the corner U).
+  const focus = new THREE.Vector3(52, 0, MAIN_PATH.z + 6);
 
   useEffect(() => {
     const light = key.current;
@@ -40,15 +41,16 @@ export function Lighting() {
         color="#b4bcff"
         intensity={0.55}
         castShadow={q.shadows}
-        shadow-mapSize={[2048, 2048]}
+        // The larger venue needs a wider shadow frustum; 4096 keeps texel density close to before.
+        shadow-mapSize={[4096, 4096]}
         shadow-bias={-0.0004}
         shadow-normalBias={0.04}
-        shadow-camera-left={-45}
-        shadow-camera-right={45}
-        shadow-camera-top={40}
-        shadow-camera-bottom={-40}
+        shadow-camera-left={-80}
+        shadow-camera-right={80}
+        shadow-camera-top={60}
+        shadow-camera-bottom={-60}
         shadow-camera-near={1}
-        shadow-camera-far={180}
+        shadow-camera-far={240}
       />
     </>
   );

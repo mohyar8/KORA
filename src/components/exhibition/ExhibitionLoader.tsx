@@ -2,6 +2,7 @@
 
 import dynamic from "next/dynamic";
 import { Component, useEffect, useRef, useState, type ReactNode } from "react";
+import { LoadingScreen } from "./ui/LoadingScreen";
 
 const ExhibitionExperience = dynamic(() => import("./ExhibitionExperience"), { ssr: false });
 
@@ -57,6 +58,9 @@ export function ExhibitionLoader({ deferMs = 4500 }: { deferMs?: number }) {
   const [status, setStatus] = useState<Status>("waiting");
   const [near, setNear] = useState(false);
   const [ready, setReady] = useState(false);
+  /** Loading stage reached (see ExhibitionExperience onProgress); `shown` eases towards it. */
+  const [stage, setStage] = useState(0.04);
+  const [shown, setShown] = useState(0);
   const host = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -104,20 +108,39 @@ export function ExhibitionLoader({ deferMs = 4500 }: { deferMs?: number }) {
   }, [listShown]);
 
   const live = status === "loading" && ready;
+  const goal = live ? 1 : status === "loading" ? Math.max(stage, 0.12) : stage;
+
+  // The line eases towards the stage reached and keeps creeping slowly
+  // within that stage (the code download has no byte progress), so it is
+  // always visibly moving but never runs ahead of the real state.
+  useEffect(() => {
+    if (!near || listShown) return;
+    let raf = 0;
+    const cap = goal >= 1 ? 1 : goal <= 0.12 ? 0.45 : Math.min(0.97, goal + 0.08);
+    const tick = () => {
+      setShown((v) => {
+        const next = Math.min(cap, v + Math.max((goal - v) * 0.08, 0.0007));
+        return next > v ? next : v;
+      });
+      raf = requestAnimationFrame(tick);
+    };
+    raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
+  }, [goal, near, listShown]);
 
   return (
     <div ref={host} className="exh-loader" data-status={status} data-ready={live}>
       {status === "loading" && (
         <Boundary onError={() => setStatus("failed")}>
-          <ExhibitionExperience onFail={() => setStatus("failed")} onReady={() => setReady(true)} />
+          <ExhibitionExperience
+            onFail={() => setStatus("failed")}
+            onReady={() => setReady(true)}
+            onProgress={(p) => setStage((s) => Math.max(s, p))}
+          />
         </Boundary>
       )}
       {near && <Poster hidden={live} />}
-      {(status === "waiting" || (status === "loading" && !ready)) && (
-        <p className="exh-loading-note" role="status">
-          جارٍ تجهيز المعرض ثلاثي الأبعاد…
-        </p>
-      )}
+      {near && (status === "waiting" || status === "loading") && <LoadingScreen progress={live ? 1 : shown} hidden={live} />}
       {status === "deferred" && (
         <div className="exh-placeholder-note">
           <p>العرض ثلاثي الأبعاد متوقف لتوفير البيانات.</p>

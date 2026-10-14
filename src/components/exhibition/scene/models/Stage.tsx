@@ -155,7 +155,7 @@ function armchairGeometry() {
   return mergeGeometries(parts);
 }
 
-/** Annular sector solid in the seating frame (centre = SEATING.center). */
+/** Annular sector solid in the stage frame (centre = SEATING.localCenter). */
 function sector(r0: number, r1: number, a0: number, a1: number, h: number, cx: number, cz: number) {
   const s = new THREE.Shape();
   const n = 20;
@@ -176,8 +176,8 @@ function sector(r0: number, r1: number, a0: number, a1: number, h: number, cx: n
 
 function amphitheatre() {
   // Seating centre in the stage frame.
-  const cx = SEATING.center.x - STAGE.centerX;
-  const cz = SEATING.center.z - STAGE.centerZ;
+  const cx = SEATING.localCenter.x;
+  const cz = SEATING.localCenter.z;
   const bands = 5;
   const band = (SEATING.outerRadius - SEATING.innerRadius) / bands;
   const rise = 0.42;

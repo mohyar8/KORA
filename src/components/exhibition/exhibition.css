@@ -82,23 +82,10 @@
   background: rgb(11 16 48 / 68%);
 }
 
-.exh-loading-note,
 .exh-poster-caption {
   position: absolute;
   z-index: 6;
   pointer-events: none;
-}
-.exh-loading-note {
-  bottom: 22px;
-  left: 50%;
-  translate: -50% 0;
-  padding: 8px 16px;
-  border-radius: 999px;
-  white-space: nowrap;
-  font-size: 13px;
-  color: rgb(236 239 245 / 82%);
-  background: rgb(11 16 48 / 72%);
-  border: 1px solid rgb(236 239 245 / 14%);
 }
 .exh-poster-caption {
   top: 22px;
@@ -108,6 +95,52 @@
   background: rgb(11 16 48 / 70%);
   font-size: 11px;
 }
+
+/* ---------- Branded loading screen (until the 3D scene is ready) ---------- */
+
+.exh-loading {
+  position: absolute;
+  inset: 0;
+  z-index: 6;
+  display: grid;
+  place-items: center;
+  background: radial-gradient(70% 60% at 50% 45%, rgb(31 42 99 / 80%), rgb(11 16 48 / 95%));
+  transition: opacity .7s ease, visibility .7s;
+}
+.exh-loading[data-hidden="true"] { opacity: 0; visibility: hidden; pointer-events: none; }
+.exh-loading-inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 18px;
+  width: min(320px, 72%);
+}
+.exh-loading-mark { width: min(220px, 52vw); aspect-ratio: 1080 / 800; }
+.exh-loading-logo { display: block; width: 100%; height: 100%; overflow: visible; }
+/* Each official logo path flies in from outside and settles in place. */
+.exh-logo-piece { opacity: 0; transform-box: fill-box; transform-origin: center; }
+.exh-loading-logo.is-assembling .exh-logo-piece {
+  animation: exh-assemble .9s cubic-bezier(.2, .9, .25, 1) both;
+  animation-delay: calc(var(--i) * 70ms + 120ms);
+}
+@keyframes exh-assemble {
+  from { opacity: 0; transform: translate(var(--dx), var(--dy)) rotate(var(--rot)) scale(.55); }
+  55% { opacity: 1; }
+  to { opacity: 1; transform: none; }
+}
+/* Once assembled, a slow coral glow keeps the screen visibly alive. */
+.exh-loading-logo.is-assembling { animation: exh-logo-breathe 2.6s ease-in-out 2.4s infinite; }
+.exh-loading[data-hidden="true"] .exh-loading-logo { animation: none; }
+@keyframes exh-logo-breathe { 50% { filter: drop-shadow(0 0 14px rgb(242 101 87 / 45%)); } }
+.exh-loading-bar { width: 100%; height: 3px; overflow: hidden; background: rgb(236 239 245 / 14%); }
+.exh-loading-bar span {
+  display: block;
+  height: 100%;
+  background: var(--color-coral);
+  transform-origin: right;
+  transition: transform .25s linear;
+}
+.exh-loading-label { color: rgb(236 239 245 / 82%); font-size: 13px; }
 
 /* Fullscreen is a fixed overlay inside the isolated stage: lift the whole
    stage above the fixed topbar (z 60) and the noise overlay (z 90). */
@@ -163,18 +196,71 @@
 }
 .exh-btn-fullscreen { display: none; }
 
-.exh-overview-hint {
+/* ---------- Guided tour: start button (overview) and tour bar ---------- */
+
+.exh-overview-cta {
   position: absolute;
-  bottom: 22px;
+  bottom: 20px;
   left: 50%;
   translate: -50% 0;
-  padding: 7px 14px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  pointer-events: none !important;
+}
+.exh-overview-cta > * { pointer-events: auto; }
+.exh-tour-start {
+  min-height: 46px;
+  padding: 10px 24px;
+  font-size: 15px;
+  box-shadow: 0 10px 30px -10px rgb(242 101 87 / 60%);
+}
+.exh-tour-start:hover { filter: brightness(1.08); }
+.exh-overview-hint {
+  padding: 5px 12px;
   color: rgb(236 239 245 / 85%);
-  font-size: 13px;
+  font-size: 12px;
   background: rgb(12 17 46 / 72%);
   pointer-events: none !important;
   white-space: nowrap;
 }
+
+.exh-tour {
+  position: absolute;
+  bottom: 16px;
+  left: 50%;
+  translate: -50% 0;
+  display: grid;
+  grid-template-columns: auto auto auto;
+  grid-template-areas: "step pause stop" "bar bar bar";
+  align-items: center;
+  gap: 8px 10px;
+  width: min(460px, calc(100% - 24px));
+  padding: 10px 12px 8px;
+  color: var(--color-paper);
+  background: rgb(12 17 46 / 92%);
+  border: 1px solid rgb(236 239 245 / 14%);
+  border-top: 2px solid var(--color-coral);
+  box-shadow: 0 18px 40px -18px rgb(0 0 0 / 70%);
+}
+.exh-tour-step { grid-area: step; display: flex; flex-direction: column; gap: 2px; min-width: 0; font-size: 12px; color: rgb(236 239 245 / 75%); }
+.exh-tour-step strong { overflow: hidden; color: var(--color-paper); font-size: 15px; text-overflow: ellipsis; white-space: nowrap; }
+.exh-tour-btn { min-height: 36px; padding: 6px 12px; font-size: 13px; }
+.exh-tour-btn:nth-of-type(1) { grid-area: pause; }
+.exh-tour-btn:nth-of-type(2) { grid-area: stop; }
+.exh-tour-progress { grid-area: bar; height: 3px; overflow: hidden; background: rgb(236 239 245 / 14%); }
+.exh-tour-progress i {
+  display: block;
+  height: 100%;
+  background: var(--color-coral);
+  transform: scaleX(0);
+  transform-origin: right;
+  animation: exh-tour-hold linear forwards;
+  animation-play-state: paused;
+}
+.exh-tour-progress i[data-run="true"] { animation-play-state: running; }
+@keyframes exh-tour-hold { to { transform: scaleX(1); } }
 
 .exh-skip {
   position: absolute;
@@ -273,7 +359,8 @@
 /* Expand / collapse. Collapsed = compact bar (name + chevron) at the same
    world anchor; the folds animate via grid rows (0fr ↔ 1fr). */
 .exh-card { transition: opacity .25s ease, visibility .25s, width .32s cubic-bezier(.2, .8, .2, 1), padding .32s cubic-bezier(.2, .8, .2, 1); }
-.exh-card[data-expanded="false"] { width: min(250px, calc(100% - 24px)); padding: 8px 10px; border-top-width: 2px; }
+/* Collapsed: wide enough for the three navigation controls (they stay inside the bar). */
+.exh-card[data-expanded="false"] { width: min(300px, calc(100% - 24px)); padding: 8px 10px; border-top-width: 2px; }
 .exh-card-fold {
   display: grid;
   grid-template-rows: 1fr;
@@ -366,8 +453,11 @@
   border-top: 1px solid rgb(236 239 245 / 12%);
 }
 .exh-card[data-expanded="false"] .exh-card-nav { margin-top: 8px; padding-top: 8px; }
+.exh-card[data-expanded="false"] .exh-card-nav-btn { padding: 6px 4px; gap: 4px; }
 .exh-card-nav-btn {
   flex: 1 1 0;
+  min-width: 0;
+  overflow: hidden;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -585,7 +675,9 @@
   .exh-btn-fullscreen { display: inline-flex; }
   .exh-toolbar { top: 12px; inset-inline-start: 12px; }
   .exh-toolbar .exh-btn { min-height: 40px; padding: 8px 12px; font-size: 13px; }
-  .exh-overview-hint { bottom: 46px; font-size: 12px; }
+  .exh-overview-cta { bottom: 48px; }
+  .exh-overview-hint { font-size: 11px; }
+  .exh-tour { bottom: 44px; }
   .exh-panel {
     top: auto;
     inset-inline: 0;
@@ -613,12 +705,15 @@
   .exh-card-tags { display: none; }
   .exh-concept-note { top: auto; bottom: 16px; inset-inline-end: 12px; max-width: 40%; }
   .exh-poster-caption { top: auto; bottom: 16px; inset-inline-end: 12px; }
-  .exh-loading-note { bottom: 52px; }
   .exh-concept-legend { display: none; }
   .exh-look-hint { bottom: auto; top: 112px; max-width: 80%; text-align: center; }
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .exh-tour-progress i { animation: none; transform: scaleX(0); }
+  .exh-logo-piece { opacity: 1; }
+  .exh-loading-logo.is-assembling,
+  .exh-loading-logo.is-assembling .exh-logo-piece { animation: none; }
   .exh-veil,
   .exh-poster,
   .exh-panel,

@@ -38,7 +38,18 @@ export function overviewPose(aspect: number): Pose {
   const position = new THREE.Vector3(...OVERVIEW.position);
   const offset = position.clone().sub(target);
   const fit = fitDistance(OVERVIEW.fitWidth, aspect, fovFor(aspect));
-  if (offset.length() < fit) offset.setLength(fit);
+  // Portrait: aim a little further down the path, so the frame starts at
+  // the arch instead of the unpaved ground outside it.
+  if (aspect < 0.8) target.x += 12;
+  if (offset.length() < fit) {
+    // Narrow screens need more distance. Pull back mostly upwards (a steeper
+    // view) rather than straight back, which would put the tree belt behind
+    // the entrance into the foreground and fill the top with sky.
+    const flat = new THREE.Vector3(offset.x, 0, offset.z);
+    const h = Math.min(fit, flat.length() * 1.15);
+    flat.setLength(h);
+    offset.set(flat.x, Math.sqrt(fit * fit - h * h), flat.z);
+  }
   return { position: target.clone().add(offset), target };
 }
 

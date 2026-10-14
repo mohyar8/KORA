@@ -6,11 +6,13 @@ import { mergeGeometries } from "three/examples/jsm/utils/BufferGeometryUtils.js
 import {
   BUILDINGS,
   ENTERTAINMENT,
-  MUSEUM,
+  LAWN_PALMS,
   MUSEUM_PATH_PLANTERS,
   PASSAGE,
   PLAZA,
   SOUTH_PALMS,
+  STAGE,
+  U_WALK,
   WEST_PLANTERS,
 } from "@/lib/exhibition/layout";
 import { concreteTexture, frondTexture, passageSignTexture, radialTexture, rng, windowTexture } from "./textures";
@@ -298,14 +300,16 @@ function treeBelt(count: number) {
   const r = rng(41);
   const out: { x: number; z: number; h: number; c: number }[] = [];
   const zones: [number, number, number, number, number][] = [
-    // minX, maxX, minZ, maxZ, share
-    [-40, 110, 70, 84, 0.34],
-    [86, 104, -30, 70, 0.26],
-    [-46, -24, -10, 70, 0.22],
-    // North belt, leaving the (provisional) entertainment zone open.
-    [-40, 6, -44, -30, 0.08],
-    [48, 110, -44, -30, 0.1],
-    [-40, 110, -72, -60, 0.12],
+    // minX, maxX, minZ, maxZ, share — a screen of evergreens around the
+    // paved grounds, leaving the buildings and the entertainment zone open.
+    [-52, 150, 62, 78, 0.3],
+    [134, 150, -60, 62, 0.2],
+    [-52, -26, -40, 62, 0.18],
+    [-52, 16, -60, -40, 0.1],
+    [110, 150, -60, -38, 0.08],
+    [-40, 36, -92, -60, 0.06],
+    [84, 150, -92, -60, 0.06],
+    [-40, 150, -106, -96, 0.14],
   ];
   for (const [x0, x1, z0, z1, share] of zones) {
     const n = Math.round(count * share);
@@ -320,61 +324,84 @@ function treeBelt(count: number) {
   return out;
 }
 
-const MX = MUSEUM.facadeX;
-const MZ = MUSEUM.northZ;
-
 /** Palms standing in their own square planters. */
 const POTTED_PALMS: [number, number][] = [
-  // East edge behind the museum (masterplan right-hand palm row).
-  ...Array.from({ length: 7 }, (_, i) => [MX + MUSEUM.depth + 3.2, MZ - 1 + i * 5] as [number, number]),
-  // North edge between the plaza and Buildings 70/57.
-  [4, -1.8], [14, -1.8], [36, -1.8], [44, -1.8],
-  // South edge behind the corners (masterplan).
+  // Between the museum and the building forecourts, and east of the passage.
+  ...[24, 32, 40, 48, 70, 80, 90, 100].map((x) => [x, -30.5] as [number, number]),
+  // Behind the base of the corner U.
   ...SOUTH_PALMS.xs.map((x) => [x, SOUTH_PALMS.z] as [number, number]),
+  // Behind the stage.
+  ...[-18, -9, 9, 18].map((z) => [STAGE.centerX + 11, z] as [number, number]),
+  // Along the eastern half of the main path.
+  ...[64, 74, 84].map((x) => [x, 6.2] as [number, number]),
+  ...[74, 84].map((x) => [x, -6.2] as [number, number]),
+  // Corner courtyard.
+  [24, 11], [42, 11], [24, 29], [42, 29],
 ];
 
-/** Palms growing out of the long planter strips (masterplan). */
+/** Palms growing out of the long planter strips. */
 const STRIP_PALMS: [number, number][] = [
-  ...MUSEUM_PATH_PLANTERS.palms.map((z) => [MUSEUM_PATH_PLANTERS.x, z] as [number, number]),
+  ...MUSEUM_PATH_PLANTERS.palms.map((x) => [x, MUSEUM_PATH_PLANTERS.z] as [number, number]),
   ...WEST_PLANTERS.palms.map((z) => [WEST_PLANTERS.x, z] as [number, number]),
 ];
 
-const PALMS: [number, number][] = [...POTTED_PALMS, ...STRIP_PALMS];
+const PALMS: [number, number][] = [...POTTED_PALMS, ...STRIP_PALMS, ...LAWN_PALMS.map(([x, z]) => [x, z] as [number, number])];
 const PLANTERS: [number, number][] = POTTED_PALMS;
 
-/** Long planter strips [x, z0, z1]: museum path column and the west column (gap = entrance). */
-const STRIPS: [number, number, number][] = [
-  ...MUSEUM_PATH_PLANTERS.runs.map(([z0, z1]) => [MUSEUM_PATH_PLANTERS.x, z0, z1] as [number, number, number]),
-  [WEST_PLANTERS.x, 0.5, PLAZA.entrance.z - 1.8],
-  [WEST_PLANTERS.x, PLAZA.entrance.z + 1.8, 34.5],
+/** Long planter strips [x0, x1, z0, z1] (1 m wide): museum strip along the path, the west column (gap = arch). */
+const STRIPS: [number, number, number, number][] = [
+  ...MUSEUM_PATH_PLANTERS.runs.map(
+    ([x0, x1]) => [x0, x1, MUSEUM_PATH_PLANTERS.z - 0.5, MUSEUM_PATH_PLANTERS.z + 0.5] as [number, number, number, number],
+  ),
+  [WEST_PLANTERS.x - 0.5, WEST_PLANTERS.x + 0.5, WEST_PLANTERS.from, -WEST_PLANTERS.gap],
+  [WEST_PLANTERS.x - 0.5, WEST_PLANTERS.x + 0.5, WEST_PLANTERS.gap, WEST_PLANTERS.to],
 ];
 
+const E = { dx: ENTERTAINMENT.minX - 11, dz: ENTERTAINMENT.minZ + 54 };
 const DISC_LAMPS: [number, number][] = [
-  [-6, 44], [6, 50], [18, 44], [30, 50], [42, 44], [54, 50], [66, 44],
-  [-8, 10], [-8, 26], [68, 8], [68, 22], [70, 36], [12, 58], [36, 58], [60, 58],
+  // Main path.
+  [-6, -5.5], [52, -6], [74, -6], [86, -6],
+  [-6, 5.5], [12, 5.5], [52, 5.5], [74, 5.5], [86, 5.5],
+  // Corner courtyard and passage branch.
+  [24, 20], [42, 20], [PASSAGE.minX - 2.5, -14.5], [PASSAGE.maxX + 2.5, -23.5],
+  // Perimeter.
+  ...[0, 24, 48, 72, 96, 120].map((x) => [x, 50] as [number, number]),
+  [126, -28], [126, -10], [126, 22], [126, 40], [-14, -28], [-14, 28], [8, -32], [110, -32], [120, -32],
   // Around the (provisional) entertainment zone.
-  [9, -31], [27, -29.5], [45, -31], [9, -55], [27, -56.5], [45, -55],
+  ...([[9, -31], [27, -29.5], [45, -31], [9, -55], [27, -56.5], [45, -55]] as const).map(
+    ([x, z]) => [x + E.dx, z + E.dz] as [number, number],
+  ),
 ];
 
 const BOLLARDS: [number, number][] = [
-  ...[0, 6, 12, 18, 32, 38, 50, 56].map((x) => [x, -0.6] as [number, number]),
-  ...Array.from({ length: 8 }, (_, i) => [MX + MUSEUM.depth + 1.6, MZ + i * 4] as [number, number]),
-  ...[2, 10, 17.5, 22, 27, 32, 50].map((x) => [x, 38.7] as [number, number]),
-  // Lanterns along the museum-path planter strip (masterplan).
-  ...[4.5, 9, 13.5, 21, 26, 30.5].map((z) => [MUSEUM_PATH_PLANTERS.x + 0.9, z] as [number, number]),
+  // Inner edges of the U walkway.
+  ...[6, 12, 18, 24, 30].flatMap((z) => [
+    [U_WALK.westX + 2.2, z] as [number, number],
+    [U_WALK.eastX - 2.2, z] as [number, number],
+  ]),
+  ...[24, 30, 36, 42].map((x) => [x, U_WALK.baseZ - 2.2] as [number, number]),
+  // Passage branch.
+  ...[-6, -14.5, -23.5, -32].flatMap((z) => [
+    [PASSAGE.minX - 0.6, z] as [number, number],
+    [PASSAGE.maxX + 0.6, z] as [number, number],
+  ]),
+  // Lanterns along the museum planter strip, and the amphitheatre forecourt.
+  ...[20.5, 36.5, 46.7].map((x) => [x, MUSEUM_PATH_PLANTERS.z + 0.9] as [number, number]),
+  [93, -8], [93, 8],
 ];
 
 const BENCHES: Placement[] = [
-  { p: [8, 0, 46], r: 0 },
-  { p: [32, 0, 46], r: 0 },
-  { p: [56, 0, 52], r: Math.PI / 2 },
-  { p: [66, 0, 30], r: Math.PI / 2 },
-  { p: [-4, 0, 18], r: Math.PI / 2 },
+  { p: [33, 0, 22], r: 0 },
+  { p: [26.5, 0, 15], r: Math.PI / 2 },
+  { p: [39.5, 0, 15], r: Math.PI / 2 },
+  { p: [78, 0, 7], r: 0 },
+  { p: [78, 0, -7], r: 0 },
+  { p: [-6, 0, 9], r: Math.PI / 2 },
 ];
 
 const ROAD_LIGHTS: [number, number][] = [
-  ...Array.from({ length: 8 }, (_, i) => [108, -30 + i * 18] as [number, number]),
-  ...Array.from({ length: 7 }, (_, i) => [-30 + i * 22, 92] as [number, number]),
+  ...Array.from({ length: 8 }, (_, i) => [142, -60 + i * 18] as [number, number]),
+  ...Array.from({ length: 9 }, (_, i) => [-40 + i * 22, 88] as [number, number]),
 ];
 
 export function Surroundings() {
@@ -434,10 +461,10 @@ export function Surroundings() {
     const r = rng(77);
     return Array.from({ length: Math.round(q.treeCount * 0.8) }, () => {
       const a = r() * Math.PI * 2;
-      const d = 130 + r() * 70;
+      const d = 165 + r() * 70;
       const c = 3 + r() * 2.5;
       const h = 5 + r() * 4;
-      return { p: [30 + Math.cos(a) * d, h + c * 0.6, 20 + Math.sin(a) * d] as [number, number, number], s: [c, c * 1.3, c] as [number, number, number], r: a };
+      return { p: [56 + Math.cos(a) * d, h + c * 0.6, Math.sin(a) * d] as [number, number, number], s: [c, c * 1.3, c] as [number, number, number], r: a };
     });
   }, [q.treeCount]);
   const items = useMemo(() => {
@@ -461,16 +488,25 @@ export function Surroundings() {
         return { p: [x + Math.cos(-a) * lean, 0.7 + h, z + Math.sin(-a) * lean], r: a };
       }),
       planters: PLANTERS.map<Placement>(([x, z]) => ({ p: [x, 0, z] })),
-      strips: STRIPS.map<Placement>(([x, z0, z1]) => ({ p: [x, 0, (z0 + z1) / 2], s: [1, 1, z1 - z0] })),
+      // Strips run along their longer side (local z), turned for east–west runs.
+      strips: STRIPS.map<Placement>(([x0, x1, z0, z1]) => {
+        const alongX = x1 - x0 > z1 - z0;
+        return { p: [(x0 + x1) / 2, 0, (z0 + z1) / 2], s: [1, 1, alongX ? x1 - x0 : z1 - z0], r: alongX ? Math.PI / 2 : 0 };
+      }),
       // Trimmed hedge in ~2 m segments (instanced, slightly varied).
-      stripHedges: STRIPS.flatMap<Placement>(([x, z0, z1]) => {
-        const n = Math.max(1, Math.round((z1 - z0) / 2));
-        const seg = (z1 - z0) / n;
-        return Array.from({ length: n }, (_, i): Placement => ({
-          p: [x, 0.55, z0 + seg * (i + 0.5)],
-          s: [1, 0.9 + (i % 3) * 0.08, seg / 2],
-          r: i % 2 ? Math.PI : 0,
-        }));
+      stripHedges: STRIPS.flatMap<Placement>(([x0, x1, z0, z1]) => {
+        const alongX = x1 - x0 > z1 - z0;
+        const len = alongX ? x1 - x0 : z1 - z0;
+        const n = Math.max(1, Math.round(len / 2));
+        const seg = len / n;
+        return Array.from({ length: n }, (_, i): Placement => {
+          const t = seg * (i + 0.5);
+          return {
+            p: alongX ? [x0 + t, 0.55, (z0 + z1) / 2] : [(x0 + x1) / 2, 0.55, z0 + t],
+            s: [1, 0.9 + (i % 3) * 0.08, seg / 2],
+            r: (alongX ? Math.PI / 2 : 0) + (i % 2 ? Math.PI : 0),
+          };
+        });
       }),
       shrubs: PLANTERS.map<Placement>(([x, z], i) => ({ p: [x, 0.7, z], s: [1.5, 0.8, 0.75], r: (i % 4) * (Math.PI / 2) })),
       poles: DISC_LAMPS.map<Placement>(([x, z]) => ({ p: [x, 0, z], s: [1, 4.6, 1] })),
@@ -612,7 +648,7 @@ export function Surroundings() {
       </Instances>
 
       {/* Entertainment-area passage between Buildings 70 and 57 (masterplan), kept as scenery. */}
-      <mesh position={[27, 0.008, -12]} rotation-x={-Math.PI / 2}>
+      <mesh position={[PASSAGE.x, 0.008, PASSAGE.frontZ - 5]} rotation-x={-Math.PI / 2}>
         <planeGeometry args={[6, 18]} />
         <meshStandardMaterial color="#6f6f73" roughness={0.9} />
       </mesh>

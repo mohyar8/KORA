@@ -3,7 +3,7 @@ export type Vec3 = readonly [number, number, number];
 /** Whether a value comes from a dimensioned drawing or was inferred from images. */
 export type Provenance = "measured" | "inferred";
 
-export type CornerId = "corner-1" | "corner-2" | "corner-3" | "corner-4" | "corner-5" | "corner-6" | "corner-7";
+export type CornerId = "corner-1" | "corner-2" | "corner-3" | "corner-4" | "corner-5" | "corner-6";
 export type AreaId = "museum" | "stage" | "entertainment" | CornerId;
 
 export type AreaKind = "museum" | "stage" | "entertainment" | "corner";
@@ -59,11 +59,13 @@ export type AreaConfig = {
    * frame (metres, +Z = open front / audience side), so swapping a model
    * never touches anchors, hit volumes or content.
    */
-  frame: { position: Vec3; rotationY: number };
+  frame: { position: Vec3; rotationY: number; scale?: number };
   /** Optional replacement model (GLB, authored in `frame`); overrides the code kit. */
   modelUrl?: string;
   /** Placement note shown in the card when the position itself is uncertain. */
   placementNote?: string;
+  /** Shown in the card when the model is a provisional concept, not a supplied design. */
+  designNote?: string;
   anchor: CameraAnchor;
   look: LookBounds;
   /** Model-independent click/hover volumes. */

@@ -1,13 +1,25 @@
-import { CORNER_SLOTS, ENTERTAINMENT, MUSEUM, PASSAGE, STAGE, type CornerSlot } from "./layout";
+import {
+  BOOTH_SCALE,
+  CORNER_SLOTS,
+  ENTERTAINMENT,
+  MUSEUM,
+  MUSEUM_BOUNDS,
+  MUSEUM_FRAME,
+  PASSAGE,
+  STAGE,
+  STAGE_FRAME,
+  type CornerSlot,
+} from "./layout";
 import type { AreaConfig, AreaContent, AreaId, CornerId, Vec3 } from "./types";
 
-const museumMidZ = MUSEUM.northZ + MUSEUM.length / 2;
+const museumMidX = (MUSEUM_BOUNDS.minX + MUSEUM_BOUNDS.maxX) / 2;
+const museumMidZ = (MUSEUM_BOUNDS.minZ + MUSEUM_BOUNDS.maxZ) / 2;
 
 /**
- * Corner content. The masterplan has seven slots but does not say which
- * corner occupies which slot, and only five corner designs were supplied —
- * so the slot ↔ corner mapping below is PROVISIONAL, and two slots are
- * explicitly "to be confirmed". Swapping identities only touches this list.
+ * Corner content. Six corners (owner, 2026-10-13): five follow supplied
+ * preliminary designs; the sixth, Engineering, has no supplied design and is
+ * a clearly marked provisional concept. The position of each corner in the
+ * U is PROVISIONAL. Swapping identities only touches this list.
  */
 const CORNER_CONTENT: Record<CornerId, AreaContent> = {
   "corner-1": {
@@ -51,19 +63,11 @@ const CORNER_CONTENT: Record<CornerId, AreaContent> = {
     provisional: true,
   },
   "corner-6": {
-    name: "ركن قيد التأكيد (الموقع ٦)",
-    shortName: "ركن ٦",
-    eyebrow: "قريبًا",
-    teaser: "سيُعلَن عن هذا الركن وتصميمه لاحقًا.",
-    highlights: [],
-    provisional: true,
-  },
-  "corner-7": {
-    name: "ركن قيد التأكيد (الموقع ٧)",
-    shortName: "ركن ٧",
-    eyebrow: "قريبًا",
-    teaser: "سيُعلَن عن هذا الركن وتصميمه لاحقًا.",
-    highlights: [],
+    name: "ركن الهندسة",
+    shortName: "الهندسة",
+    eyebrow: "هندسة الملاعب",
+    teaser: "من المخطط إلى المدرج: كيف تُصمَّم الملاعب وتُشيَّد لتحمل الجماهير واللعبة معًا؟ نظرة على الهندسة التي تقف خلف كل مباراة.",
+    highlights: ["هندسة الإنشاءات", "تصميم الملاعب"],
     provisional: true,
   },
 };
@@ -75,41 +79,45 @@ export const CORNER_IDS: readonly CornerId[] = [
   "corner-4",
   "corner-5",
   "corner-6",
-  "corner-7",
 ];
 export const BOOTH_HEIGHT = 3;
 
 /**
  * Corners with a code-kit model (Media in M3; Technology, Entrepreneurship,
- * Economy and Health in M4). Slots 6–7 stay placeholders until identified.
+ * Economy and Health in M4; Engineering as a provisional concept, 2026-10-13).
  */
-const MODELLED_CORNERS = new Set<CornerId>(["corner-1", "corner-2", "corner-3", "corner-4", "corner-5"]);
+const MODELLED_CORNERS = new Set<CornerId>(["corner-1", "corner-2", "corner-3", "corner-4", "corner-5", "corner-6"]);
+
+/** Corners whose model is a provisional concept (no supplied design). */
+const CONCEPT_CORNERS = new Set<CornerId>(["corner-6"]);
 
 function cornerArea(id: CornerId, slot: CornerSlot, index: number): AreaConfig {
-  // Side corners are viewed almost head-on, turned slightly towards the open
-  // middle of the zone (the south row was set back to free their fronts).
+  // Booths are viewed almost head-on, arm booths turned slightly towards the
+  // main path (the U's open side).
   const skew = index === 0 || index === 5 ? 0.2 : 0.12;
+  const S = BOOTH_SCALE;
   const azimuth = slot.facing === "east" ? -skew : slot.facing === "west" ? Math.PI + skew : -Math.PI / 2;
-  const [sx, sz] = slot.facing === "north" ? [slot.w, slot.d] : [slot.d, slot.w];
+  const [sx, sz] = slot.facing === "north" ? [slot.w * S, slot.d * S] : [slot.d * S, slot.w * S];
   const rotationY = slot.facing === "east" ? Math.PI / 2 : slot.facing === "west" ? -Math.PI / 2 : Math.PI;
   return {
     id,
     kind: "corner",
     content: CORNER_CONTENT[id],
     model: MODELLED_CORNERS.has(id) ? "modelled" : "placeholder",
-    frame: { position: [slot.x, 0, slot.z], rotationY },
+    frame: { position: [slot.x, 0, slot.z], rotationY, scale: S },
     placementNote: "توزيع الأركان على المواقع مبدئي",
+    designNote: CONCEPT_CORNERS.has(id) ? "تصور مبدئي مقترح — ليس تصميمًا معتمدًا" : undefined,
     anchor: {
-      target: [slot.x, 1.6, slot.z],
+      target: [slot.x, 1.75 * S, slot.z],
       azimuth,
       elevation: 0.16,
-      distance: 7.2,
-      fitWidth: 6,
-      maxDistance: 9.5,
+      distance: 7.8 * S,
+      fitWidth: 6 * S,
+      maxDistance: 10 * S,
     },
     look: { yaw: 1.0, pitchUp: 0.2, pitchDown: 0.15 },
-    hitBoxes: [{ center: [slot.x, BOOTH_HEIGHT / 2, slot.z], size: [sx + 0.3, BOOTH_HEIGHT, sz + 0.3] }],
-    labelAt: [slot.x, BOOTH_HEIGHT + 0.5, slot.z],
+    hitBoxes: [{ center: [slot.x, (BOOTH_HEIGHT * S) / 2, slot.z], size: [sx + 0.4, BOOTH_HEIGHT * S, sz + 0.4] }],
+    labelAt: [slot.x, BOOTH_HEIGHT * S + 0.6, slot.z],
   };
 }
 
@@ -126,7 +134,7 @@ export const AREAS: Record<AreaId, AreaConfig> = {
     id: "museum",
     kind: "museum",
     model: "modelled",
-    frame: { position: [MUSEUM.facadeX, 0, MUSEUM.northZ], rotationY: 0 },
+    frame: MUSEUM_FRAME,
     content: {
       name: "المتحف",
       shortName: "المتحف",
@@ -136,12 +144,11 @@ export const AREAS: Record<AreaId, AreaConfig> = {
       highlights: ["مسار زيارة متكامل", "تجربة بصرية غامرة", "تفاصيل لا تُكتشف إلا في الداخل"],
       provisional: true,
     },
-    // Standing in the open strip north of the stage, looking south-east along
-    // the facade (the M1 standpoint is now occupied by the stage).
+    // Standing on the main path, looking north-east along the facade towards
+    // the portal end (nearest the entrance).
     anchor: {
-      target: [MUSEUM.facadeX, 1.5, museumMidZ],
-      // Steeper than M2 so the stage's east truss tower stays out of frame.
-      azimuth: Math.atan2(-16, -8),
+      target: [museumMidX, 1.5, MUSEUM.facadeZ],
+      azimuth: Math.atan2(0.85, -0.53),
       elevation: 0.15,
       distance: 19.5,
       fitWidth: 18,
@@ -150,18 +157,19 @@ export const AREAS: Record<AreaId, AreaConfig> = {
     look: { yaw: 0.95, pitchUp: 0.22, pitchDown: 0.12 },
     hitBoxes: [
       {
-        center: [MUSEUM.facadeX + MUSEUM.depth / 2, MUSEUM.height / 2, museumMidZ],
-        size: [MUSEUM.depth + 0.4, MUSEUM.height + 0.4, MUSEUM.length + 0.4],
+        center: [museumMidX, MUSEUM.height / 2, museumMidZ],
+        size: [MUSEUM.length + 0.4, MUSEUM.height + 0.4, MUSEUM.depth + 0.4],
       },
     ],
-    labelAt: [MUSEUM.facadeX + MUSEUM.depth / 2, MUSEUM.height + 1.2, museumMidZ],
+    labelAt: [museumMidX, MUSEUM.height + 1.2, museumMidZ],
   },
   stage: {
     id: "stage",
     kind: "stage",
     model: "modelled",
-    // Stage + amphitheatre share one frame centred on the stage deck.
-    frame: { position: [STAGE.centerX, 0, STAGE.centerZ], rotationY: 0 },
+    // Stage + amphitheatre share one frame centred on the stage deck, facing
+    // west down the main path.
+    frame: STAGE_FRAME,
     content: {
       name: "المسرح والمدرّج",
       shortName: "المسرح",
@@ -170,9 +178,10 @@ export const AREAS: Record<AreaId, AreaConfig> = {
       highlights: ["جلسات حوارية", "مدرّج مفتوح"],
       provisional: true,
     },
+    // From the end of the main path, behind the amphitheatre.
     anchor: {
-      target: [STAGE.centerX, 3.4, STAGE.centerZ - 1],
-      azimuth: Math.PI / 2,
+      target: [STAGE.centerX + 1, 3.4, STAGE.centerZ],
+      azimuth: Math.PI,
       elevation: 0.12,
       distance: 20,
       fitWidth: 17,
@@ -182,10 +191,10 @@ export const AREAS: Record<AreaId, AreaConfig> = {
     hitBoxes: [
       {
         center: [STAGE.centerX, STAGE.screenHeight / 2 + 0.5, STAGE.centerZ],
-        size: [STAGE.width + 1.5, STAGE.screenHeight + 1, STAGE.depth],
+        size: [STAGE.depth, STAGE.screenHeight + 1, STAGE.width + 1.5],
       },
     ],
-    labelAt: [STAGE.centerX, STAGE.deckHeight + STAGE.screenHeight + 0.9, STAGE.centerZ - 1.6],
+    labelAt: [STAGE.centerX + 1.6, STAGE.deckHeight + STAGE.screenHeight + 0.9, STAGE.centerZ],
   },
   entertainment: {
     id: "entertainment",
@@ -219,7 +228,7 @@ export const AREAS: Record<AreaId, AreaConfig> = {
       // The wayfinding sign at the passage mouth is the visible entry point from the plaza.
       { center: [PASSAGE.x, 1.4, PASSAGE.signZ], size: [3, 2.8, 0.8] },
     ],
-    // Floats above the passage so it reads over the stage from the plaza.
+    // Floats above the passage mouth so it reads from the plaza.
     labelAt: [PASSAGE.x, 12, PASSAGE.signZ - 4],
     cardAt: [entMidX, 0.5, ENTERTAINMENT.maxZ - 3],
   },
@@ -230,13 +239,14 @@ export const AREAS: Record<AreaId, AreaConfig> = {
 export const AREA_ORDER: readonly AreaId[] = ["museum", "stage", "entertainment", ...CORNER_IDS];
 
 /**
- * Previous / Next order on the area card: a walk from the entrance arch —
- * the corners in number order (west pair 1–2, south row 3–5, east pair
- * 6–7), then the museum, the stage, and through the passage to the
- * entertainment zone. It wraps around at both ends. Free navigation (scene,
- * pins, area list) is independent of it; edit this list to change the tour.
+ * Previous / Next order on the area card: the visitor route from the
+ * entrance arch — the museum on the left, the corners around the U on the
+ * right (west arm 1–2, base 3–4, east arm 5–6), the stage at the end of the
+ * main path, then back through the passage to the entertainment zone. It
+ * wraps around at both ends. Free navigation (scene, pins, area list) is
+ * independent of it; edit this list to change the tour.
  */
-export const TOUR_ORDER: readonly AreaId[] = [...CORNER_IDS, "museum", "stage", "entertainment"];
+export const TOUR_ORDER: readonly AreaId[] = ["museum", ...CORNER_IDS, "stage", "entertainment"];
 
 export function tourNeighbours(id: AreaId): { prev: AreaId; next: AreaId } {
   const n = TOUR_ORDER.length;
@@ -251,12 +261,13 @@ export const AREA_GROUPS: readonly { title: string; ids: readonly AreaId[] }[] =
 
 /** Elevated overview of the whole site. Pulled back automatically on narrow viewports. */
 export const OVERVIEW = {
-  // From the entrance (west) side, behind and above the arch: the museum's
-  // lit plaza facade faces the camera, the stage is seen three-quarter on.
-  position: [-13, 35, 38] as Vec3,
-  target: [28, 0, 19] as Vec3,
+  // From the entrance side, behind the arch on the main-path axis (a little
+  // south so the museum facade reads): the gate first, then the whole venue
+  // down the path to the stage — museum left, the corner U right.
+  position: [-42, 40, 14] as Vec3,
+  target: [30, 0, 4] as Vec3,
   /** Width (metres) that must stay in frame at the target distance. */
-  fitWidth: 58,
+  fitWidth: 100,
 };
 
 export const isCorner = (id: AreaId): id is CornerId => id.startsWith("corner-");

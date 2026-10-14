@@ -4,7 +4,7 @@ import { useMemo } from "react";
 import * as THREE from "three";
 import { mergeGeometries } from "three/examples/jsm/utils/BufferGeometryUtils.js";
 import { BRAND } from "@/lib/constants";
-import { ENTRANCE_ARCH as ARCH, PASSAGE } from "@/lib/exhibition/layout";
+import { ENTRANCE_ARCH as ARCH, PASSAGE, SCENERY_SPOTS } from "@/lib/exhibition/layout";
 import { Batched } from "./Batched";
 import { useAsyncTexture } from "./useAsyncTexture";
 import { Plate } from "./kit/booth";
@@ -14,12 +14,12 @@ import { Instanced, Struts, glow, tubeAlong, useDispose, type Placement, type Se
 /**
  * Non-selectable event scenery from the preliminary renders. Positions are
  * inferred (F-15): the masterplan does not place these items.
- *  - Entrance arch «كورة — الصناعة خلف اللعبة» (…12.05.49 PM (3)) on the
- *    plan's west "Gate" footprint, which the owner identified as the entrance.
+ *  - Entrance arch «كورة — الصناعة خلف اللعبة» (…12.05.49 PM (3)) at the
+ *    start of the main path.
  *  - Octagonal light tunnel + banners (…(4)) through the passage to the
  *    entertainment zone; photo booth (…(4)) at the passage mouth.
- *  - Coffee kiosk, press/interview wall and stanchions (…(2)) beside the
- *    entrance path. Partner marks are neutral placeholders (D-14).
+ *  - Coffee kiosk, press/interview wall and stanchions (…(2)) on the
+ *    entrance forecourt, left of the main path. Partner marks are neutral placeholders (D-14).
  */
 
 /* ---------------------------- Entrance arch ---------------------------- */
@@ -85,9 +85,12 @@ function octagonPoints(w: number, h: number, c: number): [number, number][] {
   ];
 }
 
+/** Banner rows across the passage (relative to the buildings' facade line). */
+const BANNER_ZS = [1, -4.5, -10].map((dz) => PASSAGE.frontZ + dz);
+
 function PassageTunnel() {
   const frames = useMemo(() => {
-    const zs = Array.from({ length: 7 }, (_, i) => -4.2 - i * 2.6);
+    const zs = Array.from({ length: 7 }, (_, i) => PASSAGE.frontZ + 2.8 - i * 2.6);
     const panel: THREE.BufferGeometry[] = [];
     const led: THREE.BufferGeometry[] = [];
     const outline = octagonPoints(5.3, 5.6, 1.2);
@@ -111,7 +114,7 @@ function PassageTunnel() {
   useDispose(frames.panel, frames.led);
   const poles: Segment[] = useMemo(
     () =>
-      [-6, -11.5, -17].flatMap((z) => [
+      BANNER_ZS.flatMap((z) => [
         [[PASSAGE.minX + 0.4, 0, z], [PASSAGE.minX + 0.4, 6.6, z]] as Segment,
         [[PASSAGE.maxX - 0.4, 0, z], [PASSAGE.maxX - 0.4, 6.6, z]] as Segment,
         [[PASSAGE.minX + 0.4, 6.5, z], [PASSAGE.maxX - 0.4, 6.5, z]] as Segment,
@@ -130,7 +133,7 @@ function PassageTunnel() {
         <meshStandardMaterial color="#20232b" roughness={0.5} metalness={0.6} />
       </Struts>
       {banner &&
-        [-6, -11.5, -17].map((z) => (
+        BANNER_ZS.map((z) => (
           <mesh key={z} position={[PASSAGE.x, 5.9, z]}>
             <planeGeometry args={[4.6, 1.0]} />
             <meshStandardMaterial map={banner} side={THREE.DoubleSide} roughness={0.8} />
@@ -238,7 +241,8 @@ function PressWall({ position, rotationY }: { position: V3; rotationY: number })
 }
 
 function Stanchions() {
-  const posts = useMemo<Placement[]>(() => Array.from({ length: 6 }, (_, i) => ({ p: [2.6 + i * 1.6, 0, 26.1] as V3 })), []);
+  const { x0, z, count, spacing } = SCENERY_SPOTS.stanchions;
+  const posts = useMemo<Placement[]>(() => Array.from({ length: count }, (_, i) => ({ p: [x0 + i * spacing, 0, z] as V3 })), [x0, z, count, spacing]);
   const geo = useMemo(
     () => ({
       post: new THREE.CylinderGeometry(0.03, 0.03, 0.95, 10).translate(0, 0.475, 0),
@@ -268,9 +272,9 @@ export function Scenery() {
     <Batched delay={1500}>
       <EntranceArch />
       <PassageTunnel />
-      <PhotoBooth position={[31.4, 0, -1.9]} rotationY={-0.5} />
-      <CoffeeKiosk position={[7.4, 0, 29.6]} rotationY={Math.PI} />
-      <PressWall position={[4.4, 0, 32.6]} rotationY={Math.PI} />
+      <PhotoBooth position={[SCENERY_SPOTS.photoBooth.x, 0, SCENERY_SPOTS.photoBooth.z]} rotationY={SCENERY_SPOTS.photoBooth.rotationY} />
+      <CoffeeKiosk position={[SCENERY_SPOTS.coffeeKiosk.x, 0, SCENERY_SPOTS.coffeeKiosk.z]} rotationY={SCENERY_SPOTS.coffeeKiosk.rotationY} />
+      <PressWall position={[SCENERY_SPOTS.pressWall.x, 0, SCENERY_SPOTS.pressWall.z]} rotationY={SCENERY_SPOTS.pressWall.rotationY} />
       <Stanchions />
     </Batched>
   );

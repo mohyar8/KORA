@@ -8,6 +8,7 @@ import { Batched } from "./Batched";
 import { Museum } from "./Museum";
 import { EntrepreneurshipCorner, HealthCorner } from "./models/FrameCorners";
 import { MediaCorner } from "./models/MediaCorner";
+import { EngineeringCorner } from "./models/EngineeringCorner";
 import { EconomyCorner, TechnologyCorner } from "./models/NavyShellCorners";
 import { EntertainmentZone } from "./models/EntertainmentZone";
 import { StageModel } from "./models/Stage";
@@ -28,6 +29,7 @@ const KIT: Partial<Record<AreaId, ComponentType>> = {
   "corner-3": EntrepreneurshipCorner,
   "corner-4": EconomyCorner,
   "corner-5": HealthCorner,
+  "corner-6": EngineeringCorner,
 };
 
 /** Areas that currently render a real model (kit or GLB) instead of a placeholder. */
@@ -78,9 +80,9 @@ function Glb({ url }: { url: string }) {
 export function AreaModels({ overrides = {} }: { overrides?: Partial<Record<AreaId, string>> }) {
   const urlOf = (id: AreaId) => overrides[id] ?? AREAS[id].modelUrl;
   const frame = (id: AreaId, children: ReactNode) => {
-    const { position, rotationY } = AREAS[id].frame;
+    const { position, rotationY, scale = 1 } = AREAS[id].frame;
     return (
-      <group key={id} name={`area-${id}`} position={position} rotation-y={rotationY}>
+      <group key={id} name={`area-${id}`} position={position} rotation-y={rotationY} scale={scale}>
         {children}
       </group>
     );

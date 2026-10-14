@@ -6,7 +6,7 @@ import { useEffect, useLayoutEffect, useMemo, useRef, type RefObject } from "rea
 import * as THREE from "three";
 import type { AreaId } from "@/lib/exhibition/types";
 import { flightDuration, flightPoint, fovFor, planLift, poseFor, type Pose } from "./rig";
-import { planPassageRoute, planTunnelExit, type Route } from "./route";
+import { planRoute, type Route } from "./route";
 
 export type LookInput = { yaw: number; pitch: number };
 
@@ -72,6 +72,7 @@ export function CameraRig({ selected, look, reducedMotion, onArrive }: Props) {
       target: camera.position.clone().addScaledVector(dir, reach.position.distanceTo(reach.target)),
     };
     s.tween?.kill();
+    const fromDest = s.dest;
     s.dest = selected;
     // The caller resets the look goals on selection; bake current offsets.
     s.yaw = s.pitch = 0;
@@ -85,9 +86,10 @@ export function CameraRig({ selected, look, reducedMotion, onArrive }: Props) {
       return;
     }
     s.from = from;
-    // Passage route to the entertainment zone; a flight interrupted inside
-    // the tunnel leaves through a tunnel end; everything else is an arc.
-    s.route = (selected === "entertainment" ? planPassageRoute(from, to) : null) ?? planTunnelExit(from, to);
+    // Through the gate from the overview, through the passage to the
+    // entertainment zone, out of the tunnel/gate when interrupted there;
+    // everything else is an arc.
+    s.route = planRoute(fromDest, from, to, selected);
     s.lift = s.route ? 0 : planLift(from.position, to.position);
     s.flying = true;
     s.progress.t = 0;

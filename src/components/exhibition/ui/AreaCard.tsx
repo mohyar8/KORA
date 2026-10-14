@@ -42,6 +42,7 @@ export function AreaCard({
   const bodyId = `exh-card-body-${area.id}`;
   const notes = [
     area.model === "placeholder" ? "التصميم قيد الإعداد — يظهر هنا نموذج مؤقت" : null,
+    area.designNote ?? null,
     area.placementNote ?? null,
     content.provisional ? "نص مبدئي — بانتظار الاعتماد" : null,
   ].filter(Boolean);

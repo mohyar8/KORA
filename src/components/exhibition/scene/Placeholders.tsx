@@ -4,14 +4,14 @@ import { useEffect, useMemo } from "react";
 import * as THREE from "three";
 import { mergeGeometries } from "three/examples/jsm/utils/BufferGeometryUtils.js";
 import { AREAS, BOOTH_HEIGHT, CORNER_IDS } from "@/lib/exhibition/areas";
-import { CORNER_SLOTS, ENTERTAINMENT, GATE, SEATING, STAGE } from "@/lib/exhibition/layout";
+import { BOOTH_SCALE, CORNER_SLOTS, ENTERTAINMENT, GATE, SEATING, STAGE, STAGE_FRAME } from "@/lib/exhibition/layout";
 
 /**
  * Translucent "ghost" massings for structures whose design is not modelled
  * yet (M3/M4) or not confirmed. The visual language — pale fill, crisp
  * outline, dashed footprint — is the architectural convention for "future
  * structure", so these can never be mistaken for final designs. Sizes and
- * positions follow the masterplan; heights are inferred.
+ * positions follow the layout data; heights are inferred.
  *
  * Everything is merged into three draw calls (fill, outline, footprints).
  */
@@ -43,10 +43,10 @@ const ghosted = (i: number) => AREAS[CORNER_IDS[i]].model === "placeholder";
 
 function cornerParts() {
   return CORNER_SLOTS.filter((_, i) => ghosted(i)).flatMap((s) => {
-    const [w, d] = s.facing === "north" ? [s.w, s.d] : [s.d, s.w];
+    const [w, d] = s.facing === "north" ? [s.w * BOOTH_SCALE, s.d * BOOTH_SCALE] : [s.d * BOOTH_SCALE, s.w * BOOTH_SCALE];
     // A neutral open-fronted shell: back wall, two side walls, header.
     const t = 0.12;
-    const h = BOOTH_HEIGHT;
+    const h = BOOTH_HEIGHT * BOOTH_SCALE;
     const back =
       s.facing === "north"
         ? box(w, h, t, s.x, h / 2, s.z + d / 2 - t / 2)
@@ -61,8 +61,15 @@ function cornerParts() {
   });
 }
 
+/** Stage frame → world, for the stage and seating ghosts (authored in the stage frame). */
+const stageMatrix = new THREE.Matrix4()
+  .makeRotationY(STAGE_FRAME.rotationY)
+  .setPosition(STAGE_FRAME.position[0], STAGE_FRAME.position[1], STAGE_FRAME.position[2]);
+
 function stageParts() {
-  const { centerX: x, centerZ: z, width: w, depth: d, deckHeight: h, screenHeight: sh } = STAGE;
+  const { width: w, depth: d, deckHeight: h, screenHeight: sh } = STAGE;
+  const x = 0;
+  const z = 0;
   const tower = h + sh + 0.6;
   return [
     box(w, h, d, x, h / 2, z),
@@ -99,7 +106,7 @@ function seatingParts() {
       const g = new THREE.ExtrudeGeometry(shape, { depth: h, bevelEnabled: false, curveSegments: 1 });
       // Shape is in XY; lay it on the ground with shape +Y becoming +Z.
       g.rotateX(Math.PI / 2);
-      g.translate(SEATING.center.x, h, SEATING.center.z);
+      g.translate(SEATING.localCenter.x, h, SEATING.localCenter.z);
       g.deleteAttribute("uv");
       out.push(g);
     }
@@ -163,7 +170,8 @@ function normalise(g: THREE.BufferGeometry) {
 
 export function Placeholders() {
   const { fill, edges, foot } = useMemo(() => {
-    const stageGhost = AREAS.stage.model === "placeholder" ? [...stageParts(), ...seatingParts()] : [];
+    const stageGhost =
+      AREAS.stage.model === "placeholder" ? [...stageParts(), ...seatingParts()].map((g) => g.applyMatrix4(stageMatrix)) : [];
     const entGhost = AREAS.entertainment.model === "placeholder" ? entertainmentParts() : [];
     const parts = [...stageGhost, ...cornerParts(), ...gateParts(), ...entGhost];
     const fill = mergeGeometries(parts.map(normalise));

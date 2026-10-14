@@ -1,7 +1,7 @@
 # KORA 3D Exhibition — Implementation Roadmap
 
-**Status:** v0.9 (2026-10-12) — M0–M5 approved; M6 implemented; **post-M6 refinements (R1–R4) implemented and verified, awaiting owner review** (§6 "Post-M6 refinements"). Not declared production-ready; nothing committed or deployed.
-**Authoritative spec:** [`3D_EXHIBITION_SPEC.md`](./3D_EXHIBITION_SPEC.md) **v1.3**. This roadmap never overrides it; conflicts are logged in §9.
+**Status:** v1.0 (2026-10-13) — M0–M5 approved; M6 + R1–R4 committed by the owner (`1d9cb38`); **layout revision LR-1 implemented and verified, stopped for visual review** (§6 "Layout revision LR-1"). Not declared production-ready; nothing committed or deployed.
+**Authoritative spec:** [`3D_EXHIBITION_SPEC.md`](./3D_EXHIBITION_SPEC.md) **v1.5**. This roadmap never overrides it; conflicts are logged in §9.
 **Resume file:** [`3D_EXHIBITION_STATE.md`](./3D_EXHIBITION_STATE.md) (current state, verified results, how to verify).
 **Owner of this file:** Claude Code — update on every material plan change and log it in §10.
 
@@ -21,7 +21,7 @@ It also covers evening lighting, KORA-inspired surroundings, replaceable per-are
 - **Fidelity:** follow the preliminary architectural designs closely, prioritising realism and quality. Never invent missing corner designs or treat ambiguous references as confirmed: use clearly marked placeholders.
 - **Hero:** never modified.
 - **Museum:** keep the M1 entrance orientation (D-15).
-- **Placement:** take positions from the masterplan and references; the full PDF is not required while the references suffice.
+- **Placement:** superseded on 2026-10-13 by the owner-directed layout (spec §4.4); designs still from the references.
 - **Earlier recommendations approved as a batch:**
   - D-7: no people for now.
   - D-11: Media corner first.
@@ -31,7 +31,7 @@ It also covers evening lighting, KORA-inspired surroundings, replaceable per-are
   - D-19: entertainment zone provisional.
   - R-8: stage without the render's background building.
   - GATE 2 recommendations: keep plan booth sizes; code kit for shells and scenery; simplified stand-ins for complex props.
-- **Layout:** south booth row (slots 3–5) and its palms set back so slots 2 and 7 have clear fronts.
+- **Layout (2026-10-13):** museum left of the entrance, stage at the far end of the main path facing the entrance, passage beyond the museum, six corners in a U, expanded grounds, larger booths (spec §4.4).
 - **Stage:** lounge chairs in a clean, regular layout, each facing the stage centre.
 - **Cards:**
   - world-anchored, never camera-fixed;
@@ -107,7 +107,7 @@ Measured on the plan:
 - entrance path 30.0 m;
 - centre booth slot 4.0 × 2.5 m, with a 1.5 m gap.
 
-Everything else is inferred and tagged in `layout.ts`. Plan px → m: `x = (px − 80)/16.4`, `z = (py − 185)/14` on the 1056 × 1516 image.
+Everything else is inferred and tagged in `layout.ts`. Since LR-1 (2026-10-13) positions are owner-directed (origin = entrance arch, +X along the main path); the plan's px → m conversion no longer applies to positions. Measured sizes (stage, aisle) are kept; booths are their plan-slot design sizes × `BOOTH_SCALE` 1.7.
 
 ### 3.4 Findings (all still valid)
 - **F-1** Renders are preliminary AI-style concepts with unrelated backgrounds. They are used for designs, not settings.
@@ -208,10 +208,10 @@ src/lib/exhibition/
 |---|---|---|---|
 | Hero impact / homepage JS | ≈0 KB added | 832 KB raw / 269 KB gz (+8 / +4.3 KB for the client loader gate; no three/R3F) | ✅ (gate is unavoidable) |
 | Poster | — | 77 KB desktop / 40 KB mobile, only when near | ✅ |
-| Exhibition JS (compressed, loaded with section) | ≤ 300 KB | ≈306 KB (305.2 measured on `next start` after M6; +1 KB for routes/card nav) | ⚠ +2 % — structural, see D-27 |
-| Draw calls, overview (desktop) | ≤ 150 | **141** (was 188; 144 after M6, new pose 141) | ✅ |
-| Draw calls, anchored | ≤ 150 | 72–119 (was 84–126) | ✅ |
-| Triangles (overview) | ≤ 600 k desktop / 300 k mobile | ≈320 k desktop (unchanged) / ≈200 k mobile | ✅ |
+| Exhibition JS (compressed, loaded with section) | ≤ 300 KB | ≈311 KB (+5 KB in LR-1: Engineering model, venue elements) | ⚠ +4 % — structural, see D-27 |
+| Draw calls, overview (desktop) | ≤ 150 | **161** after LR-1 (141 before; the venue is ≈2.5× larger with a sixth booth and branded elements) | ⚠ +7 % — D-34 |
+| Draw calls, anchored | ≤ 150 | 68–109 | ✅ |
+| Triangles (overview) | ≤ 600 k desktop / 300 k mobile | ≈342 k desktop | ✅ |
 | DPR | 1.5 desktop / 1.25 mobile | as budgeted; adaptive down to 0.75 on slow GPUs while moving | ✅ |
 | Frame time (integrated AMD Radeon Vega, 1260×823 buffer, dev build, warm) | ~16.7 ms ideal | 19–26 ms (≈40–50 fps); auto-steps down when > 25 ms | ⚠ real devices untested |
 | GPU resources after 2 full tours of all 10 areas | stable | 356 geometries / 91 textures, identical after the 2nd tour | ✅ |
@@ -223,8 +223,10 @@ src/lib/exhibition/
 |---|---|---|
 | Museum | Code (M1) | Approved quality benchmark |
 | Stage + amphitheatre | Code (M3) | Lounge row regularised (pre-M4) |
-| Corners 1–5 | Code kit (M3/M4) | Adapted to plan slots (D-20); stadium miniature is a simplified stand-in |
-| Corners 6–7 | Placeholder | Blocked on D-17 |
+| Corners 1–5 | Code kit (M3/M4) | Plan-slot design sizes × 1.7 (LR-1); stadium miniature is a simplified stand-in |
+| Corner 6 Engineering | Code kit, **provisional concept** (LR-1) | No supplied design; marked «تصور مبدئي» in scene and card |
+| Corner 7 | removed (LR-1) | Six corners per owner |
+| Venue wayfinding / identity | Code (LR-1) | Banners, totems, path-edge lines, pentagon canopy, lockup monolith, lawns |
 | Entertainment zone | Code (M4) | Provisional location (D-19); arcade props simplified |
 | Scenery | Code (M4) | Positions inferred (F-15) |
 | Surroundings (Buildings 70/57, palms, lamps, trees, paving) | Code (M1/M2) | — |
@@ -244,7 +246,9 @@ Designer GLBs can replace any area through `AreaConfig.modelUrl` without other c
 | M3 | Stage + booth kit + Media corner, model slots (GATE 2) | ✅ approved |
 | M4 | Remaining corners, entertainment zone, scenery; world-anchored cards; chairs | ✅ approved (card behaviour since revised to expand/collapse, done) |
 | M5 | Homepage integration & fallback | ✅ approved |
-| **M6** | **Performance, accessibility, device QA → release** | ✅ implemented + verified — **awaiting owner review** (release not declared) |
+| M6 | Performance, accessibility, device QA → release | ✅ implemented + verified; committed with R1–R4 (`1d9cb38`); release not declared |
+| R1–R4 | Entrance swap, entrance-side overview, card Previous/Next, passage route | ✅ committed (`1d9cb38`) |
+| **LR-1** | **Owner-directed layout revision (six corners, Engineering concept, expanded grounds, branded wayfinding)** | ✅ implemented + verified — **stopped for visual review** |
 
 ### M5 — Homepage integration & fallback (done, awaiting review)
 - **Objective:** ship the section directly after the Hero with zero Hero regression.
@@ -308,6 +312,30 @@ Designer GLBs can replace any area through `AreaConfig.modelUrl` without other c
 - **R4 Passage route (implemented):** flights to the entertainment zone from anywhere on the plaza drop into the backstage strip, pass over the passage sign beside the photo booth, run through the tunnel under the banners at ≈3 m (half speed), then rise to the viewpoint (≈6 s total; ordinary flights ≤ 3 s). The tunnel obstacle became a hollow shell so the corridor is checkable; every route is sampled against all obstacles and falls back to the ordinary arc if not clear. Interrupting inside the tunnel continues to the tunnel end being faced, climbs out, then arcs (never through the roof). Reduced motion: instant cut, as before. Cost: ≈0.5 ms planning per flight, no per-frame overhead beyond a spline lookup; JS +1 KB.
 - **Also fixed:** denser collision sampling revealed hairline grazes on 2 museum ↔ corner arcs at landscape aspects (pre-existing, missed by the 40-probe `planLift`); `planLift` now probes 240 points and adds 10 % headroom.
 
+### Layout revision LR-1 (2026-10-13, owner request) — done, stopped for visual review
+- **Recovery point:** branch `backup/pre-layout-revision` at `1d9cb38` (working tree was clean; nothing else touched).
+- **Layout:**
+  - **Main path** (6 m) runs east from the entrance arch at x 0 to the amphitheatre at x ≈ 96.
+  - **Museum** to the left (north) of the entrance, x 20–48, long facade facing the path; portal at the west end, nearest the entrance.
+  - **Corners (6)** in a U to the right (south), open towards the path: west arm Technology / Media (facing east), base Entrepreneurship / Economy & Investment (facing north), east arm Health / Engineering (facing west). The U spans ≈47 m along the path (x 9.5–56.5), comparable to the entrance-to-museum side. A walkway loops along the booth fronts and joins the main path at both arms.
+  - **Passage** to the entertainment zone between Buildings 70 and 57 at x 56–62, just beyond the museum (not behind it), reached by a branch path; buildings, passage, tunnel and entertainment zone moved together as one block (relative geometry unchanged).
+  - **Stage** closes the east end of the main path, facing west towards arriving visitors; amphitheatre in front of it with the path running into the 2 m aisle.
+  - Ground ≈ 144 × 89 m paved (≈2.5× the masterplan-based layout); lawns with palms in the open quarters; branded wayfinding (banners, totems at the junctions, warm path-edge lines, pentagon canopy in the corner courtyard, lockup monolith at the passage branch).
+- **Frames:** museum and stage are placed by rotated frames (`MUSEUM_FRAME` π/2, `STAGE_FRAME` −π/2); the seating is defined in the stage frame (`SEATING.localCenter`); booth frames carry `scale: BOOTH_SCALE`. `toWorld` / `boxToWorld` keep collision volumes in sync with rotated/scaled frames.
+- **Engineering corner (provisional concept):** navy shell + steel-truss portal in football-goal proportions, blueprint stadium-section back wall and blueprint pitch floor, X-braced open side, stadium miniature cut away, structures panel and analysis kiosk, fascia «ركن الهندسة / ENGINEERING CORNER» with the official lockup, and a «تصور مبدئي · PRELIMINARY CONCEPT» plate; the card note reads «تصور مبدئي مقترح — ليس تصميمًا معتمدًا».
+- **Updated with the layout:** camera anchors (museum along its facade from the path, stage from the end of the path, corners ×1.7 with slightly more distance so glow titles fit), hit volumes and labels, collision volumes, tour order (museum → corners 1–6 → stage → entertainment), overview (from behind the arch, south-west, looking along the path to the stage), passage route (approach over the branch path; waypoints relative to the passage), tunnel-exit test points, light focus and shadow frustum (±80 × ±60 m, 4096 map), posters (65 / 33 KB).
+- **Found while testing:** the pentagon canopy's first position put the Media/Health viewpoints inside its safety volume at narrow portrait aspects → moved to the courtyard band the viewpoints leave free (x 29–37, z 11–19). The passage route's gaze looked at the horizon from the high overview start → look-ahead now blends in over the first 40 %.
+- **Dev note:** Fast Refresh after edits re-mounts instanced meshes without re-running static batching, so the same geometry draws twice (inflated draw calls, invisible in images). Always measure after a full reload.
+
+### LR-2 refinements (2026-10-13, owner request) — done, stopped for review
+- **Card controls in the collapsed state** stay inside the bar (collapsed width 300 px; buttons shrink without overflowing).
+- **Overview from the entrance side:** camera behind the arch on the main-path axis (−42, 40, 14) → (30, 0, 4); the gate is the first thing seen, then the whole venue. Narrow screens pull back upwards (steeper) and aim 12 m further in, instead of backing into the tree belt.
+- **Entering through the main gate:** every flight that starts at the overview comes down behind the arch, passes through its opening at eye height (slowed), then goes on to the destination (for the entertainment zone, on through the passage). The arch is a hollow collision shape (legs + top band); a flight interrupted under the arch continues through it. Gaze looks ≥ 10 m ahead horizontally and never more than ≈31° down (no roll on the steep descent).
+- **Guided tour «ابدأ الجولة»:** button at the bottom of the overview. Plays TOUR_ORDER: fly to each stop, hold 9 s with the card expanded, move on; tour bar at the bottom (step n / 9, stop name, hold progress, pause/resume, end). Free navigation stays: any pin / scene / list choice or the overview ends the tour; the card's Previous / Next move the tour along; looking around or folding the card restarts the hold; it pauses while off-screen. The card keeps clear of the bar.
+- **Branded loading screen:** until the 3D scene is ready, the official logo file (`kora-main-tight.svg`) assembles from its own pieces (ball panels, then the letters right to left) over the poster, with a coral progress line driven by real stages (code loaded 50 %, scene created 65 %, textures settled 90 %, ready 100 %, slow creep in between) and a status line. Reduced motion: the logo simply appears.
+- **Banners:** each banner is two single-sided faces; the front faces arriving visitors (west on the main path), so «كورة» reads correctly from the gate (before: mirrored).
+- **Verified:** collision sweep 0 collisions at six aspects (all 9 overview flights take the gate route, 8 area→entertainment flights the passage, 0 tunnel/gate exit problems); gate flight overview → museum 5.7 s, ≤ 0.67 m/frame, frames show the arch face, the pass through the opening and the path with correctly reading banners; tour: start → museum, auto-advance after 9 s → Technology, pause holds, card Next → Media (tour continues), area-list choice ends the tour; collapsed bar 300 px with all three controls inside; loading screen assembles (frames checked mid-animation) and reaches 100 %; posters re-captured (77 / 35 KB). Homepage JS 270.2 KB gz (+0.9 KB for the loading screen in the loader), no 3D code; exhibition JS ≈312 KB.
+
 **Release readiness:** technically ready for owner review on the `newV` branch. Not declared production-ready: needs owner approval, real-device QA (list above) and a decision on shipping provisional content.
 
 ---
@@ -356,10 +384,20 @@ Designer GLBs can replace any area through `AreaConfig.modelUrl` without other c
 | D-30 | Overview from the entrance side: position (−13, 35, 38) → target (28, 0, 19); portrait pulls back automatically | ✅ R2 (framing chosen after 5 renders) |
 | D-31 | Tour order: corners 1→7, museum, stage, entertainment; wraps at both ends | ✅ R3 (routine; one constant `TOUR_ORDER`) |
 | D-32 | Passage route implemented (optional R4): spline through the tunnel, collision-checked with arc fallback, tunnel-exit route for interruptions | ✅ R4 |
+| D-33 | LR-1 revised layout (spec §4.4) supersedes masterplan positions; Buildings 70/57 + passage + entertainment zone moved as one block | ✅ Owner direction |
+| D-34 | Overview draw calls 161 vs 150 after LR-1 (≈2.5× venue, sixth booth, branded elements; cheap merges applied). Accept, or trade branded elements / bloom passes | ⏳ Owner decision |
+| D-35 | Booths enlarged uniformly ×1.7 (keeps design proportions) rather than stretching slot sizes | ✅ LR-1 (routine) |
+| D-36 | Engineering corner = provisional concept in the corners' design language, marked in scene and card | ✅ Owner direction (design to be confirmed) |
+| D-37 | Recovery point = branch `backup/pre-layout-revision` (`1d9cb38`) | ✅ LR-1 |
+| D-38 | Guided tour: 9 s hold per stop, ends on any direct choice, card Previous/Next continue it | ✅ LR-2 (routine) |
+| D-39 | Loading screen animates the official logo SVG's own paths (no redrawing); progress from real stages | ✅ LR-2 |
+| D-40 | All camera route choices centralised in `planRoute` (gate / passage / exits / arc), shared with the dev collision sweep | ✅ LR-2 |
 
 ## 10. Update log
 | Date | Change |
 |---|---|
+| 2026-10-13 | LR-2: entrance-side overview + gate entry flights, guided tour, branded loading screen, collapsed-card fix, banner orientation fix; spec v1.5; D-38–D-40. |
+| 2026-10-13 | v1.0: layout revision LR-1 — owner-directed venue layout (spec v1.4), six corners in a U with Engineering as a provisional concept, booths ×1.7, expanded grounds with lawns, branded wayfinding (`Venue.tsx`), rotated museum/stage frames, passage moved beyond the museum with the buildings, route/anchors/collisions/tour/overview/posters updated. D-33–D-37. |
 | 2026-10-12 | v0.9: post-M6 refinements R1–R4 (arch ↔ gate swap, entrance-side overview + new posters, card Previous/Overview/Next, passage route to the entertainment zone with tunnel exit); planLift sampling densified (40 → 240 probes, +10 % headroom) after denser checks found grazes; spec v1.3. |
 | 2026-10-12 | v0.8: M5 approved; M6 implemented — batching with colour baking + cross-area batch (188 → 144 calls), async-texture batching fix, adaptive DPR, a11y fixes (skip-link order, contrast), lab route gated, real-flight verification via `__exh.step`. D-26–D-28 added. |
 | 2026-10-12 | v0.7: M5 implemented — section on the homepage after the Hero, posters, fallback hardening (poster + list, noscript, ScrollTrigger refresh), fullscreen stacking fix, loader margin 40% (D-24), provisional copy shipped (D-25). |
