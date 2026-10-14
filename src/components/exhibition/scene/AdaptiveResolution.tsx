@@ -11,6 +11,9 @@ const FAST = 1 / 57;
 /** Lowest render scale (fraction of a CSS pixel) a slow GPU is allowed to fall to. */
 const FLOOR = 0.75;
 
+/** Dev-only switch (window.__exh.adaptive) so measurements run at a fixed resolution. */
+export const adaptiveControl = { enabled: true };
+
 /** The pixel ratio the Canvas starts with (its `dpr={[1, max]}` clamp). */
 const capFor = (max: number) => Math.min(Math.max(window.devicePixelRatio || 1, 1), max);
 
@@ -29,6 +32,7 @@ export function AdaptiveResolution({ max, onChange }: { max: number; onChange: (
 
   useFrame((_, dt) => {
     const s = st.current;
+    if (!adaptiveControl.enabled) return;
     if (!s.dpr) s.dpr = capFor(max);
     // Gaps after idle are not frame times; the first rendered frames compile shaders.
     if (dt <= 0 || dt > 0.25) return;

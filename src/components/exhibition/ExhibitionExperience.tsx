@@ -15,7 +15,7 @@ import { Atmosphere } from "./scene/Atmosphere";
 import { Ground } from "./scene/Ground";
 import { HitTargets, CLICK_SLOP } from "./scene/HitTargets";
 import { Effects, Lighting } from "./scene/Lighting";
-import { AdaptiveResolution } from "./scene/AdaptiveResolution";
+import { AdaptiveResolution, adaptiveControl } from "./scene/AdaptiveResolution";
 import { AreaModels } from "./scene/AreaModels";
 import { Placeholders } from "./scene/Placeholders";
 import { Scenery } from "./scene/Scenery";
@@ -196,6 +196,10 @@ export default function ExhibitionExperience({
       select: (id: AreaId | null) => select(id),
       state: () => getRef.current?.(),
       instant: (on = true) => setInstant(on),
+      /** Enable/disable adaptive resolution (fixed-resolution measurements). */
+      adaptive: (on = true) => {
+        adaptiveControl.enabled = on;
+      },
       panel: (open = true) => setPanelOpen(open),
       fullscreen: (on = true) => setFullscreen(on),
       look: (yaw: number, pitch = 0) => {
