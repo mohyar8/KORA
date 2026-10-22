@@ -16,7 +16,7 @@ export const APPLICATION_DEADLINE = {
 } as const;
 
 export const EVENT = {
-  dates: "12–14 نوفمبر 2026",
+  dates: "21–23 يناير 2027",
   venueShort: "جامعة الملك فهد للبترول والمعادن، الظهران",
   venueLong: "الظهران، جامعة الملك فهد للبترول والمعادن، ساحة مبنى 57",
 } as const;
