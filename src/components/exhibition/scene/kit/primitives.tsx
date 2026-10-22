@@ -155,16 +155,37 @@ export function useDispose(...items: { dispose: () => void }[]) {
  * only while the camera is within `distance` metres of the group's origin.
  * Shells, titles and landmarks stay outside so the overview keeps its
  * silhouettes. Excluded from static batching so the toggle keeps working.
+ *
+ * Lights inside are never hidden: they fade to intensity 0 instead. In
+ * three.js the number of active lights is part of every lit material's
+ * shader, so hiding a light makes all of them recompile — the multi-second
+ * stalls seen mid-flight before (perf pass, 2026-10-14). With a constant
+ * light set, every shader is compiled once, behind the loading screen.
  */
 export function Detail({ children, distance = 22 }: { children: ReactNode; distance?: number }) {
   const ref = useRef<THREE.Group>(null);
   const world = useMemo(() => new THREE.Vector3(), []);
+  const st = useRef<{ near: boolean | null; count: number; base: WeakMap<THREE.Light, number> }>({
+    near: null,
+    count: -1,
+    base: new WeakMap(),
+  });
   useFrame(({ camera }) => {
     const g = ref.current;
     if (!g) return;
     g.getWorldPosition(world);
     const near = camera.position.distanceTo(world) < distance;
-    if (g.visible !== near) g.visible = near;
+    // Children can mount late (async textures): re-apply when they change too.
+    if (st.current.near === near && st.current.count === g.children.length) return;
+    st.current.near = near;
+    st.current.count = g.children.length;
+    for (const child of g.children) {
+      const light = child as THREE.Light;
+      if (light.isLight) {
+        if (!st.current.base.has(light)) st.current.base.set(light, light.intensity);
+        light.intensity = near ? (st.current.base.get(light) ?? light.intensity) : 0;
+      } else child.visible = near;
+    }
   });
   return (
     <group ref={ref} userData={{ noBatch: true }}>

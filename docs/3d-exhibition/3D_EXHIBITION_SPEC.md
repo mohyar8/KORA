@@ -1,6 +1,6 @@
 # KORA Official Website — Interactive 3D Exhibition
 
-**Document status:** Approved product direction / implementation specification, v1.5 (2026-10-13; §3.1, §3.3, §3.4 refined by the product owner, see §11)  
+**Document status:** Approved product direction / implementation specification, v1.7 (2026-10-14; §3.1, §3.4 refined by the product owner, see §11)  
 **Owner:** KORA website product planning  
 **Implementation agent:** Claude Code  
 **Scope:** The 3D exhibition section only; other homepage sections will be discussed later.
@@ -20,7 +20,7 @@ Create a premium, visually compelling, realistic interactive 3D preview of the p
 - Overview of the event layout, stage, museum and exhibition areas based on supplied references.
 - Clickable 3D locations and alternative navigation panel.
 - Smooth cinematic transitions; constrained look-around camera at selected viewpoints.
-- World-anchored area information card that appears expanded when a location is reached and can be collapsed to a compact bar and expanded again; card content is teaser-level only.
+- World-anchored area information card that appears expanded when a location is reached and can be collapsed to a compact bar and expanded again; card content is teaser-level only (since v1.6: the area name, one short question and the navigation).
 - Responsive desktop/mobile interaction; optional mobile fullscreen.
 - Replaceable 3D assets and configurable camera anchors, selectable regions, content and layout.
 - Night/evening architectural lighting and KORA-inspired environmental design.
@@ -43,7 +43,7 @@ Create a premium, visually compelling, realistic interactive 3D preview of the p
 - Use a large, responsive full-width scene, not a mandatory page takeover.
 - Initially show the entire exhibition from an elevated overview angle **from the entrance side** (behind and above the entrance arch, looking into the event): the entrance gate is the first thing seen, then the whole venue, on desktop and mobile.
 - A branded loading screen (the official logo assembling, with real progress) covers the stage until the 3D scene is ready.
-- An optional guided tour («ابدأ الجولة») plays the defined order of areas automatically; it never removes free navigation (any direct choice ends it).
+- «ابدأ الجولة» (v1.7) simply takes the visitor to the first area of the defined order. There is no separate tour mode, status box, counter or end button, and no timers or automatic progression: the visitor moves on manually with the card's Previous / Next. Free navigation (scene, labels, area list) is never restricted.
 - All major areas should be discoverable via 3D click targets and an accessible list.
 - Do not autoplay a mandatory route between locations.
 - Keep a visible means to scroll onward, and ensure the scene does not trap mouse wheel or vertical touch gestures.
@@ -61,6 +61,7 @@ Do not make the 3D hit targets the only navigation mechanism. Provide hover/focu
 - Limit rotation to authored, safe bounds and keep the card readable while the 3D scene moves behind it.
 - Clicking another visible area triggers a new cinematic transition and changes the active area/card.
 - Leaving the overview for any area, the camera enters through the main entrance gate first, then continues to the area.
+- Transitions must run without visible hitches, including the first one. Preparation (shader compilation, GPU uploads, choice of render resolution) happens behind the loading screen; resolution changes never happen during camera motion. Animation durations are not shortened to hide performance problems.
 - Flights to the entertainment zone may travel briefly through the passage between the buildings (light tunnel, banners, photo booth) before arriving; the passage is never a stop or a selectable destination, and reduced motion keeps the instant cut.
 - Returning to overview restores the overview camera and removes the selected-area card.
 - Interrupt/retrigger behavior, camera animation cancellation, and resize transitions must be robust.
@@ -78,10 +79,11 @@ Do not make the 3D hit targets the only navigation mechanism. Provide hover/focu
 - When the camera looks left or right, the card (expanded or collapsed) **stays with its area**: it moves with the world and leaves the frame with it.
 - Arabic text stays crisp and accessible: HTML, not text rendered into the 3D scene. The toggle follows the accordion pattern (heading + button with `aria-expanded` / `aria-controls`); collapsed content is not focusable.
 - Cards must **not obstruct navigation or interaction with neighbouring areas**: in-scene area labels stay clickable above the card, and the card is compact and placed below its subject.
-- Identify the area and convey its idea, appeal and reason to visit as a concise teaser; avoid disclosing full activities or surprises.
-- **Card navigation (v1.3):** three compact controls below the card — Previous, Back to overview, Next — follow one defined tour order of the selectable areas, trigger the normal cinematic transitions, stay visible and accessible when the card is collapsed, and never restrict free navigation (scene, labels, area list).
+- **Compact content (v1.6):** the card shows only the area name, **one short, engaging Arabic teaser question**, and the Previous / Back to overview / Next controls — compact enough not to obscure the booth. Detailed descriptions belong to the homepage section(s) after the exhibition and to the text area list, not the card. Avoid disclosing full activities or surprises.
+- **Card navigation (v1.3, linear since v1.7):** compact controls below the card — Previous, Back to overview, Next — follow one defined order of the selectable areas (museum → corners → stage → **entertainment zone last**), trigger the normal cinematic transitions, stay visible and accessible when the card is collapsed, and never restrict free navigation. The order does not wrap: the first area has no Previous, and the entertainment zone shows only Previous and Back to overview.
+- Area names are always shown in full; long Arabic names wrap rather than being cut, on desktop and mobile, without overflow or overlap.
 - Remove the card in the overview. Adapt to mobile size, safe areas and legibility; preserve scene context.
-- Card text and final copy are not yet approved: use clearly marked provisional content until provided.
+- Card text and final copy are not yet approved: use clearly marked provisional content until provided (the provisional marking is shown in the area list since v1.6; the questions are provisional too).
 
 ### 3.5 Mobile and accessibility
 - Embedded mode: vertical swipe scrolls the page; horizontal swipe within the scene adjusts look direction, without blocking normal scrolling. Test touch gesture conflicts on actual devices.
@@ -181,7 +183,7 @@ Claude Code also maintains `docs/3d-exhibition/3D_EXHIBITION_STATE.md` with comp
 1. Existing Hero remains visually and functionally unchanged, and its load/performance is not materially degraded.
 2. Exhibition appears immediately after Hero; visitor can bypass it with normal scrolling.
 3. Elevated overview, area selection, smooth transition, constrained look-around and three navigation paths work reliably.
-4. Area card is world-anchored to its area in both expanded and collapsed states, appears expanded on every arrival, collapses to a compact name bar that expands again on click/tap, stays with its area during look-around, keeps Arabic text crisp and accessible, does not block neighbouring areas, and is teaser-focused.
+4. Area card is world-anchored to its area in both expanded and collapsed states, appears expanded on every arrival, collapses to a compact name bar that expands again on click/tap, stays with its area during look-around, keeps Arabic text crisp and accessible, does not block neighbouring areas, and is compact and teaser-focused (name, one short question, navigation).
 5. Mobile bottom sheet, optional fullscreen and natural page scrolling behave correctly.
 6. Museum exterior prototype has believable geometry and visually reflects the supplied preliminary reference, with explicit treatment of unverified sides/details.
 7. Evening lighting and KORA-inspired surroundings form a coherent, non-empty world.
@@ -206,6 +208,8 @@ This specification governs product intent and approved UX decisions. Claude Code
 
 | Date | Change | Approved by |
 |---|---|---|
+| 2026-10-14 | v1.7 — §3.1 «ابدأ الجولة» only flies to the first area (no tour box, counter, end button or tour state); §3.4 linear card navigation ending at the entertainment zone (no wrap, no Next on the last area), full card titles (wrap, never clipped). | Product owner (requested) |
+| 2026-10-14 | v1.6 — §3.4 compact cards (name + one short Arabic question + Previous / Overview / Next; descriptions live in the homepage sections and the area list); §3.1 the guided tour is manual (no timers or automatic moves; Next / Previous only; free selection unrestricted); §3.3 hitch-free transitions incl. the first one, preparation behind the loading screen, no resolution changes during motion. | Product owner (requested) |
 | 2026-10-13 | v1.5 — overview from the entrance with the gate first; flights from the overview enter through the gate; guided tour «ابدأ الجولة»; branded loading screen; collapsed-card controls stay inside the bar; banners read correctly from the gate. | Product owner (requested) |
 | 2026-10-13 | v1.4 — §4.1 / §4.4: revised venue layout (museum left of the entrance, stage at the far end of the main path facing the entrance, passage beyond the museum, six corners in a U, expanded grounds, larger booths, branded wayfinding); sixth corner = Engineering (provisional concept). | Product owner (requested) |
 | 2026-10-12 | v1.3 — Entrance arch placed on the plan's west "Gate" footprint (swapped with that placeholder); §3.1 overview from the entrance side; §3.3 optional passage route to the entertainment zone; §3.4 Previous / Back to overview / Next card controls. | Product owner (requested) |

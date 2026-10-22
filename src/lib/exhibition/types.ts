@@ -36,6 +36,9 @@ export type AreaContent = {
   /** Compact label for in-scene pins. */
   shortName: string;
   eyebrow: string;
+  /** One short, engaging question shown on the compact in-scene card. */
+  question: string;
+  /** Longer description (text area list / fallback; not shown on the card). */
   teaser: string;
   highlights: readonly string[];
   /** Copy is placeholder until the product owner approves it. */

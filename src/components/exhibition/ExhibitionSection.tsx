@@ -43,6 +43,14 @@ export function ExhibitionSection({ deferMs }: { deferMs?: number }) {
                   {AREAS[id].model === "placeholder" && <small> — التصميم قيد الإعداد</small>}
                 </strong>
                 <p>{AREAS[id].content.teaser}</p>
+                {(() => {
+                  const notes = [
+                    AREAS[id].designNote,
+                    AREAS[id].placementNote,
+                    AREAS[id].content.provisional ? "نص مبدئي — بانتظار الاعتماد" : undefined,
+                  ].filter(Boolean);
+                  return notes.length > 0 && <small>{notes.join(" · ")}</small>;
+                })()}
               </li>
             ))}
           </ul>

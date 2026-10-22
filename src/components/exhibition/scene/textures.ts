@@ -475,7 +475,16 @@ export async function glowTitleTexture(text: string, color: string, width = 1024
   ctx.textAlign = "center";
   ctx.textBaseline = "middle";
   ctx.direction = "rtl";
-  ctx.font = `800 ${Math.round(height * 0.62)}px ${family}`;
+  // Shrink long titles to fit inside the glow margin (a fixed size clipped
+  // «ركن ريادة الأعمال» at both ends).
+  let size = Math.round(height * 0.62);
+  ctx.font = `800 ${size}px ${family}`;
+  const fit = width - height * 0.36;
+  const measured = ctx.measureText(text).width;
+  if (measured > fit) {
+    size = Math.floor((size * fit) / measured);
+    ctx.font = `800 ${size}px ${family}`;
+  }
   ctx.shadowColor = color;
   ctx.shadowBlur = height * 0.12;
   ctx.fillStyle = color;

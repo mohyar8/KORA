@@ -56,7 +56,8 @@ export function EntrepreneurshipCorner() {
   const R_FRONT: [number, number] = [w / 2 - 0.05, d / 2 - 0.2];
   const H = 2.45;
 
-  const title = useAsyncTexture(() => glowTitleTexture("ركن ريادة الأعمال", "#e9eeff"));
+  // Wider canvas and plane (5 : 1) so the long title stays large and whole.
+  const title = useAsyncTexture(() => glowTitleTexture("ركن ريادة الأعمال", "#e9eeff", 1280, 256));
   const fun64 = useAsyncTexture(() => funnelTexture("6", "4", ["PROBLEMS", "OPPORTUNITIES"]));
   const fun43 = useAsyncTexture(() => funnelTexture("4", "3", ["OPPORTUNITIES", "VIABLE"]));
   const fun31 = useAsyncTexture(() => funnelTexture("3", "1", ["PROJECTS", "DECISION"]));
@@ -156,13 +157,13 @@ export function EntrepreneurshipCorner() {
         <meshStandardMaterial color="#e9ecf2" roughness={0.4} transparent opacity={0.85} />
       </Instanced>
 
-      <Plate lines={[{ text: "من الفكرة إلى الملعب", size: 92 }]} size={[1.5, 0.3]} position={[0, H + 0.27, d / 2 - 0.02]} bg="#1c2030" />
+      <Plate lines={[{ text: "من الفكرة إلى الملعب", size: 92 }]} size={[1.5, 0.3]} position={[0, H + 0.27, d / 2 + 0.04]} bg="#1c2030" />
       <Plate lines={[{ text: "اكتشف الفرصة", size: 70 }, { text: "SPOT THE OPPORTUNITY", size: 40, dir: "ltr" }]} number="01" size={[0.78, 0.22]} position={s1.position} rotationY={s1.rotationY} bg="#1c2030" />
       <Plate lines={[{ text: "قرّر", size: 70 }, { text: "MAKE THE DECISION", size: 40, dir: "ltr" }]} number="03" size={[0.78, 0.22]} position={s3.position} rotationY={s3.rotationY} bg="#1c2030" />
       </Detail>
       {title && (
         <mesh position={[0, H + 0.95, d / 2 - 0.1]}>
-          <planeGeometry args={[2.3, 0.56]} />
+          <planeGeometry args={[3.0, 0.6]} />
           <meshBasicMaterial map={title} transparent toneMapped={false} color={new THREE.Color(1.5, 1.5, 1.6)} depthWrite={false} />
         </mesh>
       )}

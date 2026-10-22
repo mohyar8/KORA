@@ -24,8 +24,6 @@ export type PinRegistry = {
   /** The open area card (world-anchored) and its world anchor. */
   card: HTMLElement | null;
   cardAt: readonly [number, number, number] | null;
-  /** Space kept free at the bottom of the stage (e.g. for the tour bar). */
-  bottomInset?: number;
 };
 
 const PRIORITY: readonly AreaId[] = ["museum", "stage", "entertainment", ...CORNER_IDS];
@@ -46,23 +44,70 @@ type Rect = { x0: number; y0: number; x1: number; y1: number };
 const cardV = new THREE.Vector3();
 const MARGIN = 12;
 
+/*
+ * The per-frame pass must never force a layout: reading offsetWidth right
+ * after writing another element's transform made the browser lay the page
+ * out for every pin, every frame (perf pass 2026-10-14). Sizes come from a
+ * ResizeObserver instead, and DOM writes happen only when a value changes.
+ */
+const sizes = new WeakMap<Element, { w: number; h: number }>();
+let observer: ResizeObserver | null = null;
+function sizeOf(el: HTMLElement) {
+  let s = sizes.get(el);
+  if (!s) {
+    s = { w: el.offsetWidth, h: el.offsetHeight };
+    sizes.set(el, s);
+    if (typeof ResizeObserver !== "undefined") {
+      observer ??= new ResizeObserver((entries) => {
+        for (const e of entries) {
+          const box = e.borderBoxSize?.[0];
+          const t = e.target as HTMLElement;
+          sizes.set(t, box ? { w: box.inlineSize, h: box.blockSize } : { w: t.offsetWidth, h: t.offsetHeight });
+        }
+      });
+      observer.observe(el);
+    }
+  }
+  return s;
+}
+function forget(el: HTMLElement | null) {
+  if (!el) return;
+  observer?.unobserve(el);
+  sizes.delete(el);
+}
+
+const written = new WeakMap<HTMLElement, { t: string; h: string; tab: number }>();
+/** Writes position / state only when they changed since the last frame. */
+function apply(el: HTMLElement, transform: string, hidden: string, attr: "hidden" | "inview", tab?: number) {
+  const prev = written.get(el);
+  if (prev && prev.t === transform && prev.h === hidden && prev.tab === (tab ?? -2)) return;
+  if (!prev || prev.t !== transform) el.style.transform = transform;
+  if (!prev || prev.h !== hidden) el.dataset[attr] = hidden;
+  if (tab !== undefined && (!prev || prev.tab !== tab)) el.tabIndex = tab;
+  written.set(el, { t: transform, h: hidden, tab: tab ?? -2 });
+}
+
+let lastCard: HTMLElement | null = null;
+
 /** Positions the world-anchored card for this frame (see PinRegistry). */
 function placeCard(reg: PinRegistry, camera: THREE.Camera, size: { width: number; height: number }) {
   const el = reg.card;
+  if (el !== lastCard) {
+    forget(lastCard);
+    lastCard = el;
+  }
   if (!el || !reg.cardAt) return;
   cardV.set(reg.cardAt[0], reg.cardAt[1], reg.cardAt[2]).project(camera);
   // In view = anchor in front of the camera and within the frame (+ a little slack).
   const inView = cardV.z < 1 && Math.abs(cardV.x) <= 1.1 && Math.abs(cardV.y) <= 1.15;
-  const w = el.offsetWidth;
-  const h = el.offsetHeight;
+  const { w, h } = sizeOf(el);
   let x = ((cardV.x + 1) / 2) * size.width - w / 2;
   // The card hangs below its world point (top edge at the anchor), so the
   // subject above the anchor stays visible on every aspect ratio.
   let y = ((1 - cardV.y) / 2) * size.height + 8;
   x = Math.min(Math.max(x, MARGIN), size.width - w - MARGIN);
-  y = Math.min(Math.max(y, 64), size.height - h - (reg.bottomInset ?? MARGIN));
-  el.style.transform = `translate(${x.toFixed(1)}px, ${y.toFixed(1)}px)`;
-  el.dataset.inview = inView ? "true" : "false";
+  y = Math.min(Math.max(y, 64), size.height - h - MARGIN);
+  apply(el, `translate(${x.toFixed(1)}px, ${y.toFixed(1)}px)`, inView ? "true" : "false", "inview");
 }
 const overlaps = (a: Rect, b: Rect) => a.x0 < b.x1 && a.x1 > b.x0 && a.y0 < b.y1 && a.y1 > b.y0;
 
@@ -98,16 +143,13 @@ export function PinProjector({ registry, current }: { registry: RefObject<PinReg
       const x = ((tmp.v.x + 1) / 2) * size.width;
       const y = ((1 - tmp.v.y) / 2) * size.height;
       if (!hidden) {
-        const w = el.offsetWidth;
-        const h = el.offsetHeight;
+        const { w, h } = sizeOf(el);
         // Collision box slightly smaller than the pin: neighbours may touch.
         const rect = { x0: x - w / 2 + 5, y0: y - h + 5, x1: x + w / 2 - 5, y1: y - 3 };
         if (placed.some((p) => overlaps(p, rect))) hidden = true;
         else placed.push(rect);
       }
-      el.style.transform = `translate(${x.toFixed(1)}px, ${y.toFixed(1)}px)`;
-      el.dataset.hidden = hidden ? "true" : "false";
-      el.tabIndex = hidden ? -1 : 0;
+      apply(el, `translate(${x.toFixed(1)}px, ${y.toFixed(1)}px)`, hidden ? "true" : "false", "hidden", hidden ? -1 : 0);
     }
   });
 

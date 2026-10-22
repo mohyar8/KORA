@@ -9,7 +9,8 @@ const LOGO_SRC = "/assets/brand/kora-main-tight.svg";
 function labelFor(p: number) {
   if (p < 0.5) return "نحمّل المعرض…";
   if (p < 0.65) return "نبني المشهد ثلاثي الأبعاد…";
-  if (p < 0.9) return "نجهّز الأجنحة والإضاءة…";
+  if (p < 0.86) return "نجهّز الأجنحة والإضاءة…";
+  if (p < 0.97) return "نهيّئ العرض ليكون سلسًا…";
   return "لحظات ونبدأ الجولة…";
 }
 

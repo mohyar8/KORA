@@ -112,6 +112,22 @@ function needsColours(list: THREE.Mesh[]) {
   });
 }
 
+// Batches that have not run yet. The scene's shaders are pre-compiled once
+// these are done (merged meshes bring their own, cloned materials).
+let pendingBatches = 0;
+const batchWaiters = new Set<() => void>();
+function batchDone() {
+  pendingBatches = Math.max(0, pendingBatches - 1);
+  if (pendingBatches > 0) return;
+  for (const resolve of batchWaiters) resolve();
+  batchWaiters.clear();
+}
+
+/** Resolves once every mounted static batch has been built. */
+export function batchesSettled(): Promise<void> {
+  return pendingBatches === 0 ? Promise.resolve() : new Promise((resolve) => batchWaiters.add(resolve));
+}
+
 export function Batched({ children, delay = 0 }: { children: ReactNode; delay?: number }) {
   const group = useRef<THREE.Group>(null);
   const get = useThree((s) => s.get);
@@ -123,7 +139,14 @@ export function Batched({ children, delay = 0 }: { children: ReactNode; delay?: 
     const ownMaterials: THREE.Material[] = [];
     const hidden: THREE.Mesh[] = [];
     let cancelled = false;
+    let done = false;
     let commit: number | undefined;
+    pendingBatches += 1;
+    const finish = () => {
+      if (done) return;
+      done = true;
+      batchDone();
+    };
     const run = () => {
       root.updateMatrixWorld(true);
       const inv = new THREE.Matrix4().copy(root.matrixWorld).invert();
@@ -172,6 +195,7 @@ export function Batched({ children, delay = 0 }: { children: ReactNode; delay?: 
       const { gl, invalidate } = get();
       gl.shadowMap.needsUpdate = true;
       invalidate();
+      finish();
     };
     // After `delay`, wait for async textures, then one more tick so React has
     // committed them to their materials (if new ones started meanwhile, wait again).
@@ -182,6 +206,7 @@ export function Batched({ children, delay = 0 }: { children: ReactNode; delay?: 
     const timer = window.setTimeout(attempt, delay);
     return () => {
       cancelled = true;
+      finish();
       window.clearTimeout(timer);
       window.clearTimeout(commit);
       for (const m of created) {

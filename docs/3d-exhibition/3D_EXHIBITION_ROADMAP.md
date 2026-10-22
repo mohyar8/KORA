@@ -1,7 +1,7 @@
 # KORA 3D Exhibition — Implementation Roadmap
 
-**Status:** v1.0 (2026-10-13) — M0–M5 approved; M6 + R1–R4 committed by the owner (`1d9cb38`); **layout revision LR-1 implemented and verified, stopped for visual review** (§6 "Layout revision LR-1"). Not declared production-ready; nothing committed or deployed.
-**Authoritative spec:** [`3D_EXHIBITION_SPEC.md`](./3D_EXHIBITION_SPEC.md) **v1.5**. This roadmap never overrides it; conflicts are logged in §9.
+**Status:** v1.0 (2026-10-14) — M0–M5 approved; M6 + R1–R4 committed by the owner (`1d9cb38`); LR-1 / LR-2 committed by the owner (`d95898b`); **PF-1, FR-1 and FR-2 implemented and verified, stopped for review** (§6). Not declared production-ready; nothing committed or deployed.
+**Authoritative spec:** [`3D_EXHIBITION_SPEC.md`](./3D_EXHIBITION_SPEC.md) **v1.7**. This roadmap never overrides it; conflicts are logged in §9.
 **Resume file:** [`3D_EXHIBITION_STATE.md`](./3D_EXHIBITION_STATE.md) (current state, verified results, how to verify).
 **Owner of this file:** Claude Code — update on every material plan change and log it in §10.
 
@@ -198,22 +198,28 @@ src/lib/exhibition/
 - **Card (spec §3.4):**
   - Anchored to `cardAnchor(area)` (in front of and below the subject); it hangs below that point, is clamped to the viewport, and hides while the point is out of frame. It moves with the world on look-around.
   - It expands on every arrival.
-  - **Collapse:** the whole title row is an `aria-expanded` toggle; the body and eyebrow fold away with a 0.32 s grid-rows animation, and the card narrows to a 250 px bar at the same anchor. Reduced motion → no animation. The body is `inert` while collapsed.
+  - **Content (FR-1, spec v1.6):** name (the toggle) + one short question (`content.question`) + Previous / المنظر العام / Next; 320 px wide (300 on phones). Long teasers and provisional notes live in the text area list.
+  - **Collapse:** the whole title row is an `aria-expanded` toggle; the question folds away with a 0.32 s grid-rows animation, and the card narrows to a 300 px bar (name + navigation) at the same anchor. Reduced motion → no animation. The body is `inert` while collapsed.
+- **«ابدأ الجولة» (FR-2):** flies to the first stop of `TOUR_ORDER`; no tour state or UI. Card Previous / Next walk `TOUR_ORDER` linearly (museum … entertainment, no wrap; ends hide the missing control).
+  - Card title: wraps (never clipped).
 - **Loading:** nothing (JS or poster) before near-viewport; 3D also not before `deferMs`; poster while loading; SSR text list always present; failure / context loss / no WebGL / Save-Data → dimmed poster + message + visible text list; `<noscript>` reveals the list.
 - **Fullscreen stacking:** while fullscreen, `.exh-stage` is lifted to z 100 (via `:has`) so the fixed overlay covers the topbar (z 60) and noise overlay (z 90); before M5 the isolated stage kept it below the topbar.
-- **Performance:** frameloop `demand` / `never` off-screen; DPR caps per tier plus adaptive DPR while moving (floor 0.75); `Detail` LOD (booth interiors 22 m, entertainment 40 m); cross-area static batching with colour baking; one-shot shadow map.
+- **Performance:** frameloop `never` until the scene is prepared, then `demand` (`never` off-screen); DPR caps per tier; starting ratio measured behind the loading screen; adaptive DPR (floor 0.75) decided while moving but applied only at rest; `Detail` LOD (booth interiors 22 m, entertainment 40 m; lights fade, never hide); cross-area static batching with colour baking; one-shot shadow map. Preparation before the reveal: textures + batches settle → `compileAsync` (composer variant) → chunked upload render → 8 measured frames → reveal.
 
 ### 4.3 Performance budgets (proposed, D-6) and current values
 | Metric | Budget | Now | Status |
 |---|---|---|---|
 | Hero impact / homepage JS | ≈0 KB added | 832 KB raw / 269 KB gz (+8 / +4.3 KB for the client loader gate; no three/R3F) | ✅ (gate is unavoidable) |
 | Poster | — | 77 KB desktop / 40 KB mobile, only when near | ✅ |
-| Exhibition JS (compressed, loaded with section) | ≤ 300 KB | ≈311 KB (+5 KB in LR-1: Engineering model, venue elements) | ⚠ +4 % — structural, see D-27 |
+| Exhibition JS (compressed, loaded with section) | ≤ 300 KB | 313.2 KB gz (FR-1, production build) | ⚠ +4 % — structural, see D-27 |
 | Draw calls, overview (desktop) | ≤ 150 | **161** after LR-1 (141 before; the venue is ≈2.5× larger with a sixth booth and branded elements) | ⚠ +7 % — D-34 |
 | Draw calls, anchored | ≤ 150 | 68–109 | ✅ |
 | Triangles (overview) | ≤ 600 k desktop / 300 k mobile | ≈342 k desktop | ✅ |
-| DPR | 1.5 desktop / 1.25 mobile | as budgeted; adaptive down to 0.75 on slow GPUs while moving | ✅ |
-| Frame time (integrated AMD Radeon Vega, 1260×823 buffer, dev build, warm) | ~16.7 ms ideal | 19–26 ms (≈40–50 fps); auto-steps down when > 25 ms | ⚠ real devices untested |
+| DPR | 1.5 desktop / 1.25 mobile | as budgeted; starting ratio measured at load, adaptive down to 0.75 on slow GPUs, changed only at rest | ✅ |
+| Frame time (integrated AMD Radeon Vega, 1600×898 buffer, dev build, adaptive off) | ~16.7 ms ideal | static 21–28 ms, flights mean 27–31 ms, worst cold frame ≤ 61 ms (was 4.3 s); auto-steps down when > 25 ms | ⚠ GPU-bound; real devices untested |
+| Shader compiles / GPU uploads / buffer reallocations during flights | 0 | 0 / 0 / 0 (production build, FR-1) | ✅ |
+| Frame time in flight (production, 1920 × 1080 cap, adaptive on) | ~16.7 ms ideal | means 17.5–24.9 ms, worst ≤ 45 ms, 0 frames > 50 ms (first flight before FR-1: 79 ms hitches) | ⚠ GPU-bound; real devices untested |
+| Main-thread blocking while the 3D loads (homepage) | short tasks | 2.45 s total, longest 455 ms (was 5.34 s / 2.9 s) | ⚠ acceptable behind the loading screen; not zero |
 | GPU resources after 2 full tours of all 10 areas | stable | 356 geometries / 91 textures, identical after the 2nd tour | ✅ |
 
 ---
@@ -336,6 +342,84 @@ Designer GLBs can replace any area through `AreaConfig.modelUrl` without other c
 - **Banners:** each banner is two single-sided faces; the front faces arriving visitors (west on the main path), so «كورة» reads correctly from the gate (before: mirrored).
 - **Verified:** collision sweep 0 collisions at six aspects (all 9 overview flights take the gate route, 8 area→entertainment flights the passage, 0 tunnel/gate exit problems); gate flight overview → museum 5.7 s, ≤ 0.67 m/frame, frames show the arch face, the pass through the opening and the path with correctly reading banners; tour: start → museum, auto-advance after 9 s → Technology, pause holds, card Next → Media (tour continues), area-list choice ends the tour; collapsed bar 300 px with all three controls inside; loading screen assembles (frames checked mid-animation) and reaches 100 %; posters re-captured (77 / 35 KB). Homepage JS 270.2 KB gz (+0.9 KB for the loading screen in the loader), no 3D code; exhibition JS ≈312 KB.
 
+### Performance pass PF-1 (2026-10-14, owner request) — done, stopped for review
+
+Bottleneck found: transitions froze because of **shader compiles and GPU uploads triggered mid-flight** (lights toggled by `Detail` changed every program key; interiors uploaded on first approach). Steady frames are **GPU-bound** (CPU ≤ 6 ms), half of it post-processing.
+
+1. **Constant light set (`Detail`, `kit/primitives.tsx`).** Lights inside a `<Detail>` now fade to intensity 0 when far instead of being hidden. three.js keys every shader program on the number of lights, so hiding / showing a light forced a recompile of every visible material mid-flight (the multi-second freezes). Meshes in `Detail` are still hidden when far. No visual change (a 0-intensity light adds nothing; measured cost of keeping them: none).
+2. **Everything compiled and uploaded behind the loading screen (`ExhibitionExperience.tsx` `onCreated`).** After textures and static batches settle (new `batchesSettled()` signal in `Batched.tsx`), `gl.compileAsync` compiles all programs with an off-screen HalfFloat target bound (the composer's variant — compiling for the canvas produced the wrong tone-mapping/colour-space variants), then one render into a 1×1 target with every object shown and culling off uploads all geometries and textures (booth interiors used to upload on first approach: 100–175 ms stalls). Visibility / culling are restored exactly; lights untouched. Loading-screen labels follow the new stages.
+3. **MSAA 4 → 2 on the high tier (`quality.ts`).** Post-processing is about half of GPU time; MSAA 4 → 2 saved 10–15 % GPU per frame with no visible difference in side-by-side captures (MSAA 0 was visibly aliased and was rejected; half-resolution bloom gave no gain and was rejected).
+4. **No forced layouts per frame (`ui/AreaPins.tsx`).** The pin / card projector read `offsetWidth` every frame and rewrote styles unconditionally; it now caches sizes via one `ResizeObserver` and only writes changed values.
+5. Dev only: `__exh.adaptive(on)` toggles adaptive resolution for equal-condition measurements.
+
+Conditions for every number: lab route, dev build, integrated AMD Radeon (Vega) in the hidden in-app browser, stage forced to 1280×720 CSS → 1600×898 buffer, adaptive resolution **off**, a GPU readback after every frame (so "frame" = real CPU + GPU time), same 7-flight route (overview → museum → corner-1 → corner-4 → corner-6 → stage → entertainment → overview), cold = first pass after a full reload. Flight durations and easing were **not** changed, so every gain below is frame cost, not shorter animations.
+
+| Measure | Before | After |
+|---|---|---|
+| Shader programs compiled **during** flights (cold pass) | 53 (43 at ready → 96) | **0** (all compiled behind the loading screen) |
+| GPU uploads during flights (cold pass) | up to 12 textures + 138 buffers in one frame | **0** |
+| Worst frame, cold pass | 339–4258 ms (4.3 s freeze overview → museum, 3.1 s corner-1 → corner-4) | **≤ 61 ms** |
+| Worst CPU frame, cold pass | 93–144 ms (lazy uploads) | ≤ 10 ms |
+| Frames > 50 ms per flight, cold | many (shader stalls) | 0–2 |
+| Mean frame in flight | 26–76 ms | 26.6–30.5 ms |
+| Static overview / museum / corner-3 / stage / entertainment (p50) | 31.5 / 28.4 / 30.3 / 26.5 / 19.5 ms | 27.7 / 27.9 / 20.8 / 26.1 / 20.4 ms |
+| CPU per frame (submit) | 2–6 ms | 1.5–3 ms |
+| Draw calls overview | 161 | 161 (unchanged) |
+
+Note: an earlier harness version reported a 120–260 ms "frame 1" at every flight start; that was a measurement artifact (8 un-synced setup frames drained by the first readback) — with a sync before the flight, frame 1 is 35–55 ms, like the rest.
+
+Remaining bottlenecks:
+- **GPU fill is the ceiling:** ≈26–30 ms per frame at 1.44 Mpx on the integrated GPU (≈35 fps) with adaptive resolution off; adaptive resolution (unchanged) lowers DPR while moving when frames exceed 25 ms. About half of that is post-processing (bloom mipmap chain, vignette, AGX tone mapping, HalfFloat buffers); the scene pass is ≈16 ms.
+- Draw calls 161 on the overview (budget 150, D-34) — CPU is not the limit (≤ 3 ms submit), so batching further would not change fps here.
+- Ready time grows slightly (all compiles/uploads before the reveal; ≈7 s in the hidden dev pane, unmeasured on a production build / visible window).
+- Exhibition JS ≈312 KB gz (D-27), unchanged.
+- **Real devices untested:** all numbers come from one integrated-GPU laptop in a hidden dev-build pane; phones / visible-window production numbers still need checking.
+
+Verified: tsc ✅, eslint ✅ (only pre-existing `Departments.tsx:19`), build ✅; homepage JS 270.2 KB gz with no 3D code; Hero / layout / globals / brand unchanged vs `1d9cb38`; overview capture matches the approved look.
+
+### Final refinements FR-1 (2026-10-14, owner request) — done, stopped for review
+
+1. **Entrepreneurship signage** (`textures.ts`, `models/FrameCorners.tsx`): the upper glowing title «ركن ريادة الأعمال» was wider than its 1024 px canvas and was cut at both ends. `glowTitleTexture` now shrinks any title that does not fit; the Entrepreneurship title uses a wider canvas (1280 × 256) on a 3.0 × 0.6 m plane, so it stays large and complete. The header plate «من الفكرة إلى الملعب» sat exactly on the canopy front (z-fighting, garbled) and was moved 6 cm forward. No other booth changed (the Media title fits and is unaffected).
+2. **Compact cards** (`ui/AreaCard.tsx`, `exhibition.css`, `areas.ts`, `types.ts`): the card now shows only the area name (the expand/collapse toggle), **one short Arabic teaser question** (new `content.question`, provisional, one per area) and Previous / المنظر العام / Next. Eyebrow, long teaser, tags and the provisional note left the card; it is 320 px wide (300 px on phones) and ≈170 px tall instead of 380 × ≈330. Still world-anchored, expanded on every arrival, collapses to the 300 px name bar with the navigation (≈107 px tall) and expands on tap. The longer descriptions stay in `content.teaser`, used by the text area list under the stage (screen readers, no-3D fallback) and the homepage sections that follow; the provisional / concept / placement notes moved into that list (`ExhibitionSection.tsx`). The live region announces "name: question".
+3. **Manual guided tour** (`ExhibitionExperience.tsx`): «ابدأ الجولة» flies to the first stop (museum) and shows a small bar (step n / 9, stop name, «تابِع بزر «التالي» في البطاقة», «إنهاء الجولة»). No timers, countdowns, hold progress, pause or automatic moves remain (`TOUR_DWELL_MS`, the progress bar and its CSS were removed). The visitor advances only with the card's Next / Previous; free selection (scene, labels, area list) stays unrestricted and keeps the tour, whose step follows the current stop; returning to the overview or «إنهاء الجولة» ends it.
+4. **First-flight stutter — cause and fix** (`scene/AdaptiveResolution.tsx`, `ExhibitionExperience.tsx`): profiled in a production build (`next start`). At laptop size (1536 × 864 CSS stage, 1920 × 1080 buffer) adaptive resolution stepped the pixel ratio down **twice during the very first flight** (1.25 → 1.0 → 0.8). Each step resizes the canvas and reallocates every post-processing buffer (17 textures + the MSAA renderbuffers): 79 ms hitches plus a visible jump in sharpness mid-flight. Small stages (≈1 Mpx) never adapted and showed no stutter. Fix, without touching the animation: (a) the starting pixel ratio is measured behind the loading screen from 8 real frames (median of the last 5) and set before the reveal (`startingScale`: √(22 ms / measured) × cap, floor 0.75); (b) adaptive resolution never resizes mid-motion — a decision waits until no frame has rendered for 180 ms (camera at rest), is one decisive step based on the measured frame time, and never steps back up to a ratio already found too slow (no see-saw between arrivals).
+5. **Main-thread freeze while the 3D loads** (found by the production validation, `ExhibitionExperience.tsx`): the R3F render loop now stays off (`frameloop="never"`) until the scene is prepared. Before, the first automatic frame compiled every visible shader synchronously (3.4 s in one task) before the async pre-compile could run. The upload render is split into 6 chunks and every preparation step yields to the page (MessageChannel), so scrolling continues while the 3D prepares behind the loading screen.
+6. **Profiling build** (`next.config.ts`): `EXH_PROFILE=1` (with `EXHIBITION_LAB=1`) keeps the `window.__exh` hook in a production build for measurements; `next.config` always inlines the flag, so a normal build contains no hook code (verified: 0 chunks).
+
+Conditions: production build (`next start`), integrated AMD Radeon (Vega), built-in browser pane (hidden; frames driven by `__exh.step` with a GPU readback after every frame, so a frame = real CPU + GPU time), adaptive resolution **on** as visitors get it. Flight durations and easing unchanged (overview → museum: 323–326 frames before and after), so gains are frame cost, not shorter animations.
+
+| Measure (production build) | Before | After |
+|---|---|---|
+| First flight overview → museum, 1536 × 864 stage: pixel-ratio changes mid-flight | 2 (1.25 → 1.0 → 0.8) | **0** (starts at the measured 0.87–0.97) |
+| — buffer reallocations / shader compiles / uploads during the flight | 2 × (17 textures + MSAA buffers) / 0 / 0 | **0 / 0 / 0** |
+| — worst frame · frames > 50 ms · mean | 79.1 ms · 3 · 25.8 ms | **40.8–45.1 ms · 0** · 22.3–24.9 ms |
+| Same flight, small stage 1009 × 660 (no adaptation needed) | max 38.8 ms, mean 22.2 ms, 0 changes | unchanged path (≈ same) |
+| Full route (7 flights incl. return to overview), 1536 × 864 | — | 0 frames > 50 ms; worst 27.9–45.1 ms; means 17.5–24.9 ms; 0 reallocations / compiles / uploads in flight; ratio settles at 0.75–0.86, changed only at rest |
+| Homepage, 3D loading after scrolling in (1009 × 660 stage): main-thread long tasks | 5.34 s total, longest **2.9 s** | 2.45 s total, longest **455 ms** |
+| — ready after the stage enters the viewport (localhost) | 7.3 s | 6.0 s |
+| Homepage JS before the 3D (gz) | 270.2 KB, no 3D code | 270.2 KB, no 3D code |
+| Exhibition JS (lazy, gz) | ≈312 KB | 313.2 KB (3 files; questions + tour/adaptive code) |
+
+Still views after the route (production, ratio 0.83, 1536 × 864): overview 13.9 · museum 20.8 · corner-3 19.1 · stage 20.9 · entertainment 14.2 ms (p50).
+
+Remaining limitations:
+- **Not measured on real devices or in a visible window.** All numbers come from one integrated-GPU laptop in a hidden browser pane (rAF paused; frames driven by `__exh.step`). Phones, other GPUs, Safari and a real visible-window frame rate remain owner-side checks.
+- **GPU-bound:** ≈18–25 ms per frame while flying at 1536 × 864 on this GPU, so adaptive resolution settles at 0.75–0.86 there; about half of GPU time is post-processing (bloom chain, vignette, AGX, HalfFloat). Lighter post-processing would change the approved look — not done.
+- **A resolution change can still happen once at rest** after the first flight (e.g. 0.87 → 0.79) — no hitch, but a slight sharpness change on a still view.
+- **Load still costs ≈2.4 s of main-thread work** in ≤ 455 ms tasks (scene construction ≈0.35 s, program finalisation and uploads per chunk 0.2–0.45 s). Scrolling continues between tasks but can stutter briefly while the loading screen is up.
+- Lighthouse is not installed here; LCP/TBT not measured with it (homepage JS and long tasks measured directly instead).
+- Overview draw calls: 161 in dev at 16 : 9 (D-34); the production still-view sample read 85 at 1536 × 864 — not investigated, treat 161 as the reference.
+- Exhibition JS 313.2 KB gz vs the 300 KB budget (D-27).
+
+Verified: tsc ✅; eslint ✅ (only pre-existing `Departments.tsx:19`); `npm run build` ✅; homepage 270.2 KB gz / 11 chunks, no three/R3F; no `__exh` code in a normal build; Hero / page / layout / globals / brand unchanged vs `1d9cb38`. Browser (dev + prod): Entrepreneurship title complete and plate clean (render before/after); card 320 × 170 expanded / 301 × 107 collapsed with all three controls inside, re-expands, phone 288 × 135 inside the stage and clear of the tour bar; tour: start → museum (1 / 9), no change after 12 s, Next → Technology (2 / 9), free pick of the stage → 8 / 9, overview ends it.
+
+### UX fixes FR-2 (2026-10-14, owner request) — done, stopped for review
+
+1. **Card title clipping** (`exhibition.css`): the name in the card header was `nowrap` + ellipsis, so «ركن الاقتصاد والاستثمار» was cut at the desktop size (22 px). It now wraps (`white-space: normal`, balanced lines, `min-width: 0` beside the fixed chevron; title line-height 1.35 for Arabic). Measured: 1440 × 900 → name 238 × 57 px on two complete lines, no overlap with the chevron; collapsed (16 px) one line; 375 px phone → one line, card 288 × 135 inside the stage, no horizontal overflow.
+2. **Tour simplified** (`ExhibitionExperience.tsx`, `ui/AreaCard.tsx`, `areas.ts`, `ui/AreaPins.tsx`, `exhibition.css`): the tour status bar (step n / 9, stop name, hint, «إنهاء الجولة»), the `touring` / `tourStep` / `tourNote` state, the card's bottom inset for the bar and the bar CSS were removed. «ابدأ الجولة» simply flies to the first stop of `TOUR_ORDER` (museum). `tourNeighbours` is now **linear**: no Previous on the museum (first), no Next on the entertainment zone (last); the card renders only the controls that exist, so the last stop shows Previous + المنظر العام only, and nothing wraps in either direction. Keyboard focus after Next / Previous falls back to the remaining control at either end. Scene, labels and the area list are unchanged (unrestricted).
+
+Verified (dev, lab route): «ابدأ الجولة» → museum, card controls [overview, next], no tour bar; Next → «ركن التقنية» with focus on Next; stage → Next → «منطقة الترفيه», controls [prev, overview], focus on Previous; title checks above. tsc ✅; eslint ✅ (only pre-existing `Departments.tsx:19`); `npm run build` ✅; homepage 270.2 KB gz / 11 chunks, no three/R3F; exhibition JS 313.0 KB gz, no `__exh` hook; Hero / page / layout / globals / brand unchanged vs `1d9cb38`.
+
 **Release readiness:** technically ready for owner review on the `newV` branch. Not declared production-ready: needs owner approval, real-device QA (list above) and a decision on shipping provisional content.
 
 ---
@@ -348,7 +432,7 @@ Designer GLBs can replace any area through `AreaConfig.modelUrl` without other c
 5. Every milestone confirms `git diff` on the Hero, page, layout, globals and public files is empty, except the planned M5 insertion.
 
 ## 8. Verification toolkit
-`npx tsc --noEmit` · `npx eslint` · `npm run build` (+ the homepage chunk audit described in STATE) · `npm run dev` with the built-in browser preview (`.claude/launch.json` → `kora-dev`) · dev-only `window.__exh` hook. Details, quirks and recipes are in STATE ("How to verify").
+`npx tsc --noEmit` · `npx eslint` · `npm run build` (+ the homepage chunk audit described in STATE) · `npm run dev` with the built-in browser preview (`.claude/launch.json` → `kora-dev`) · dev-only `window.__exh` hook · production profiling: `EXHIBITION_LAB=1 EXH_PROFILE=1 npx next build` then `kora-prod` (port 3100) — rebuild normally afterwards. Details, quirks and recipes are in STATE ("How to verify").
 
 ## 9. Decisions register
 | ID | Decision | Status |
@@ -392,10 +476,23 @@ Designer GLBs can replace any area through `AreaConfig.modelUrl` without other c
 | D-38 | Guided tour: 9 s hold per stop, ends on any direct choice, card Previous/Next continue it | ✅ LR-2 (routine) |
 | D-39 | Loading screen animates the official logo SVG's own paths (no redrawing); progress from real stages | ✅ LR-2 |
 | D-40 | All camera route choices centralised in `planRoute` (gate / passage / exits / arc), shared with the dev collision sweep | ✅ LR-2 |
+| D-41 | Fixed light set: far `Detail` lights fade to 0 instead of hiding; all programs compiled and all GPU resources uploaded before the reveal | ✅ PF-1 |
+| D-42 | MSAA 2 on the high tier (was 4): −10–15 % GPU, no visible difference | ✅ PF-1 (routine) |
+| D-43 | Compact card: name + one short question + navigation; descriptions and provisional notes move to the area list / following sections | ✅ FR-1 (owner request) |
+| D-44 | Manual guided tour: no timers; Next / Previous only; free selection keeps the tour; overview ends it | ✅ FR-1 (owner request) |
+| D-45 | Starting pixel ratio measured behind the loading screen; adaptive changes applied only at rest, one decisive step, never back up to a ratio found slow | ✅ FR-1 |
+| D-46 | Render loop off until the scene is prepared; preparation split into yielding tasks | ✅ FR-1 |
+| D-47 | `EXH_PROFILE=1` production profiling build (hook kept); flag always inlined by `next.config`, so normal builds drop the hook | ✅ FR-1 (routine) |
+| D-48 | Teaser questions written by Claude as provisional copy (R-10 still open) | ⏳ Owner to approve or replace |
+| D-49 | No tour mode: «ابدأ الجولة» only flies to the first stop; tour bar / counter / end button removed (supersedes D-38, D-44) | ✅ FR-2 (owner request) |
+| D-50 | Linear card sequence ending at the entertainment zone; no wrap; first stop has no Previous, last has no Next | ✅ FR-2 (owner request; hiding Previous on the first stop follows from "no wrap") |
 
 ## 10. Update log
 | Date | Change |
 |---|---|
+| 2026-10-14 | FR-2: card titles wrap (no clipping); tour UI/state removed, «ابدأ الجولة» → first stop, linear Previous / Next ending at the entertainment zone; spec v1.7; D-49–D-50. |
+| 2026-10-14 | FR-1: Entrepreneurship title/plate fixed, compact question cards, manual tour, first-flight stutter fixed (starting resolution + no resizes in motion), load no longer freezes the page (render loop gated, chunked uploads), production validation recorded; spec v1.6; D-43–D-48. |
+| 2026-10-14 | PF-1 performance pass: no shader compiles / uploads during flights (worst cold frame 4.3 s → ≤ 61 ms), MSAA 4 → 2, pin projector without forced layouts; D-41–D-42. |
 | 2026-10-13 | LR-2: entrance-side overview + gate entry flights, guided tour, branded loading screen, collapsed-card fix, banner orientation fix; spec v1.5; D-38–D-40. |
 | 2026-10-13 | v1.0: layout revision LR-1 — owner-directed venue layout (spec v1.4), six corners in a U with Engineering as a provisional concept, booths ×1.7, expanded grounds with lawns, branded wayfinding (`Venue.tsx`), rotated museum/stage frames, passage moved beyond the museum with the buildings, route/anchors/collisions/tour/overview/posters updated. D-33–D-37. |
 | 2026-10-12 | v0.9: post-M6 refinements R1–R4 (arch ↔ gate swap, entrance-side overview + new posters, card Previous/Overview/Next, passage route to the entertainment zone with tunnel exit); planLift sampling densified (40 → 240 probes, +10 % headroom) after denser checks found grazes; spec v1.3. |

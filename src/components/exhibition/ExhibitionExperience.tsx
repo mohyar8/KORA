@@ -3,7 +3,7 @@
 import { Canvas, invalidate, type RootState } from "@react-three/fiber";
 import gsap from "gsap";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { Vector3, type WebGLRenderer } from "three";
+import { HalfFloatType, Vector3, WebGLRenderTarget, type Light, type Object3D, type WebGLRenderer } from "three";
 import { AREA_ORDER, AREAS, TOUR_ORDER, cardAnchor } from "@/lib/exhibition/areas";
 import { PASSAGE } from "@/lib/exhibition/layout";
 import type { AreaId } from "@/lib/exhibition/types";
@@ -15,20 +15,18 @@ import { Atmosphere } from "./scene/Atmosphere";
 import { Ground } from "./scene/Ground";
 import { HitTargets, CLICK_SLOP } from "./scene/HitTargets";
 import { Effects, Lighting } from "./scene/Lighting";
-import { AdaptiveResolution, adaptiveControl } from "./scene/AdaptiveResolution";
+import { AdaptiveResolution, adaptiveControl, startingScale } from "./scene/AdaptiveResolution";
 import { AreaModels } from "./scene/AreaModels";
 import { Placeholders } from "./scene/Placeholders";
 import { Scenery } from "./scene/Scenery";
 import { Venue } from "./scene/Venue";
 import { asyncTexturesSettled } from "./scene/useAsyncTexture";
+import { batchesSettled } from "./scene/Batched";
 import { QualityContext, detectQuality, type Quality } from "./scene/quality";
 import { Surroundings } from "./scene/Surroundings";
 import { AreaCard, type CardNav } from "./ui/AreaCard";
 import { AreaPanel, AreaPanelTrigger } from "./ui/AreaPanel";
 import { AreaPins, PinProjector, type PinRegistry } from "./ui/AreaPins";
-
-/** How long the guided tour holds at each stop (reading time for the card). */
-const TOUR_DWELL_MS = 9000;
 
 type Drag = {
   id: number;
@@ -64,6 +62,8 @@ export default function ExhibitionExperience({
   const [hover, setHover] = useState<{ id: AreaId; x: number; y: number } | null>(null);
   const [visible, setVisible] = useState(true);
   const [ready, setReady] = useState(false);
+  /** Render loop allowed (after shaders, uploads and the starting resolution are prepared). */
+  const [live, setLive] = useState(false);
   const [panelOpen, setPanelOpen] = useState(false);
   const [fullscreen, setFullscreen] = useState(false);
   const look = useRef<LookInput>({ yaw: 0, pitch: 0 });
@@ -134,63 +134,19 @@ export default function ExhibitionExperience({
     setCardExpanded(true);
   }, []);
 
-  // ----- Guided tour (owner request, 2026-10-13) ---------------------------
-  // «ابدأ الجولة» plays TOUR_ORDER: fly to each stop, hold for DWELL while the
-  // card is read, then move on. The visitor stays free: choosing any area
-  // (scene, label, list) or the overview ends the tour; the card's Previous /
-  // Next move the tour along; looking around or folding the card restarts
-  // the hold; it pauses while the section is off-screen.
-  const [tour, setTour] = useState({ active: false, index: 0, paused: false });
-  const [dwellKey, setDwellKey] = useState(0);
-  const [tourNote, setTourNote] = useState("");
-  const holdTour = useCallback(() => setDwellKey((k) => k + 1), []);
+  /** Visitor-driven navigation (scene, labels, area list, card controls). */
+  const select = go;
 
-  /** Visitor-driven navigation: ends a running tour. */
-  const select = useCallback(
-    (id: AreaId | null, viaKeyboard = false) => {
-      setTour((t) => (t.active ? { ...t, active: false } : t));
-      go(id, viaKeyboard);
-    },
-    [go],
-  );
-
-  const startTour = useCallback(() => {
-    setTour({ active: true, index: 0, paused: false });
-    setTourNote("بدأت الجولة");
-    go(TOUR_ORDER[0]);
-  }, [go]);
-  const stopTour = useCallback(() => {
-    setTour((t) => ({ ...t, active: false }));
-    setTourNote("انتهت الجولة");
-  }, []);
-
-  useEffect(() => {
-    if (!tour.active || tour.paused || !visible) return;
-    if (arrived === null || arrived !== selected || selected !== TOUR_ORDER[tour.index]) return;
-    const timer = window.setTimeout(() => {
-      if (tour.index >= TOUR_ORDER.length - 1) {
-        setTour((t) => ({ ...t, active: false }));
-        setTourNote("انتهت الجولة");
-        return;
-      }
-      const next = tour.index + 1;
-      setTour((t) => ({ ...t, index: next }));
-      go(TOUR_ORDER[next]);
-    }, TOUR_DWELL_MS);
-    return () => window.clearTimeout(timer);
-  }, [tour, visible, arrived, selected, go, dwellKey]);
-
-  // Keep the world-anchored card clear of the tour bar at the bottom.
-  useEffect(() => {
-    // The bar is ~70 px tall, 16 px from the bottom (44 px on phones, above the skip link).
-    const narrow = (root.current?.clientWidth ?? 1024) < 768;
-    pins.current.bottomInset = tour.active ? (narrow ? 124 : 96) : 12;
-    invalidate();
-  }, [tour.active]);
+  // «ابدأ الجولة» (spec v1.7): simply flies to the first stop of TOUR_ORDER.
+  // There is no tour state: the card's Previous / Next walk the order, which
+  // ends at the entertainment zone; free navigation is never restricted.
+  const startTour = useCallback(() => go(TOUR_ORDER[0]), [go]);
 
   // Development-only inspection hook (stripped from production builds).
   useEffect(() => {
-    if (process.env.NODE_ENV !== "development") return;
+    // Also in production builds made with EXH_PROFILE=1 (profiling only;
+    // next.config inlines the flag, so a normal build drops the hook).
+    if (process.env.NODE_ENV !== "development" && process.env.EXH_PROFILE !== "1") return;
     const w = window as unknown as { __exh?: unknown };
     w.__exh = {
       select: (id: AreaId | null) => select(id),
@@ -356,10 +312,11 @@ export default function ExhibitionExperience({
     const want = focusOnArrive.current;
     if (!anchored || !want) return;
     focusOnArrive.current = null;
+    // At either end of the sequence Next / Previous is not rendered: fall
+    // back to the other one so keyboard focus stays in the card.
+    const nav = (id: string) => pins.current.card?.querySelector<HTMLButtonElement>(`[data-nav="${id}"]`);
     const el =
-      want === "toggle"
-        ? cardToggle.current
-        : pins.current.card?.querySelector<HTMLButtonElement>(`[data-nav="${want}"]`);
+      want === "toggle" ? cardToggle.current : (nav(want) ?? nav(want === "next" ? "prev" : "next") ?? cardToggle.current);
     el?.focus({ preventScroll: true });
   }, [anchored]);
 
@@ -368,16 +325,12 @@ export default function ExhibitionExperience({
   // scene itself when returning to the overview (the card unmounts).
   const navigateFromCard = useCallback(
     (id: AreaId | null, control: CardNav) => {
-      // During the tour, Previous / Next move the tour; the overview ends it.
-      const step = id ? TOUR_ORDER.indexOf(id) : -1;
-      if (tour.active && control !== "overview" && step >= 0) {
-        setTour((t) => ({ ...t, index: step, paused: false }));
-        go(id);
-      } else select(id);
+      // Previous / Next follow TOUR_ORDER (linear: museum … entertainment).
+      select(id);
       if (control === "overview") root.current?.focus({ preventScroll: true });
       else focusOnArrive.current = control;
     },
-    [select, go, tour.active],
+    [select],
   );
 
   const clampLook = (yaw: number, pitch: number) => {
@@ -392,7 +345,6 @@ export default function ExhibitionExperience({
   // ----- Look-around gestures (only once anchored) -----------------------
   const onPointerDown = (e: React.PointerEvent) => {
     if (!anchored || e.button > 0) return;
-    if (tour.active) holdTour();
     // Controls, pins, the card and the panel keep their own pointer behaviour.
     if ((e.target as HTMLElement).closest("button, a, nav, .exh-card")) return;
     const touch = e.pointerType === "touch";
@@ -472,7 +424,6 @@ export default function ExhibitionExperience({
   // length of the transition so it stays pinned to its world point.
   const toggleCard = () => {
     setCardExpanded((e) => !e);
-    if (tour.active) holdTour();
     const until = performance.now() + 450;
     const tick = () => {
       invalidate();
@@ -507,7 +458,11 @@ export default function ExhibitionExperience({
       )}
       <Canvas
         className="exh-canvas"
-        frameloop={visible ? "demand" : "never"}
+        // No automatic frames until the scene is prepared: the first render
+        // used to compile every visible shader synchronously, freezing the
+        // page for 3.4 s (production build, 2026-10-14). The preparation
+        // below renders the frames it needs itself.
+        frameloop={visible && live ? "demand" : "never"}
         dpr={dpr}
         shadows={quality.shadows ? "percentage" : false}
         gl={{ antialias: false, alpha: false, stencil: false, powerPreference: "high-performance" }}
@@ -516,19 +471,123 @@ export default function ExhibitionExperience({
           glRef.current = gl;
           getRef.current = get;
           onProgress?.(0.65);
-          asyncTexturesSettled().then(() => onProgress?.(0.9));
           gl.domElement.addEventListener("webglcontextlost", (ev) => {
             ev.preventDefault();
             onFail();
           });
-          requestAnimationFrame(() =>
+          // Behind the loading screen: wait for the async textures and the
+          // static batches (they create the final materials), then compile
+          // every shader of the scene — hidden LOD detail included — without
+          // blocking the page (KHR_parallel_shader_compile where available).
+          // Before this, those compiles happened mid-flight on first visits
+          // (multi-second stalls; perf pass 2026-10-14). A timeout keeps a
+          // stuck texture from ever holding the scene back.
+          const settle = <T,>(p: Promise<T>) => Promise.race([p, new Promise<void>((r) => window.setTimeout(r, 12000))]);
+          // Yields to the page (input, scrolling) between preparation steps.
+          const nextTask = () =>
+            new Promise<void>((r) => {
+              const ch = new MessageChannel();
+              ch.port1.onmessage = () => r();
+              ch.port2.postMessage(null);
+            });
+          (async () => {
+            await settle(asyncTexturesSettled());
+            onProgress?.(0.8);
+            await settle(batchesSettled());
+            await settle(asyncTexturesSettled());
+            onProgress?.(0.86);
+            const { scene, camera } = get();
+            // Compile for the composer's off-screen target, not the canvas:
+            // three bakes tone mapping and output colour space into each
+            // shader from the bound render target, so the screen variant
+            // would be the wrong one. Shader inputs are fixed synchronously
+            // inside compileAsync, so the target is restored right away.
+            const target = new WebGLRenderTarget(1, 1, { type: HalfFloatType });
+            const previous = gl.getRenderTarget();
+            try {
+              gl.setRenderTarget(target);
+              const compiling = gl.compileAsync(scene, camera);
+              gl.setRenderTarget(previous);
+              await settle(compiling);
+            } catch {
+              gl.setRenderTarget(previous);
+              /* compiled lazily on first use instead */
+            }
+            // Upload every geometry and texture now, behind the loading
+            // screen. Interiors hidden by <Detail> would otherwise upload the
+            // first time a flight reaches them (measured 100–175 ms stalls
+            // mid-flight). Renders into the 1×1 target with culling off, in
+            // a few chunks with a yield between them so the page keeps
+            // scrolling; lights are left alone, so every chunk uses the
+            // program keys just compiled.
+            await nextTask();
+            const restore: [Object3D, boolean, boolean][] = [];
+            const renderables: Object3D[] = [];
+            scene.traverse((o) => {
+              if ((o as Light).isLight) return;
+              restore.push([o, o.visible, o.frustumCulled]);
+              o.visible = true;
+              o.frustumCulled = false;
+              const r = o as Object3D & { isMesh?: boolean; isLine?: boolean; isPoints?: boolean; isSprite?: boolean };
+              if (r.isMesh || r.isLine || r.isPoints || r.isSprite) renderables.push(o);
+            });
+            const CHUNKS = 6;
+            const per = Math.ceil(renderables.length / CHUNKS) || 1;
+            try {
+              for (let c = 0; c < CHUNKS; c++) {
+                for (const o of renderables) o.visible = false;
+                // This chunk's objects, plus their ancestors so they are reached.
+                for (const o of renderables.slice(c * per, (c + 1) * per)) {
+                  for (let p: Object3D | null = o; p && p !== scene; p = p.parent) p.visible = true;
+                }
+                gl.setRenderTarget(target);
+                gl.render(scene, camera);
+                gl.setRenderTarget(previous);
+                await nextTask();
+              }
+            } catch {
+              /* uploaded lazily on first use instead */
+            } finally {
+              gl.setRenderTarget(previous);
+              for (const [o, visible, culled] of restore) {
+                o.visible = visible;
+                o.frustumCulled = culled;
+              }
+              target.dispose();
+            }
+            // Starting resolution from a few real frames, still behind the
+            // loading screen: adaptive resolution used to step down during
+            // the very first flight, and each step reallocates the canvas and
+            // every post-processing buffer (79 ms hitches + a visible jump in
+            // sharpness on a 1920×1080 integrated-GPU stage, 2026-10-14).
+            if (adaptiveControl.enabled) {
+              const ctx = gl.getContext();
+              const px = new Uint8Array(4);
+              const times: number[] = [];
+              for (let i = 0; i < 8; i++) {
+                const t0 = performance.now();
+                get().advance(t0);
+                ctx.readPixels(0, 0, 1, 1, ctx.RGBA, ctx.UNSIGNED_BYTE, px);
+                times.push(performance.now() - t0);
+                await nextTask();
+              }
+              // The first frames still carry queued upload work.
+              const steady = times.slice(3).sort((a, b) => a - b);
+              const scale = startingScale(quality.dpr[1], steady[steady.length >> 1]);
+              const current = gl.getPixelRatio();
+              adaptiveControl.seed = Math.min(scale, current);
+              if (scale < current - 0.01) setDpr(scale);
+            }
+            onProgress?.(0.97);
+            setLive(true);
             requestAnimationFrame(() => {
-              setReady(true);
-              // Async signage textures land shortly after the first frames;
-              // let the loader's poster cover them before it fades out.
-              window.setTimeout(() => onReady?.(), 400);
-            }),
-          );
+              invalidate();
+              requestAnimationFrame(() => {
+                setReady(true);
+                onReady?.();
+              });
+            });
+          })();
         }}
         aria-hidden
         tabIndex={-1}
@@ -603,7 +662,7 @@ export default function ExhibitionExperience({
           </button>
         </div>
 
-        {!selected && !tour.active && (
+        {!selected && (
           <div className="exh-overview-cta">
             <button type="button" className="exh-btn exh-btn-primary exh-tour-start" onClick={startTour}>
               <span aria-hidden>▶</span> ابدأ الجولة
@@ -611,36 +670,6 @@ export default function ExhibitionExperience({
             <p className="exh-overview-hint">أو اختر منطقة من المشهد أو من «مناطق المعرض»</p>
           </div>
         )}
-
-        {tour.active && (
-          <div className="exh-tour" role="group" aria-label="الجولة الموجّهة">
-            <p className="exh-tour-step">
-              <span>
-                الجولة {tour.index + 1} / {TOUR_ORDER.length}
-              </span>
-              <strong>{AREAS[TOUR_ORDER[tour.index]].content.shortName}</strong>
-            </p>
-            <span className="exh-tour-progress" aria-hidden>
-              <i
-                key={`${tour.index}-${dwellKey}-${tour.paused}-${anchored}`}
-                data-run={anchored && !tour.paused ? "true" : "false"}
-                style={{ animationDuration: `${TOUR_DWELL_MS}ms` }}
-              />
-            </span>
-            <button
-              type="button"
-              className="exh-btn exh-tour-btn"
-              aria-pressed={tour.paused}
-              onClick={() => setTour((t) => ({ ...t, paused: !t.paused }))}
-            >
-              {tour.paused ? "متابعة" : "إيقاف مؤقت"}
-            </button>
-            <button type="button" className="exh-btn exh-tour-btn" onClick={stopTour}>
-              إنهاء الجولة
-            </button>
-          </div>
-        )}
-
 
         {anchored && <p className="exh-look-hint">اسحب للتلفّت · اضغط منطقة مجاورة للانتقال إليها</p>}
 
@@ -656,7 +685,7 @@ export default function ExhibitionExperience({
       </div>
 
       <p className="sr-only" aria-live="polite">
-        {anchored && area ? `${area.content.name}: ${area.content.teaser}` : flying ? "جارٍ الانتقال…" : tourNote}
+        {anchored && area ? `${area.content.name}: ${area.content.question}` : flying ? "جارٍ الانتقال…" : ""}
       </p>
     </div>
   );

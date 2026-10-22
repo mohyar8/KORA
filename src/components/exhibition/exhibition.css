@@ -226,42 +226,6 @@
   white-space: nowrap;
 }
 
-.exh-tour {
-  position: absolute;
-  bottom: 16px;
-  left: 50%;
-  translate: -50% 0;
-  display: grid;
-  grid-template-columns: auto auto auto;
-  grid-template-areas: "step pause stop" "bar bar bar";
-  align-items: center;
-  gap: 8px 10px;
-  width: min(460px, calc(100% - 24px));
-  padding: 10px 12px 8px;
-  color: var(--color-paper);
-  background: rgb(12 17 46 / 92%);
-  border: 1px solid rgb(236 239 245 / 14%);
-  border-top: 2px solid var(--color-coral);
-  box-shadow: 0 18px 40px -18px rgb(0 0 0 / 70%);
-}
-.exh-tour-step { grid-area: step; display: flex; flex-direction: column; gap: 2px; min-width: 0; font-size: 12px; color: rgb(236 239 245 / 75%); }
-.exh-tour-step strong { overflow: hidden; color: var(--color-paper); font-size: 15px; text-overflow: ellipsis; white-space: nowrap; }
-.exh-tour-btn { min-height: 36px; padding: 6px 12px; font-size: 13px; }
-.exh-tour-btn:nth-of-type(1) { grid-area: pause; }
-.exh-tour-btn:nth-of-type(2) { grid-area: stop; }
-.exh-tour-progress { grid-area: bar; height: 3px; overflow: hidden; background: rgb(236 239 245 / 14%); }
-.exh-tour-progress i {
-  display: block;
-  height: 100%;
-  background: var(--color-coral);
-  transform: scaleX(0);
-  transform-origin: right;
-  animation: exh-tour-hold linear forwards;
-  animation-play-state: paused;
-}
-.exh-tour-progress i[data-run="true"] { animation-play-state: running; }
-@keyframes exh-tour-hold { to { transform: scaleX(1); } }
-
 .exh-skip {
   position: absolute;
   bottom: 14px;
@@ -340,8 +304,10 @@
   position: absolute;
   top: 0;
   left: 0;
-  width: min(380px, calc(100% - 24px));
-  padding: 20px 22px 18px;
+  /* Compact (owner, 2026-10-14): name + one question + navigation, so the
+     card never hides the booth it describes. */
+  width: min(320px, calc(100% - 24px));
+  padding: 12px 14px 12px;
   color: var(--color-paper);
   background: rgb(12 17 46 / 93%);
   border: 1px solid rgb(236 239 245 / 14%);
@@ -375,14 +341,15 @@
   justify-content: space-between;
   gap: 12px;
   width: 100%;
-  min-height: 40px;
+  min-height: 36px;
   font: inherit;
   text-align: start;
   color: inherit;
   cursor: pointer;
 }
 .exh-card-toggle:focus-visible { outline: 2px solid var(--color-coral); outline-offset: 4px; }
-.exh-card-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+/* Long Arabic names («ركن الاقتصاد والاستثمار») wrap instead of being cut. */
+.exh-card-name { flex: 1 1 auto; min-width: 0; white-space: normal; overflow-wrap: anywhere; text-wrap: balance; }
 .exh-card-chevron {
   flex: none;
   width: 30px;
@@ -411,45 +378,23 @@
 .exh-card[data-motion="reduced"],
 .exh-card[data-motion="reduced"] .exh-card-fold,
 .exh-card[data-motion="reduced"] .exh-card-chevron::before { transition: none; }
-.exh-card-eyebrow {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  color: var(--color-coral);
-  font-size: 12px;
-  font-weight: 600;
-  letter-spacing: .12em;
-}
-.exh-card-rule { width: 22px; height: 1px; background: currentColor; }
 .exh-card-title {
-  margin-top: 8px;
-  font-size: clamp(22px, 2.2vw, 30px);
+  font-size: clamp(18px, 1.6vw, 22px);
   font-weight: 800;
-  line-height: 1.15;
+  line-height: 1.35;
   outline: none;
 }
-.exh-card-teaser {
-  margin-top: 10px;
-  color: rgb(236 239 245 / 82%);
+.exh-card-question {
+  margin-top: 4px;
+  color: rgb(236 239 245 / 86%);
   font-size: 15px;
-  line-height: 1.8;
-}
-.exh-card-tags {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin-top: 16px;
-}
-.exh-card-tags li {
-  padding: 5px 11px;
-  font-size: 12px;
-  border: 1px solid rgb(236 239 245 / 22%);
+  line-height: 1.6;
 }
 .exh-card-nav {
   display: flex;
   gap: 6px;
-  margin-top: 14px;
-  padding-top: 12px;
+  margin-top: 10px;
+  padding-top: 10px;
   border-top: 1px solid rgb(236 239 245 / 12%);
 }
 .exh-card[data-expanded="false"] .exh-card-nav { margin-top: 8px; padding-top: 8px; }
@@ -475,11 +420,6 @@
 .exh-card-nav-btn[data-nav="overview"] { flex-grow: 1.3; }
 .exh-card-nav-btn:hover { background: rgb(236 239 245 / 14%); border-color: rgb(236 239 245 / 40%); }
 .exh-card-nav-btn:focus-visible { outline: 2px solid var(--color-coral); outline-offset: 2px; }
-.exh-card-provisional {
-  margin-top: 14px;
-  color: rgb(236 239 245 / 62%);
-  font-size: 11px;
-}
 
 /* ---------- Text list (screen readers; visible when 3D is unavailable) ---------- */
 
@@ -504,6 +444,7 @@
 .exh-list ul { display: grid; gap: 18px; margin-top: 16px; }
 .exh-list strong { display: block; font-size: 17px; }
 .exh-list p { margin-top: 4px; color: rgb(236 239 245 / 72%); line-height: 1.8; }
+.exh-list li > small { display: block; margin-top: 2px; color: rgb(236 239 245 / 55%); font-size: 12px; }
 
 /* ---------- Location panel (RTL right drawer / mobile bottom sheet) ---------- */
 
@@ -677,7 +618,6 @@
   .exh-toolbar .exh-btn { min-height: 40px; padding: 8px 12px; font-size: 13px; }
   .exh-overview-cta { bottom: 48px; }
   .exh-overview-hint { font-size: 11px; }
-  .exh-tour { bottom: 44px; }
   .exh-panel {
     top: auto;
     inset-inline: 0;
@@ -700,9 +640,8 @@
     background: rgb(236 239 245 / 30%);
     border-radius: 2px;
   }
-  .exh-card { width: min(300px, calc(100% - 24px)); padding: 16px 16px 14px; }
-  .exh-card-teaser { font-size: 14px; line-height: 1.7; }
-  .exh-card-tags { display: none; }
+  .exh-card { width: min(300px, calc(100% - 24px)); padding: 10px 12px; }
+  .exh-card-question { font-size: 14px; }
   .exh-concept-note { top: auto; bottom: 16px; inset-inline-end: 12px; max-width: 40%; }
   .exh-poster-caption { top: auto; bottom: 16px; inset-inline-end: 12px; }
   .exh-concept-legend { display: none; }
@@ -710,7 +649,6 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .exh-tour-progress i { animation: none; transform: scaleX(0); }
   .exh-logo-piece { opacity: 1; }
   .exh-loading-logo.is-assembling,
   .exh-loading-logo.is-assembling .exh-logo-piece { animation: none; }

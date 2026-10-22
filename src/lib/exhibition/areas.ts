@@ -24,6 +24,7 @@ const museumMidZ = (MUSEUM_BOUNDS.minZ + MUSEUM_BOUNDS.maxZ) / 2;
 const CORNER_CONTENT: Record<CornerId, AreaContent> = {
   "corner-1": {
     name: "ركن التقنية",
+    question: "ما التقنيات التي تعمل بصمت خلف كل مباراة؟",
     shortName: "التقنية",
     eyebrow: "منظومة الملعب",
     teaser: "نظرة على التقنيات التي تعمل بصمت خلف كل مباراة، من الملعب الذكي إلى البيانات التي تصنع القرار.",
@@ -32,6 +33,7 @@ const CORNER_CONTENT: Record<CornerId, AreaContent> = {
   },
   "corner-2": {
     name: "ركن الإعلام",
+    question: "كيف تصل لحظة الملعب إلى ملايين الشاشات؟",
     shortName: "الإعلام",
     eyebrow: "من الملعب إلى العالم",
     teaser: "كيف تنتقل اللحظة من أرض الملعب إلى ملايين الشاشات؟ رحلة إلى ما خلف البث وصناعة المحتوى الرياضي.",
@@ -40,6 +42,7 @@ const CORNER_CONTENT: Record<CornerId, AreaContent> = {
   },
   "corner-3": {
     name: "ركن ريادة الأعمال",
+    question: "هل تصبح فكرة صغيرة مشروعًا رياضيًا ناجحًا؟",
     shortName: "ريادة الأعمال",
     eyebrow: "من الفكرة إلى الملعب",
     teaser: "من فرصة صغيرة إلى مشروع رياضي قابل للنمو؛ اكتشف كيف تولد الأفكار في قطاع الرياضة.",
@@ -48,6 +51,7 @@ const CORNER_CONTENT: Record<CornerId, AreaContent> = {
   },
   "corner-4": {
     name: "ركن الاقتصاد والاستثمار",
+    question: "من يصنع القيمة الاقتصادية خلف اللعبة؟",
     shortName: "الاقتصاد والاستثمار",
     eyebrow: "القيمة خلف اللعبة",
     teaser: "الوجه الاقتصادي لكرة القدم: الاستثمار والرعاية والقيمة التي تصنعها الملاعب لمدنها.",
@@ -56,6 +60,7 @@ const CORNER_CONTENT: Record<CornerId, AreaContent> = {
   },
   "corner-5": {
     name: "ركن الصحة",
+    question: "كيف تحمي الرياضة صحة المجتمع؟",
     shortName: "الصحة",
     eyebrow: "الصحة العامة للمجتمع",
     teaser: "كيف تحمي الرياضة صحة المجتمع؟ ركن يقرّب مفاهيم الوقاية والسلامة من الجمهور.",
@@ -64,6 +69,7 @@ const CORNER_CONTENT: Record<CornerId, AreaContent> = {
   },
   "corner-6": {
     name: "ركن الهندسة",
+    question: "كيف يُصمَّم ملعب يتّسع لآلاف المشجعين؟",
     shortName: "الهندسة",
     eyebrow: "هندسة الملاعب",
     teaser: "من المخطط إلى المدرج: كيف تُصمَّم الملاعب وتُشيَّد لتحمل الجماهير واللعبة معًا؟ نظرة على الهندسة التي تقف خلف كل مباراة.",
@@ -137,6 +143,7 @@ export const AREAS: Record<AreaId, AreaConfig> = {
     frame: MUSEUM_FRAME,
     content: {
       name: "المتحف",
+      question: "كيف تتحوّل المباراة إلى صناعة متكاملة؟",
       shortName: "المتحف",
       eyebrow: "الصناعة خلف اللعبة",
       teaser:
@@ -172,6 +179,7 @@ export const AREAS: Record<AreaId, AreaConfig> = {
     frame: STAGE_FRAME,
     content: {
       name: "المسرح والمدرّج",
+      question: "ماذا يدور خلف القرار الرياضي؟",
       shortName: "المسرح",
       eyebrow: "حوارات الصناعة",
       teaser: "منصة الحدث الرئيسية، حيث تلتقي أصوات الصناعة بالجمهور في جلسات تكشف ما يدور خلف القرار الرياضي.",
@@ -204,6 +212,7 @@ export const AREAS: Record<AreaId, AreaConfig> = {
     placementNote: "الموقع تقريبي — المخطط يشير إلى الاتجاه فقط",
     content: {
       name: "منطقة الترفيه",
+      question: "هل أنت مستعد لاختبار مهاراتك الكروية؟",
       shortName: "منطقة الترفيه",
       eyebrow: "اختبر مهاراتك",
       teaser: "ساحة مفتوحة للتحدي والمرح، تختبر فيها مهاراتك وتتنافس مع أصدقائك بروح كرة القدم.",
@@ -248,10 +257,14 @@ export const AREA_ORDER: readonly AreaId[] = ["museum", "stage", "entertainment"
  */
 export const TOUR_ORDER: readonly AreaId[] = ["museum", ...CORNER_IDS, "stage", "entertainment"];
 
-export function tourNeighbours(id: AreaId): { prev: AreaId; next: AreaId } {
-  const n = TOUR_ORDER.length;
+/**
+ * Previous / next stop in TOUR_ORDER. The sequence is linear (spec v1.7): the
+ * first stop has no previous, the entertainment zone (last) has no next.
+ */
+export function tourNeighbours(id: AreaId): { prev: AreaId | null; next: AreaId | null } {
   const i = TOUR_ORDER.indexOf(id);
-  return { prev: TOUR_ORDER[(i - 1 + n) % n], next: TOUR_ORDER[(i + 1) % n] };
+  if (i < 0) return { prev: null, next: null };
+  return { prev: TOUR_ORDER[i - 1] ?? null, next: TOUR_ORDER[i + 1] ?? null };
 }
 
 export const AREA_GROUPS: readonly { title: string; ids: readonly AreaId[] }[] = [

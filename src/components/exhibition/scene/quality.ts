@@ -18,7 +18,9 @@ export const QUALITY: Record<Quality["tier"], Quality> = {
   high: {
     tier: "high",
     dpr: [1, 1.5],
-    msaa: 4,
+    // 2× (was 4×): measured −10–15 % GPU frame time on an integrated GPU with
+    // no visible difference from 4× at this pixel density (perf pass 2026-10-14).
+    msaa: 2,
     shadows: true,
     lights: true,
     facadeTex: 4096,
