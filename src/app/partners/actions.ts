@@ -6,6 +6,7 @@ import { createDbDeps } from "@/lib/sponsor/db";
 import { createEmailDeps } from "@/lib/sponsor/email";
 import { getClientIp, hashIp } from "@/lib/sponsor/ip";
 import { processSponsorRequest } from "@/lib/sponsor/process";
+import { notifyRecipients } from "@/lib/submissions/recipients";
 import { captchaVerifier } from "@/lib/submissions/turnstile";
 import type { SponsorFormState } from "@/lib/sponsor/types";
 
@@ -34,12 +35,4 @@ export async function submitSponsorRequest(
       console.error(`[sponsor:${scope}]`, error instanceof Error ? error.message : error),
     contactEmail: CONTACT_EMAIL,
   });
-}
-
-function notifyRecipients(raw: string | undefined): string[] {
-  const list = (raw ?? "")
-    .split(",")
-    .map((email) => email.trim())
-    .filter(Boolean);
-  return list.length ? list : [CONTACT_EMAIL];
 }
