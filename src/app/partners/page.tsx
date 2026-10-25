@@ -3,6 +3,9 @@ import { PartnersHero } from "@/components/partners/PartnersHero";
 import { PartnersStats } from "@/components/partners/PartnersStats";
 import { WhyKora } from "@/components/partners/WhyKora";
 import { Placements } from "@/components/partners/Placements";
+import { PartnershipSteps } from "@/components/partners/PartnershipSteps";
+import { PartnersLogos } from "@/components/partners/PartnersLogos";
+import { DirectContact } from "@/components/partners/DirectContact";
 import { BRAND } from "@/lib/constants";
 
 export const metadata: Metadata = {
@@ -18,6 +21,9 @@ export default function PartnersPage() {
       <PartnersStats />
       <WhyKora />
       <Placements />
+      <PartnershipSteps />
+      <PartnersLogos />
+      <DirectContact />
     </>
   );
 }
