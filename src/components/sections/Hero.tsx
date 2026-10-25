@@ -2,6 +2,8 @@
 
 import { motion, useReducedMotion } from "motion/react";
 import { useEffect, useState } from "react";
+import { Button } from "@/components/ui/Button";
+import { EVENT } from "@/lib/constants";
 
 const PASS_TIMES = [0, 0.1, 0.2, 0.32, 0.44, 0.55, 0.66, 0.78, 0.88, 1];
 
@@ -113,6 +115,22 @@ export function Hero() {
               width={1062}
               height={367}
             />
+          </div>
+        </div>
+
+        <div className="hero-info">
+          <ul className="hero-info-facts" aria-label="معلومات الحدث">
+            <li>{EVENT.dates}</li>
+            <li>{EVENT.venueShort}</li>
+            <li>9 مسارات</li>
+          </ul>
+          <div className="hero-info-actions">
+            <Button href="/#tracks" variant="secondary" showArrow={false}>
+              اكتشف المسارات
+            </Button>
+            <Button href="/partners" variant="primary" showArrow={false}>
+              كن شريكًا
+            </Button>
           </div>
         </div>
       </div>
