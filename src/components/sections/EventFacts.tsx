@@ -31,7 +31,7 @@ export function EventFacts() {
         <div className="facts-meta">
           <p className="facts-date">{EVENT.dates}.</p>
           <p className="facts-place">
-            الظهران، جامعة الملك فهد للبترول والمعادن، ساحة مبنى 57
+            {EVENT.venueLong}
           </p>
         </div>
       </Container>

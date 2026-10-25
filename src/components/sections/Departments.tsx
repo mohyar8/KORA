@@ -16,6 +16,9 @@ export function Departments() {
   useEffect(() => {
     const hash = window.location.hash.replace("#", "");
     if (hash && DEPARTMENTS.some((item) => item.slug === hash)) {
+      // The URL hash is only readable after mount (the page is prerendered),
+      // so syncing it into state here is intentional.
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setActive(hash);
     }
   }, []);
@@ -120,7 +123,7 @@ export function Departments() {
                   <i className="kora-pentagon" />
                 </div>
                 <h3>{team.title}</h3>
-                {team.leader ? (
+                {team.leader && team.leader.name.trim() !== "" ? (
                   <p className="depts-person">
                     <span>{team.leader.role}</span>
                     <strong>{team.leader.name}</strong>
