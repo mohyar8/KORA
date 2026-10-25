@@ -38,8 +38,8 @@ export function Departments() {
       <header className="depts-mast">
         <h1 id="depts-heading">الإدارات والفرق</h1>
         <p className="depts-lead">
-          اختر إدارة، ثم اقرأ فرقها. كل فريق يمسك جزءًا واضحًا من كورة: المكان،
-          التسويق، التخطيط، التشغيل، العلاقات والموارد، أو التقنية.
+          تعرّف على الفريق الطلابي الذي يصنع كورة: إدارات وفرق تمسك المكان
+          والتسويق والتخطيط والتشغيل والعلاقات والتقنية.
         </p>
       </header>
 
@@ -142,10 +142,8 @@ export function Departments() {
       </div>
 
       <div className="depts-cta">
-        <p>لقِيت الفريق الأقرب لك؟</p>
-        <Link href="/partners">
-          انضم للفريق
-        </Link>
+        <p>تريد أن تكون علامتك جزءًا من كورة؟</p>
+        <Link href="/partners">كن شريكًا</Link>
       </div>
     </section>
   );
