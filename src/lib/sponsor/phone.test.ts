@@ -1,5 +1,5 @@
 import { expect, test } from "vitest";
-import { normalizeSaudiPhone } from "./phone";
+import { normalizeAnyPhone, normalizeSaudiPhone } from "./phone";
 
 test.each([
   ["0512345678", "+966512345678"],
@@ -14,3 +14,11 @@ test.each([
 test.each(["0412345678", "05123", "abc", "", "+9715123456789"])("rejects %s", (raw) =>
   expect(normalizeSaudiPhone(raw)).toBeNull(),
 );
+
+test.each([
+  ["+44 20 7946 0958", "+442079460958"],
+  ["0044 20 7946 0958", "+442079460958"],
+  ["0512345678", "+966512345678"],
+])("normalizeAnyPhone accepts %s", (raw, out) => expect(normalizeAnyPhone(raw)).toBe(out));
+
+test("normalizeAnyPhone rejects short numbers", () => expect(normalizeAnyPhone("12345")).toBeNull());
