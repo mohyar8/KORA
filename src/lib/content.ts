@@ -326,6 +326,7 @@ export const NAV_LINKS = [
   { href: "/#tracks", label: "المسارات" },
   { href: "/teams", label: "الفريق" },
   { href: "/partners", label: "الشركاء" },
+  { href: "/speakers", label: "المتحدثون" },
 ] as const;
 
 export interface TitledItem {
@@ -449,3 +450,85 @@ export interface Partner {
 
 /** Confirmed partners only. The "شركاؤنا" section stays hidden while empty. */
 export const PARTNERS: readonly Partner[] = [];
+
+/** Home-page "شارك في كورة" doors. The visitor path has no link: it shows the social icons. */
+export const PARTICIPATE_PATHS: readonly {
+  number: string;
+  title: string;
+  description: string;
+  href?: string;
+  cta?: string;
+}[] = [
+  {
+    number: "01",
+    title: "راعٍ أو شريك",
+    description:
+      "اربط علامتك بحدث يقدّم كرة القدم السعودية بوصفها صناعة، أمام جمهور جامعي واسع.",
+    href: "/partners",
+    cta: "اعرف أكثر عن الشراكة",
+  },
+  {
+    number: "02",
+    title: "متحدث",
+    description: "شارك تجربتك على مسرح كورة، أو رشّح من يستحق أن يُسمع صوته.",
+    href: "/speakers",
+    cta: "قدّم أو رشّح متحدثًا",
+  },
+  {
+    number: "03",
+    title: "زائر ومهتم",
+    description: "تابع كورة لتعرف كل جديد عن الحدث ومساراته وموعد التسجيل.",
+  },
+];
+
+export const SPEAKER_PROFILES = [
+  "قادة الأندية والاتحادات",
+  "الإعلاميون وصنّاع المحتوى",
+  "المستثمرون ورواد الأعمال",
+  "الأكاديميون والباحثون",
+  "المختصون في الطب وعلوم الرياضة",
+  "اللاعبون والمدربون",
+] as const;
+
+export type SpeakerFormatSlug = "panel" | "talk" | "workshop" | "meetup";
+
+export const SPEAKER_FORMATS: readonly { slug: SpeakerFormatSlug; title: string; description: string }[] = [
+  {
+    slug: "panel",
+    title: "جلسة حوارية على المسرح الرئيسي",
+    description: "نقاش مفتوح مع قادة القطاع أمام جمهور الحدث.",
+  },
+  {
+    slug: "talk",
+    title: "محاضرة في أحد المسارات",
+    description: "حديث مركّز في المسار الأقرب لتخصصك.",
+  },
+  {
+    slug: "workshop",
+    title: "ورشة عمل",
+    description: "تجربة تطبيقية يتعلّم فيها الحضور بالممارسة.",
+  },
+  {
+    slug: "meetup",
+    title: "لقاء مفتوح مع الجمهور",
+    description: "حوار قريب وأسئلة مباشرة من الزوار.",
+  },
+];
+
+export const SPEAKER_STEPS: readonly TitledItem[] = [
+  {
+    number: "01",
+    title: "أرسل طلبك أو ترشيحك",
+    description: "عبّئ النموذج؛ الاسم والمنصب والنبذة وطريقة تواصل واحدة تكفي.",
+  },
+  {
+    number: "02",
+    title: "يراجعه فريق البرنامج",
+    description: "نقرأ كل طلب ونطابقه مع مسارات الحدث وجلساته.",
+  },
+  {
+    number: "03",
+    title: "نتواصل لتنسيق الجلسة",
+    description: "نتفق معك أو مع المرشَّح على الموضوع والموعد وشكل المشاركة.",
+  },
+];
