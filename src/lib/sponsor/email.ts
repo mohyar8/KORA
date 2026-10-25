@@ -1,4 +1,4 @@
-import { Resend } from "resend";
+import { createTeamMailer, type MailerConfig } from "@/lib/submissions/email";
 import { describeSponsorValues } from "./format";
 import type { SponsorRequest } from "./schema";
 import type { SponsorDeps } from "./process";
@@ -10,20 +10,9 @@ export function renderTeamEmail(req: SponsorRequest): { subject: string; text: s
   };
 }
 
-export function createEmailDeps(cfg: {
-  apiKey?: string;
-  from?: string;
-  /** One or more team inboxes. */
-  teamTo: string[];
-}): Pick<SponsorDeps, "notifyTeam"> {
-  // Only the KORA team is emailed; sponsors never receive automatic messages.
-  const send = async (message: { to: string[]; subject: string; text: string; replyTo?: string }) => {
-    if (!cfg.apiKey || !cfg.from || message.to.length === 0) throw new Error("email not configured");
-    const { error } = await new Resend(cfg.apiKey).emails.send({ from: cfg.from, ...message });
-    if (error) throw new Error(`resend: ${error.message}`);
-  };
-
+export function createEmailDeps(cfg: MailerConfig): Pick<SponsorDeps, "notifyTeam"> {
+  const send = createTeamMailer(cfg);
   return {
-    notifyTeam: (req) => send({ to: cfg.teamTo, replyTo: req.email, ...renderTeamEmail(req) }),
+    notifyTeam: (req) => send({ replyTo: req.email, ...renderTeamEmail(req) }),
   };
 }
