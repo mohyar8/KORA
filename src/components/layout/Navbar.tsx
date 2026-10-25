@@ -42,7 +42,7 @@ export function Navbar() {
             </li>
           ))}
         </ul>
-        <Link className="topbar-apply" href="/partners">كن شريكًا</Link>
+        <Link className="topbar-apply" href="/#participate">شارك معنا</Link>
       </nav>
       <div className="scroll-progress"><span ref={bar} style={{ width: "0%" }} /></div>
     </header>

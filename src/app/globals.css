@@ -1130,8 +1130,11 @@ body:has(.hero-field) .topbar { animation: topbar-in .7s 4.1s cubic-bezier(.16,1
 }
 
 @media (max-width: 440px) {
-  /* Four links + the CTA only fit a phone once the index numbers go. */
+  /* Five links fit a phone only without the index numbers and the CTA;
+     the home page's "شارك في كورة" section takes over the CTA's job. */
   .topbar-links span { display: none; }
+  .topbar-links { flex: 1; }
+  .topbar-apply { display: none !important; }
   .topbar-apply {
     flex: 1;
     height: 58px;

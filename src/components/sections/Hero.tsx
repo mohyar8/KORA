@@ -128,8 +128,8 @@ export function Hero() {
             <Button href="/#tracks" variant="secondary" showArrow={false}>
               اكتشف المسارات
             </Button>
-            <Button href="/partners" variant="primary" showArrow={false}>
-              كن شريكًا
+            <Button href="/#participate" variant="primary" showArrow={false}>
+              شارك معنا
             </Button>
           </div>
         </div>
