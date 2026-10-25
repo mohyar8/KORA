@@ -21,9 +21,10 @@ export async function submitSponsorRequest(
     ...createEmailDeps({
       apiKey: process.env.RESEND_API_KEY,
       from: process.env.SPONSOR_FROM_EMAIL,
-      // Defaults to the official inbox; override to the Resend account's own
-      // address while sending from onboarding@resend.dev (no verified domain).
-      teamTo: process.env.SPONSOR_NOTIFY_TO || CONTACT_EMAIL,
+      // Comma-separated list; defaults to the official inbox. While sending from
+      // onboarding@resend.dev (no verified domain) only the Resend account's own
+      // address is accepted.
+      teamTo: notifyRecipients(process.env.SPONSOR_NOTIFY_TO),
     }),
     verifyCaptcha: (token) => verifyTurnstile(token, ip, process.env.TURNSTILE_SECRET_KEY ?? ""),
     ipHash: ip && salt ? hashIp(ip, salt) : null,
@@ -33,4 +34,12 @@ export async function submitSponsorRequest(
       console.error(`[sponsor:${scope}]`, error instanceof Error ? error.message : error),
     contactEmail: CONTACT_EMAIL,
   });
+}
+
+function notifyRecipients(raw: string | undefined): string[] {
+  const list = (raw ?? "")
+    .split(",")
+    .map((email) => email.trim())
+    .filter(Boolean);
+  return list.length ? list : [CONTACT_EMAIL];
 }
