@@ -2,7 +2,6 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { APPLY_URL } from "@/lib/constants";
 import { NAV_LINKS } from "@/lib/content";
 
 export function Navbar() {
@@ -31,7 +30,7 @@ export function Navbar() {
             </li>
           ))}
         </ul>
-        <a className="topbar-apply" href={APPLY_URL} target="_blank" rel="noreferrer">انضم للفريق</a>
+        <Link className="topbar-apply" href="/partners">انضم للفريق</Link>
       </nav>
       <div className="scroll-progress"><span style={{ width: `${progress}%` }} /></div>
     </header>

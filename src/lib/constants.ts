@@ -8,13 +8,6 @@ export const BRAND = {
   concept: "BEYOND THE VISIBLE GAME",
 } as const;
 
-export const APPLY_URL = "https://forms.cloud.microsoft/r/QQmb1auxvd";
-
-export const APPLICATION_DEADLINE = {
-  date: "4 أكتوبر 2026",
-  time: "الساعة 11:59 مساءً بتوقيت السعودية",
-} as const;
-
 export const EVENT = {
   dates: "21–23 يناير 2027",
   venueShort: "جامعة الملك فهد للبترول والمعادن، الظهران",

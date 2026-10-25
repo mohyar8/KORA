@@ -1,7 +1,7 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useState } from "react";
-import { APPLY_URL } from "@/lib/constants";
 import { DEPARTMENTS, LEADERSHIP, type TeamAudience } from "@/lib/content";
 
 const AUDIENCE_LABEL: Record<TeamAudience, string> = {
@@ -140,9 +140,9 @@ export function Departments() {
 
       <div className="depts-cta">
         <p>لقِيت الفريق الأقرب لك؟</p>
-        <a href={APPLY_URL} target="_blank" rel="noreferrer">
+        <Link href="/partners">
           انضم للفريق
-        </a>
+        </Link>
       </div>
     </section>
   );

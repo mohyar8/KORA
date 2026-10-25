@@ -1,9 +1,7 @@
-import { CalendarClock } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Container } from "@/components/ui/Container";
 import { Reveal } from "@/components/motion/Reveal";
 import { Magnetic } from "@/components/motion/Magnetic";
-import { APPLICATION_DEADLINE, APPLY_URL } from "@/lib/constants";
 
 export function FinalCta() {
   return (
@@ -32,26 +30,10 @@ export function FinalCta() {
 
         <Reveal delay={0.12} className="mt-10">
           <Magnetic>
-            <Button href={APPLY_URL} variant="primary" className="px-9 py-5 text-lg">
+            <Button href="/partners" variant="primary" className="px-9 py-5 text-lg">
               ابدأ طلبك
             </Button>
           </Magnetic>
-        </Reveal>
-
-        <Reveal delay={0.18} className="mt-12 w-full max-w-xl">
-          <dl className="border border-white/15 bg-navy-dark/80 text-start">
-            <div className="flex items-start gap-3 p-6">
-              <CalendarClock aria-hidden className="mt-0.5 size-5 shrink-0 text-coral" />
-              <div>
-                <dt className="text-xs font-semibold tracking-wide text-paper/50">
-                  آخر موعد للتقديم
-                </dt>
-                <dd className="mt-1 text-sm leading-relaxed text-paper/85">
-                  {APPLICATION_DEADLINE.date}، {APPLICATION_DEADLINE.time}
-                </dd>
-              </div>
-            </div>
-          </dl>
         </Reveal>
       </Container>
     </section>
