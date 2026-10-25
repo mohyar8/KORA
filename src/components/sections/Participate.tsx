@@ -2,6 +2,7 @@ import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import type { CSSProperties } from "react";
 import { Container } from "@/components/ui/Container";
+import { HexField } from "@/components/motion/HexField";
 import { SocialPentagons } from "@/components/ui/SocialIcons";
 import { Reveal } from "@/components/motion/Reveal";
 import { Stagger, StaggerItem } from "@/components/motion/Stagger";
@@ -15,8 +16,9 @@ export function Participate() {
     <section
       id="participate"
       aria-labelledby="participate-heading"
-      className="section-light kora-grid-light relative scroll-mt-16 py-16 md:py-24"
+      className="has-hex relative scroll-mt-16 overflow-hidden bg-ink py-16 md:py-24"
     >
+      <HexField />
       <Container>
         <Reveal>
           <p className="kora-label text-coral">شارك معنا</p>
@@ -26,7 +28,7 @@ export function Participate() {
           >
             شارك في كورة
           </h2>
-          <p className="mt-4 max-w-xl text-lg text-ink/70">
+          <p className="mt-4 max-w-xl text-lg text-paper/70">
             كورة تُصنع بمشاركة الجميع. اختر الطريقة الأقرب لك.
           </p>
         </Reveal>
@@ -36,7 +38,7 @@ export function Participate() {
             <StaggerItem
               as="li"
               key={path.number}
-              className="kora-card flex flex-col border border-navy/15 bg-white"
+              className="kora-card flex flex-col border border-paper/12 bg-navy-dark/85 backdrop-blur-sm"
               style={{ "--accent": ACCENTS[index % ACCENTS.length] } as CSSProperties}
             >
               <div className="flex h-full flex-col">
@@ -46,18 +48,18 @@ export function Participate() {
                 </div>
                 <div className="flex flex-1 flex-col gap-3 p-7">
                   <h3 className="text-2xl font-extrabold">{path.title}</h3>
-                  <p className="text-pretty leading-relaxed text-ink/70">{path.description}</p>
+                  <p className="text-pretty leading-relaxed text-paper/70">{path.description}</p>
                   <div className="mt-auto pt-4">
                     {path.href && path.cta ? (
                       <Link
                         href={path.href}
-                        className="inline-flex items-center gap-2 font-bold text-navy underline-offset-4 hover:underline"
+                        className="inline-flex items-center gap-2 font-bold text-paper underline-offset-4 hover:text-coral hover:underline"
                       >
                         {path.cta}
                         <ArrowLeft aria-hidden className="kora-card-arrow size-4" />
                       </Link>
                     ) : (
-                      <SocialPentagons className="final-cta-socials participate-socials socials-light" />
+                      <SocialPentagons className="final-cta-socials participate-socials" />
                     )}
                   </div>
                 </div>

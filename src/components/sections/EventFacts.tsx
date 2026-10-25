@@ -1,17 +1,17 @@
 import { CalendarDays, MapPin } from "lucide-react";
 import { Container } from "@/components/ui/Container";
+import { HexField } from "@/components/motion/HexField";
 import { AnimatedNumber } from "@/components/motion/AnimatedNumber";
 import { Reveal } from "@/components/motion/Reveal";
 import { Stagger, StaggerItem } from "@/components/motion/Stagger";
 import { EVENT_FACTS } from "@/lib/content";
 import { EVENT } from "@/lib/constants";
 
-/** The event in numbers, on a coral band with floating pentagons. */
+/** The event in numbers over a live, colourful hexagon field. */
 export function EventFacts() {
   return (
-    <section id="facts" aria-labelledby="facts-heading" className="facts-band">
-      <span aria-hidden className="facts-shape facts-shape-a kora-pentagon kora-float" />
-      <span aria-hidden className="facts-shape facts-shape-b kora-pentagon kora-float" />
+    <section id="facts" aria-labelledby="facts-heading" className="facts-band has-hex">
+      <HexField tone="color" className="hex-field-full" />
 
       <Container className="relative">
         <Reveal>
@@ -27,7 +27,7 @@ export function EventFacts() {
                 <AnimatedNumber value={fact.value} />
                 {fact.unit}
               </p>
-              <p className="mt-2 text-base font-bold text-ink/70">{fact.label}</p>
+              <p className="mt-2 text-base font-bold text-paper/65">{fact.label}</p>
             </StaggerItem>
           ))}
         </Stagger>

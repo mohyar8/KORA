@@ -1,6 +1,7 @@
 import { Button } from "@/components/ui/Button";
 import { Container } from "@/components/ui/Container";
 import { Reveal } from "@/components/motion/Reveal";
+import { SpinningBall } from "@/components/motion/SpinningBall";
 import { Magnetic } from "@/components/motion/Magnetic";
 import { SocialPentagons } from "@/components/ui/SocialIcons";
 
@@ -21,6 +22,7 @@ export function FinalCta() {
         className="kora-pentagon kora-float absolute start-[18%] top-12 hidden size-14 bg-green/70 [animation-delay:-4s] md:block"
       />
 
+      <SpinningBall className="final-cta-ball" />
       <Container className="relative flex flex-col items-center text-center">
         <Reveal>
           <h2

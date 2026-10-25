@@ -1,5 +1,6 @@
 import type { CSSProperties } from "react";
 import { Container } from "@/components/ui/Container";
+import { HexField } from "@/components/motion/HexField";
 import { Reveal } from "@/components/motion/Reveal";
 import { Stagger, StaggerItem } from "@/components/motion/Stagger";
 import { SPONSOR_REASONS } from "@/lib/content";
@@ -10,8 +11,9 @@ export function WhyKora() {
   return (
     <section
       aria-labelledby="why-kora-heading"
-      className="section-light kora-grid-light py-16 md:py-24"
+      className="has-hex relative overflow-hidden bg-ink py-16 md:py-24"
     >
+      <HexField />
       <Container>
         <Reveal>
           <h2
@@ -27,13 +29,13 @@ export function WhyKora() {
             <StaggerItem
               as="li"
               key={reason.title}
-              className="kora-card flex gap-5 border border-navy/12 bg-white p-6 md:p-8"
+              className="kora-card flex gap-5 border border-paper/12 bg-navy-dark/85 p-6 backdrop-blur-sm md:p-8"
               style={{ "--accent": ACCENTS[index % ACCENTS.length] } as CSSProperties}
             >
               <span aria-hidden className="kora-pentagon kora-card-mark mt-1 size-9 shrink-0" />
               <div>
                 <h3 className="text-xl font-extrabold">{reason.title}</h3>
-                <p className="mt-2 text-pretty leading-relaxed text-ink/70">{reason.description}</p>
+                <p className="mt-2 text-pretty leading-relaxed text-paper/70">{reason.description}</p>
               </div>
             </StaggerItem>
           ))}

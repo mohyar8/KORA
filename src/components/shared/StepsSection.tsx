@@ -14,7 +14,7 @@ export function StepsSection({
   steps: readonly TitledItem[];
 }) {
   return (
-    <section aria-labelledby={id} className="section-light py-16 md:py-24">
+    <section aria-labelledby={id} className="bg-ink py-16 md:py-24">
       <Container>
         <h2
           id={id}
@@ -24,7 +24,7 @@ export function StepsSection({
         </h2>
 
         <ol className="relative mt-10 grid gap-8 md:grid-cols-3 md:gap-6">
-          <GrowLine className="absolute inset-x-[16%] top-6 hidden h-0.5 bg-navy/25 md:block" />
+          <GrowLine className="absolute inset-x-[16%] top-6 hidden h-0.5 bg-paper/25 md:block" />
           {steps.map((step, index) => (
             <li key={step.number} className="relative flex gap-5 md:flex-col md:items-center md:text-center">
               <span
@@ -34,7 +34,7 @@ export function StepsSection({
               </span>
               <div>
                 <h3 className="text-xl font-bold">{step.title}</h3>
-                <p className="mt-2 text-pretty leading-relaxed text-ink/70">
+                <p className="mt-2 text-pretty leading-relaxed text-paper/72">
                   {step.description}
                 </p>
               </div>

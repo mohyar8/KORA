@@ -1,5 +1,6 @@
 import type { CSSProperties } from "react";
 import { Container } from "@/components/ui/Container";
+import { HexField } from "@/components/motion/HexField";
 import { Stagger, StaggerItem } from "@/components/motion/Stagger";
 import { SPEAKER_PROFILES } from "@/lib/content";
 
@@ -9,8 +10,9 @@ export function SpeakerProfiles() {
   return (
     <section
       aria-labelledby="speaker-profiles-heading"
-      className="section-light kora-grid-light py-16 md:py-24"
+      className="has-hex relative overflow-hidden bg-ink py-16 md:py-24"
     >
+      <HexField />
       <Container>
         <h2
           id="speaker-profiles-heading"
@@ -24,7 +26,7 @@ export function SpeakerProfiles() {
             <StaggerItem
               as="li"
               key={profile}
-              className="kora-card flex items-center gap-4 border border-navy/12 bg-white p-6"
+              className="kora-card flex items-center gap-4 border border-paper/12 bg-navy-dark/85 p-6 backdrop-blur-sm"
               style={{ "--accent": ACCENTS[index % ACCENTS.length] } as CSSProperties}
             >
               <span aria-hidden className="kora-pentagon kora-card-mark size-8 shrink-0" />

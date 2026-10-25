@@ -425,20 +425,10 @@ body:has(.hero-field) .topbar { animation: topbar-in .7s 4.1s cubic-bezier(.16,1
 .manifesto {
   position: relative;
   overflow: hidden;
+  background: var(--color-ink);
+  color: var(--color-paper);
 }
-/* Slowly turning pentagon outline behind the manifesto copy. */
-.manifesto-orbit {
-  position: absolute;
-  inset-inline-end: -6rem;
-  top: 50%;
-  width: clamp(16rem, 34vw, 30rem);
-  aspect-ratio: 1;
-  translate: 0 -50%;
-  background: linear-gradient(135deg, rgb(242 101 87 / 22%), rgb(148 67 153 / 18%));
-  animation: var(--animate-spin-slow);
-  animation-duration: 40s;
-  pointer-events: none;
-}
+.manifesto-ball { inset-inline-start: -7rem; top: 50%; translate: 0 -50%; }
 .manifesto-stage {
   position: relative;
   display: flex;
@@ -464,7 +454,7 @@ body:has(.hero-field) .topbar { animation: topbar-in .7s 4.1s cubic-bezier(.16,1
 .manifesto-body {
   max-width: 36rem;
   margin-top: clamp(18px, 2.2vw, 28px);
-  color: rgb(14 20 53 / 74%);
+  color: rgb(236 239 245 / 76%);
   font-size: clamp(14px, 1.1vw, 17px);
   line-height: 1.95;
   text-align: right;
@@ -1358,9 +1348,9 @@ body:has(.hero-field) .topbar { animation: topbar-in .7s 4.1s cubic-bezier(.16,1
      -50% loop would slide it fully off-screen. */
   direction: ltr;
   overflow: hidden;
-  background: var(--color-coral);
-  color: var(--color-ink);
-  border-block: 1px solid rgb(14 20 53 / 18%);
+  background: var(--color-navy-dark);
+  color: var(--color-paper);
+  border-block: 1px solid rgb(236 239 245 / 14%);
 }
 .kora-marquee-track {
   display: flex;
@@ -1380,9 +1370,11 @@ body:has(.hero-field) .topbar { animation: topbar-in .7s 4.1s cubic-bezier(.16,1
 .kora-marquee-item i {
   width: 14px;
   height: 14px;
-  background: var(--color-ink);
+  background: var(--color-coral);
   clip-path: polygon(50% 0, 100% 38%, 82% 100%, 18% 100%, 0 38%);
 }
+.kora-marquee-item:nth-child(3n+2) i { background: var(--color-fuchsia); }
+.kora-marquee-item:nth-child(3n) i { background: var(--color-green); }
 @keyframes kora-float {
   0%, 100% { transform: translateY(0) rotate(0deg); }
   50% { transform: translateY(-14px) rotate(10deg); }
@@ -1394,8 +1386,9 @@ body:has(.hero-field) .topbar { animation: topbar-in .7s 4.1s cubic-bezier(.16,1
   position: relative;
   overflow: hidden;
   padding-block: clamp(56px, 8vw, 104px);
-  background: var(--color-coral);
-  color: var(--color-ink);
+  background: var(--color-navy-dark);
+  color: var(--color-paper);
+  border-top: 1px solid rgb(236 239 245 / 15%);
 }
 .facts-shape {
   position: absolute;
@@ -1406,18 +1399,20 @@ body:has(.hero-field) .topbar { animation: topbar-in .7s 4.1s cubic-bezier(.16,1
 .facts-shape-b { width: 12rem; aspect-ratio: 1; inset-inline-end: 6%; bottom: -3rem; animation-delay: -3s; }
 .facts-tile {
   padding: 28px 26px;
-  background: rgb(255 255 255 / 88%);
-  border: 1px solid rgb(14 20 53 / 10%);
+  background: rgb(14 20 53 / 55%);
+  border: 1px solid rgb(236 239 245 / 14%);
+  backdrop-filter: blur(6px);
   transition: transform .45s cubic-bezier(.16,1,.3,1), box-shadow .45s ease;
 }
 .facts-tile:hover { transform: translateY(-6px) rotate(-1deg); box-shadow: 0 22px 40px -24px rgb(14 20 53 / 55%); }
-.facts-tile p:first-child { color: var(--color-navy); }
+.facts-tile p:first-child { color: var(--color-coral); }
 .facts-pill {
   display: inline-flex;
   align-items: center;
   gap: 10px;
   padding: 10px 16px;
-  background: var(--color-ink);
+  background: rgb(236 239 245 / 6%);
+  border: 1px solid rgb(236 239 245 / 16%);
   color: var(--color-paper);
   font-weight: 700;
   font-size: 15px;
@@ -1444,4 +1439,58 @@ body:has(.hero-field) .topbar { animation: topbar-in .7s 4.1s cubic-bezier(.16,1
   aspect-ratio: 1;
   background: rgb(255 255 255 / 30%);
 }
-.participate-socials.socials-light .manifesto-social-fill { background: #fff; }
+
+/* ── Brand hexagon field (live background) ─────────────────────────── */
+.hex-field {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  /* Fade toward the reading side so copy stays crisp. */
+  -webkit-mask-image: linear-gradient(to left, transparent 0%, #000 55%);
+  mask-image: linear-gradient(to left, transparent 0%, #000 55%);
+}
+.hex-field-full {
+  -webkit-mask-image: radial-gradient(120% 100% at 50% 50%, #000 40%, transparent 100%);
+  mask-image: radial-gradient(120% 100% at 50% 50%, #000 40%, transparent 100%);
+}
+.hex-cell {
+  fill: rgb(236 239 245 / 2.5%);
+  stroke: rgb(236 239 245 / 7%);
+  stroke-width: 1.2;
+  transform-box: fill-box;
+  transform-origin: center;
+  transition: fill .5s ease, fill-opacity .5s ease, transform .6s cubic-bezier(.16,1,.3,1), stroke .5s ease;
+}
+.hex-cell[data-filled] { fill: var(--hex); fill-opacity: .13; }
+.hex-cell[data-lit] {
+  fill: var(--hex);
+  fill-opacity: .55;
+  stroke: var(--hex);
+  transform: scale(.9);
+  transition-duration: .15s;
+}
+@keyframes hex-breathe {
+  0%, 100% { fill-opacity: .04; }
+  50% { fill: var(--hex); fill-opacity: .4; }
+}
+.hex-pulse { animation: hex-breathe 6s ease-in-out infinite; }
+@media (prefers-reduced-motion: reduce) {
+  .hex-pulse { animation: none; }
+}
+/* Content sits above the field. */
+.has-hex > :not(.hex-field):not(.spinning-ball) { position: relative; z-index: 1; }
+
+/* ── KORA ball watermark ───────────────────────────────────────────── */
+.spinning-ball {
+  position: absolute;
+  z-index: 0;
+  width: clamp(18rem, 38vw, 34rem);
+  aspect-ratio: 1;
+  pointer-events: none;
+  opacity: .09;
+}
+.spinning-ball img { width: 100%; height: 100%; }
+.final-cta-ball { inset-inline-end: -8rem; bottom: -10rem; opacity: .08; }

@@ -1,13 +1,16 @@
 import { SocialPentagons } from "@/components/ui/SocialIcons";
 import { Mark } from "@/components/ui/Mark";
 import { Reveal } from "@/components/motion/Reveal";
+import { HexField } from "@/components/motion/HexField";
+import { SpinningBall } from "@/components/motion/SpinningBall";
 
 const LINES = ["لا تكتفِ", "بمشاهدة اللعبة.", "كن جزءًا مما يصنعها."] as const;
 
 export function Manifesto() {
   return (
-    <section aria-labelledby="manifesto-heading" className="manifesto section-light kora-grid-light">
-      <div aria-hidden className="manifesto-orbit kora-pentagon" />
+    <section aria-labelledby="manifesto-heading" className="manifesto has-hex">
+      <HexField />
+      <SpinningBall className="manifesto-ball" />
       <div className="manifesto-stage">
         <div className="manifesto-copy">
           <h2 id="manifesto-heading">
@@ -33,7 +36,7 @@ export function Manifesto() {
         </div>
 
         <Reveal delay={0.5} className="manifesto-socials-band">
-          <SocialPentagons className="socials-light" />
+          <SocialPentagons />
         </Reveal>
       </div>
     </section>

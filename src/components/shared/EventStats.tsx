@@ -1,15 +1,15 @@
 import { Container } from "@/components/ui/Container";
+import { HexField } from "@/components/motion/HexField";
 import { AnimatedNumber } from "@/components/motion/AnimatedNumber";
 import { Reveal } from "@/components/motion/Reveal";
 import { Stagger, StaggerItem } from "@/components/motion/Stagger";
 import { EVENT_FACTS } from "@/lib/content";
 
-/** KORA in numbers, on the same coral band as the home page facts. */
+/** KORA in numbers, styled like the home page facts. */
 export function EventStats() {
   return (
-    <section aria-labelledby="event-stats-heading" className="facts-band">
-      <span aria-hidden className="facts-shape facts-shape-a kora-pentagon kora-float" />
-      <span aria-hidden className="facts-shape facts-shape-b kora-pentagon kora-float" />
+    <section aria-labelledby="event-stats-heading" className="facts-band has-hex">
+      <HexField tone="color" className="hex-field-full" />
 
       <Container className="relative">
         <Reveal>
@@ -25,12 +25,12 @@ export function EventStats() {
                 <AnimatedNumber value={fact.value} />
                 {fact.unit}
               </p>
-              <p className="mt-2 text-sm font-bold text-ink/70 md:text-base">{fact.label}</p>
+              <p className="mt-2 text-sm font-bold text-paper/65 md:text-base">{fact.label}</p>
             </StaggerItem>
           ))}
           <StaggerItem as="li" className="facts-tile">
             <p className="text-3xl font-extrabold sm:text-4xl md:text-6xl">KFUPM</p>
-            <p className="mt-2 text-sm font-bold text-ink/70 md:text-base">
+            <p className="mt-2 text-sm font-bold text-paper/65 md:text-base">
               جامعة الملك فهد للبترول والمعادن
             </p>
           </StaggerItem>
