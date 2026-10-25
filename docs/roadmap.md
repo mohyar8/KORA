@@ -840,4 +840,6 @@ export function createEmailDeps(cfg: { apiKey?: string; from?: string; teamTo: s
 | 2026-10-25 | المرحلة 7.1 👤 | ◐ | Neon (الجدول منشأ) وResend (الدومين موثّق، 4 مستلمين) جاهزان محليًا. متبقٍ: مفاتيح Turnstile حقيقية، ومتغيرات Vercel، وتغيير كلمة مرور قاعدة Neon (ظهرت في مخرجات الجلسة) |
 | 2026-10-25 | المرحلة 7.2 | ✅ | طلب حقيقي واحد: حُفظ الصف بكل الحقول، الجوال طُبِّع، IP مخزّن كـ hash، `notified = true`، بلا أخطاء في السجلات. حُذف الصف التجريبي. لم يُجرَّب حد الإرسال ومفتاح Resend الخاطئ فعليًا لتجنّب إيميلات مزعجة؛ مغطّيان باختبارات الوحدة |
 
+| 2026-10-25 | الجزء الثاني | ◐ | رئيسية لكل الجمهور وصفحة `/speakers` — انظر [`roadmap-speakers.md`](roadmap-speakers.md). متغيرات Vercel الإضافية: `SPEAKERS_NOTIFY_TO` (اختياري). وتشغيل `db/002_speaker_requests.sql` تم على Neon |
+
 القرارات التفصيلية أثناء التنفيذ مسجّلة في `.superpowers/sdd/roadmap/progress.md` (أسطر `Ruling:`).
