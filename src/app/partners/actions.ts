@@ -6,7 +6,7 @@ import { createDbDeps } from "@/lib/sponsor/db";
 import { createEmailDeps } from "@/lib/sponsor/email";
 import { getClientIp, hashIp } from "@/lib/sponsor/ip";
 import { processSponsorRequest } from "@/lib/sponsor/process";
-import { verifyTurnstile } from "@/lib/sponsor/turnstile";
+import { captchaVerifier } from "@/lib/submissions/turnstile";
 import type { SponsorFormState } from "@/lib/sponsor/types";
 
 export async function submitSponsorRequest(
@@ -26,7 +26,7 @@ export async function submitSponsorRequest(
       // address is accepted.
       teamTo: notifyRecipients(process.env.SPONSOR_NOTIFY_TO),
     }),
-    verifyCaptcha: (token) => verifyTurnstile(token, ip, process.env.TURNSTILE_SECRET_KEY ?? ""),
+    verifyCaptcha: captchaVerifier(process.env.TURNSTILE_SECRET_KEY, ip),
     ipHash: ip && salt ? hashIp(ip, salt) : null,
     now: () => new Date(),
     // Scope and error text only — never the visitor's data.

@@ -21,3 +21,16 @@ export async function verifyTurnstile(
     return false;
   }
 }
+
+/**
+ * Turnstile is optional: with no secret configured the check is skipped,
+ * leaving the honeypot and rate limit as the form's protection.
+ */
+export function captchaVerifier(
+  secret: string | undefined,
+  ip: string | null,
+  fetchImpl: typeof fetch = fetch,
+): (token: string | null) => Promise<boolean> {
+  if (!secret) return async () => true;
+  return (token) => verifyTurnstile(token, ip, secret, fetchImpl);
+}
