@@ -470,6 +470,9 @@ body:has(.hero-field) .topbar { animation: topbar-in .7s 4.1s cubic-bezier(.16,1
 }
 .final-cta-socials { padding-inline-end: 0; }
 .final-cta-socials .manifesto-social-fill { background: var(--color-navy); }
+.participate-socials { gap: 10px; }
+.participate-socials .manifesto-social { width: 48px; height: 48px; }
+.participate-socials .manifesto-social-fill { background: var(--color-navy-dark); }
 .manifesto-social {
   position: relative;
   display: grid;

@@ -19,20 +19,19 @@ export function FinalCta() {
             id="final-cta-heading"
             className="max-w-4xl text-balance text-4xl font-extrabold leading-[1.2] sm:text-5xl md:text-7xl"
           >
-            كن جزءًا من الصناعة خلف اللعبة
+            كن جزءًا من كورة
           </h2>
         </Reveal>
         <Reveal delay={0.05}>
           <p className="mt-6 max-w-xl text-pretty text-lg leading-relaxed text-paper/75">
-            تابع كورة لتعرف كل جديد عن الحدث، أو انضم إلينا شريكًا يصنع
-            التجربة.
+            تابع كورة لتعرف كل جديد عن الحدث، أو شارك معنا راعيًا أو متحدثًا.
           </p>
         </Reveal>
 
         <Reveal delay={0.12} className="mt-10">
           <Magnetic>
-            <Button href="/partners" variant="primary" className="px-9 py-5 text-lg">
-              كن شريكًا
+            <Button href="/#participate" variant="primary" className="px-9 py-5 text-lg">
+              شارك معنا
             </Button>
           </Magnetic>
         </Reveal>

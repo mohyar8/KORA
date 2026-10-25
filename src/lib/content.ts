@@ -335,25 +335,6 @@ export interface TitledItem {
   description: string;
 }
 
-/** Home-page "why sponsor KORA" teaser. */
-export const SPONSOR_TEASER: readonly TitledItem[] = [
-  {
-    number: "01",
-    title: "جمهور يصنع المستقبل",
-    description: "أكثر من 20 ألف زائر متوقع من طلبة الجامعات والمهتمين بصناعة الرياضة.",
-  },
-  {
-    number: "02",
-    title: "في قلب طموحات 2034",
-    description: "ارتبط بحدث يواكب طموحات المملكة الرياضية ومستقبل كرة القدم السعودية.",
-  },
-  {
-    number: "03",
-    title: "حضور في مسارك",
-    description: "تسعة مسارات متخصصة تتيح لعلامتك الظهور حيث يلتقي قطاعك بجمهوره.",
-  },
-];
-
 export const SPONSOR_REASONS: readonly Omit<TitledItem, "number">[] = [
   {
     title: "جمهور جامعي شاب",
