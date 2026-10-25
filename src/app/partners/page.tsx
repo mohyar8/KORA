@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import { PartnersHero } from "@/components/partners/PartnersHero";
+import { PartnersStats } from "@/components/partners/PartnersStats";
+import { WhyKora } from "@/components/partners/WhyKora";
 import { BRAND } from "@/lib/constants";
 
 export const metadata: Metadata = {
@@ -12,6 +14,8 @@ export default function PartnersPage() {
   return (
     <>
       <PartnersHero />
+      <PartnersStats />
+      <WhyKora />
     </>
   );
 }
