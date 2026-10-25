@@ -26,6 +26,8 @@ export interface Track {
   description: string;
   accent: AccentColor;
   icon: LucideIcon;
+  /** Industries a sponsor of this track would typically come from. */
+  sectors: readonly string[];
 }
 
 export const TRACKS: Track[] = [
@@ -36,6 +38,7 @@ export const TRACKS: Track[] = [
       "رحلة زمنية تفاعلية توثّق مسيرة كرة القدم السعودية منذ بداياتها عام 1927، مرورًا بأبرز لحظاتها وتحولاتها، وصولًا إلى طموحات المملكة ومستقبلها الرياضي في 2034.",
     accent: "coral",
     icon: Landmark,
+    sectors: ["الثقافة والتراث", "الأندية والاتحادات"],
   },
   {
     number: "02",
@@ -44,6 +47,7 @@ export const TRACKS: Track[] = [
       "مسار يكشف ما يحدث خلف الشاشات، ويعرّف الزائر برحلة المحتوى الرياضي من الملعب إلى الجمهور، عبر البث والمنصات الرقمية والبودكاست وصناعة المحتوى وبناء العلامات الإعلامية.",
     accent: "fuchsia",
     icon: Radio,
+    sectors: ["القنوات والمنصات الرقمية", "الإنتاج والإعلان"],
   },
   {
     number: "03",
@@ -52,6 +56,7 @@ export const TRACKS: Track[] = [
       "مسار يوضّح الأثر الاقتصادي لصناعة كرة القدم، ويستعرض نماذج الاستثمار ومصادر الإيرادات والصفقات الرياضية، إلى جانب الفرص المتاحة أمام الشركات والمستثمرين في القطاع.",
     accent: "green",
     icon: LineChart,
+    sectors: ["البنوك", "الاستثمار والتأمين"],
   },
   {
     number: "04",
@@ -60,6 +65,7 @@ export const TRACKS: Track[] = [
       "ركن يساعد الزائر على اكتشاف الفرص والمشكلات الموجودة في القطاع الرياضي، والتعرّف على كيفية تحويلها إلى مشاريع وحلول مبتكرة في التقنية والتجارة الإلكترونية وتحليل الأداء وتجربة الجماهير.",
     accent: "coral",
     icon: Lightbulb,
+    sectors: ["حاضنات الأعمال", "رأس المال الجريء"],
   },
   {
     number: "05",
@@ -68,6 +74,7 @@ export const TRACKS: Track[] = [
       "تجربة تفاعلية تجمع بين المتعة والمعرفة من خلال تحديات كروية وتقنيات حديثة، مثل الواقع الافتراضي واختبارات المعلومات وتحليل ردة فعل الجماهير وتحديات المهارات والتسديد.",
     accent: "fuchsia",
     icon: Gamepad2,
+    sectors: ["الألعاب والترفيه", "العلامات الاستهلاكية"],
   },
   {
     number: "06",
@@ -76,6 +83,7 @@ export const TRACKS: Track[] = [
       "مساحة للحوار وتبادل الخبرات، تستضيف قادة الأندية والإعلاميين والمستثمرين والأكاديميين ورواد الأعمال لمناقشة واقع كرة القدم السعودية وفرصها ومستقبل صناعتها.",
     accent: "green",
     icon: Presentation,
+    sectors: ["جميع القطاعات"],
   },
   {
     number: "07",
@@ -84,6 +92,7 @@ export const TRACKS: Track[] = [
       "مسار يستعرض دور العلوم الصحية في كرة القدم، من الطب الرياضي والوقاية من الإصابات والتأهيل، إلى التغذية والاستشفاء ورفع جاهزية اللاعبين وأدائهم.",
     accent: "coral",
     icon: HeartPulse,
+    sectors: ["المستشفيات والعيادات", "التغذية والمكملات"],
   },
   {
     number: "08",
@@ -92,6 +101,7 @@ export const TRACKS: Track[] = [
       "مسار يكشف كيف غيّرت التقنية كرة القدم، من تحليل البيانات والإحصائيات والذكاء الاصطناعي، إلى تتبع أداء اللاعبين واكتشاف المواهب ودعم القرارات داخل وخارج الملعب.",
     accent: "fuchsia",
     icon: Cpu,
+    sectors: ["الاتصالات", "التقنية والذكاء الاصطناعي"],
   },
   {
     number: "09",
@@ -100,6 +110,7 @@ export const TRACKS: Track[] = [
       "مسار يعرّف الزائر بدور الهندسة خلف تجربة كرة القدم، من تصميم الملاعب وتجهيزها وتطوير بنيتها وتقنياتها، إلى هندسة المعدات والكرة وصناعة بيئة رياضية أكثر كفاءة وأمانًا.",
     accent: "green",
     icon: Cog,
+    sectors: ["الإنشاءات والبنية التحتية", "الطاقة والصناعة"],
   },
 ];
 
@@ -313,5 +324,128 @@ export const LEADERSHIP = {
 export const NAV_LINKS = [
   { href: "/#about", label: "عن كورة" },
   { href: "/#tracks", label: "المسارات" },
-  { href: "/teams", label: "الفرق" },
+  { href: "/teams", label: "الفريق" },
+  { href: "/partners", label: "الشركاء" },
 ] as const;
+
+export interface TitledItem {
+  number: string;
+  title: string;
+  description: string;
+}
+
+/** Home-page "why sponsor KORA" teaser. */
+export const SPONSOR_TEASER: readonly TitledItem[] = [
+  {
+    number: "01",
+    title: "جمهور يصنع المستقبل",
+    description: "أكثر من 20 ألف زائر متوقع من طلبة الجامعات والمهتمين بصناعة الرياضة.",
+  },
+  {
+    number: "02",
+    title: "في قلب طموحات 2034",
+    description: "ارتبط بحدث يواكب طموحات المملكة الرياضية ومستقبل كرة القدم السعودية.",
+  },
+  {
+    number: "03",
+    title: "حضور في مسارك",
+    description: "تسعة مسارات متخصصة تتيح لعلامتك الظهور حيث يلتقي قطاعك بجمهوره.",
+  },
+];
+
+export const SPONSOR_REASONS: readonly Omit<TitledItem, "number">[] = [
+  {
+    title: "جمهور جامعي شاب",
+    description:
+      "طلبة اليوم هم كفاءات القطاع الرياضي وقادته غدًا، وكورة تضع علامتك أمامهم مباشرة.",
+  },
+  {
+    title: "متصل بطموحات 2034",
+    description: "حدث يواكب تحوّل الرياضة السعودية وطموحات المملكة نحو 2034.",
+  },
+  {
+    title: "منصة مستمرة",
+    description:
+      "رسالة كورة لا تنتهي بانتهاء الحدث؛ المحتوى الإعلامي والمعرفي يستمر ويستمر معه حضور شركائنا.",
+  },
+  {
+    title: "حضور يناسب قطاعك",
+    description:
+      "اختر المسار الأقرب لنشاطك، من التقنية والإعلام إلى الصحة والاستثمار والهندسة.",
+  },
+];
+
+export type PartnershipFormSlug = "track" | "main-stage" | "media" | "experience" | "in-kind";
+
+export interface PartnershipForm {
+  slug: PartnershipFormSlug;
+  title: string;
+  description: string;
+}
+
+/** General partnership shapes — never prices; packages are shared privately. */
+export const PARTNERSHIP_FORMS: readonly PartnershipForm[] = [
+  {
+    slug: "track",
+    title: "رعاية مسار أو ركن",
+    description: "اربط اسم علامتك بأحد المسارات التسعة ومحتواه وتجربة زواره.",
+  },
+  {
+    slug: "main-stage",
+    title: "رعاية المسرح الرئيسي",
+    description: "حضور على المنصة التي تجمع قادة الأندية والإعلاميين والمستثمرين.",
+  },
+  {
+    slug: "media",
+    title: "شراكة إعلامية ومحتوى",
+    description: "ظهور في محتوى كورة الرقمي قبل الحدث وأثناءه وبعده.",
+  },
+  {
+    slug: "experience",
+    title: "تجربة تفاعلية",
+    description: "صمّم تجربة لعلامتك داخل الركن الترفيهي يعيشها الزوار بأنفسهم.",
+  },
+  {
+    slug: "in-kind",
+    title: "شراكة عينية",
+    description: "ادعم الحدث بمنتجاتك أو خدماتك مقابل حضور يناسب مساهمتك.",
+  },
+];
+
+export const PARTNERSHIP_STEPS: readonly TitledItem[] = [
+  {
+    number: "01",
+    title: "أرسل طلبك",
+    description: "عبّئ النموذج في أقل من دقيقة؛ اسم الشركة والبريد يكفيان.",
+  },
+  {
+    number: "02",
+    title: "نتواصل معك",
+    description: "يتواصل معك فريق الشراكات ويرسل لك ملف الرعاية الكامل.",
+  },
+  {
+    number: "03",
+    title: "نصمّم الشراكة معًا",
+    description: "نختار معك شكل الحضور الأنسب لأهداف علامتك.",
+  },
+];
+
+export const SECTORS = [
+  "اتصالات وتقنية",
+  "بنوك واستثمار",
+  "صحة",
+  "إعلام",
+  "تجزئة",
+  "طاقة",
+  "أخرى",
+] as const;
+
+export interface Partner {
+  name: string;
+  /** Path under /public, e.g. "/assets/partners/acme.svg". */
+  logo: string;
+  href?: string;
+}
+
+/** Confirmed partners only. The "شركاؤنا" section stays hidden while empty. */
+export const PARTNERS: readonly Partner[] = [];
