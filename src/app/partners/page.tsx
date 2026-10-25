@@ -4,6 +4,7 @@ import { PartnersStats } from "@/components/partners/PartnersStats";
 import { WhyKora } from "@/components/partners/WhyKora";
 import { Placements } from "@/components/partners/Placements";
 import { PartnershipSteps } from "@/components/partners/PartnershipSteps";
+import { SponsorFormSection } from "@/components/partners/SponsorFormSection";
 import { PartnersLogos } from "@/components/partners/PartnersLogos";
 import { DirectContact } from "@/components/partners/DirectContact";
 import { BRAND } from "@/lib/constants";
@@ -22,6 +23,7 @@ export default function PartnersPage() {
       <WhyKora />
       <Placements />
       <PartnershipSteps />
+      <SponsorFormSection />
       <PartnersLogos />
       <DirectContact />
     </>
