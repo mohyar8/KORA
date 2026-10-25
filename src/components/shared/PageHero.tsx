@@ -3,10 +3,24 @@ import { Container } from "@/components/ui/Container";
 import { Reveal } from "@/components/motion/Reveal";
 import { EVENT } from "@/lib/constants";
 
-export function PartnersHero() {
+export function PageHero({
+  id,
+  label,
+  title,
+  body,
+  ctaHref,
+  ctaLabel,
+}: {
+  id: string;
+  label: string;
+  title: string;
+  body: string;
+  ctaHref: string;
+  ctaLabel: string;
+}) {
   return (
     <section
-      aria-labelledby="partners-heading"
+      aria-labelledby={id}
       className="kora-grid relative overflow-hidden bg-ink pb-16 pt-[118px] md:pb-24 md:pt-[150px]"
     >
       <div
@@ -20,24 +34,22 @@ export function PartnersHero() {
 
       <Container className="relative">
         <Reveal>
-          <p className="kora-label text-coral">الشراكات والرعاية</p>
+          <p className="kora-label text-coral">{label}</p>
           <h1
-            id="partners-heading"
+            id={id}
             className="mt-4 max-w-3xl text-balance text-4xl font-extrabold leading-[1.2] sm:text-5xl md:text-6xl"
           >
-            علامتك في قلب الصناعة خلف اللعبة
+            {title}
           </h1>
         </Reveal>
         <Reveal delay={0.06}>
           <p className="mt-6 max-w-2xl text-pretty text-base leading-loose text-paper/75 md:text-lg">
-            «كورة» حدث وطني جامعي في جامعة الملك فهد للبترول والمعادن يقدّم كرة
-            القدم السعودية بوصفها صناعة متكاملة. نبحث عن شركاء يؤمنون بهذه
-            الصناعة ويريدون أن يكونوا جزءًا منها.
+            {body}
           </p>
         </Reveal>
         <Reveal delay={0.12} className="mt-9 flex flex-col items-start gap-4">
-          <Button href="#request" variant="primary" showArrow={false}>
-            قدّم طلب شراكة
+          <Button href={ctaHref} variant="primary" showArrow={false}>
+            {ctaLabel}
           </Button>
           <p className="text-sm font-medium text-paper/55">
             {EVENT.dates} · {EVENT.venueShort}

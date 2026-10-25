@@ -3,14 +3,14 @@ import { AnimatedNumber } from "@/components/motion/AnimatedNumber";
 import { Stagger, StaggerItem } from "@/components/motion/Stagger";
 import { EVENT_FACTS } from "@/lib/content";
 
-export function PartnersStats() {
+export function EventStats() {
   return (
     <section
-      aria-labelledby="partners-stats-heading"
+      aria-labelledby="event-stats-heading"
       className="border-t border-paper/15 bg-navy-dark py-14 md:py-20"
     >
       <Container className="text-center">
-        <h2 id="partners-stats-heading" className="facts-heading">
+        <h2 id="event-stats-heading" className="facts-heading">
           كورة بالأرقام
         </h2>
 
