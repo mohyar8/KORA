@@ -40,3 +40,28 @@ export const SOCIAL_NETWORKS = [
   { href: SOCIAL_LINKS.tiktok, label: "تيك توك", Icon: TikTokIcon, accent: "coral" },
   { href: SOCIAL_LINKS.linkedin, label: "لينكدإن", Icon: LinkedInIcon, accent: "fuchsia" },
 ] as const;
+
+/** KORA's social accounts as the brand's pentagon buttons. */
+export function SocialPentagons({ className }: { className?: string }) {
+  return (
+    <ul className={className ? `manifesto-socials ${className}` : "manifesto-socials"} aria-label="حسابات كورة">
+      {SOCIAL_NETWORKS.map(({ href, label, Icon, accent }) => (
+        <li key={label}>
+          <a
+            href={href}
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label={label}
+            title={label}
+            className="manifesto-social"
+            data-accent={accent}
+          >
+            <span className="kora-pentagon manifesto-social-ring" aria-hidden />
+            <span className="kora-pentagon manifesto-social-fill" aria-hidden />
+            <Icon />
+          </a>
+        </li>
+      ))}
+    </ul>
+  );
+}

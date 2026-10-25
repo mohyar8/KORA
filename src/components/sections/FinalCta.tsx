@@ -2,6 +2,7 @@ import { Button } from "@/components/ui/Button";
 import { Container } from "@/components/ui/Container";
 import { Reveal } from "@/components/motion/Reveal";
 import { Magnetic } from "@/components/motion/Magnetic";
+import { SocialPentagons } from "@/components/ui/SocialIcons";
 
 export function FinalCta() {
   return (
@@ -18,22 +19,27 @@ export function FinalCta() {
             id="final-cta-heading"
             className="max-w-4xl text-balance text-4xl font-extrabold leading-[1.2] sm:text-5xl md:text-7xl"
           >
-            مكانك قد يكون خلف اللعبة
+            كن جزءًا من الصناعة خلف اللعبة
           </h2>
         </Reveal>
         <Reveal delay={0.05}>
           <p className="mt-6 max-w-xl text-pretty text-lg leading-relaxed text-paper/75">
-            تعرّف على الفرق الأقرب إلى مهاراتك واهتماماتك، واستعد لترتيب رغباتك
-            الثلاث عند فتح نموذج التقديم.
+            تابع كورة لتعرف كل جديد عن الحدث، أو انضم إلينا شريكًا يصنع
+            التجربة.
           </p>
         </Reveal>
 
         <Reveal delay={0.12} className="mt-10">
           <Magnetic>
             <Button href="/partners" variant="primary" className="px-9 py-5 text-lg">
-              ابدأ طلبك
+              كن شريكًا
             </Button>
           </Magnetic>
+        </Reveal>
+
+        <Reveal delay={0.18} className="mt-12 flex flex-col items-center gap-5">
+          <p className="kora-label text-paper/60">تابع كورة</p>
+          <SocialPentagons className="final-cta-socials" />
         </Reveal>
       </Container>
     </section>

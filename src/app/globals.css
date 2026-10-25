@@ -468,6 +468,8 @@ body:has(.hero-field) .topbar { animation: topbar-in .7s 4.1s cubic-bezier(.16,1
   gap: 18px;
   padding-inline-end: clamp(8px, 3vw, 36px);
 }
+.final-cta-socials { padding-inline-end: 0; }
+.final-cta-socials .manifesto-social-fill { background: var(--color-navy); }
 .manifesto-social {
   position: relative;
   display: grid;

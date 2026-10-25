@@ -1,4 +1,4 @@
-import { SOCIAL_NETWORKS } from "@/components/ui/SocialIcons";
+import { SocialPentagons } from "@/components/ui/SocialIcons";
 import { Mark } from "@/components/ui/Mark";
 
 export function Manifesto() {
@@ -20,25 +20,7 @@ export function Manifesto() {
         </div>
 
         <div className="manifesto-socials-band">
-          <ul className="manifesto-socials" aria-label="حسابات كورة">
-            {SOCIAL_NETWORKS.map(({ href, label, Icon, accent }) => (
-              <li key={label}>
-                <a
-                  href={href}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  aria-label={label}
-                  title={label}
-                  className="manifesto-social"
-                  data-accent={accent}
-                >
-                  <span className="kora-pentagon manifesto-social-ring" aria-hidden />
-                  <span className="kora-pentagon manifesto-social-fill" aria-hidden />
-                  <Icon />
-                </a>
-              </li>
-            ))}
-          </ul>
+          <SocialPentagons />
         </div>
       </div>
     </section>
