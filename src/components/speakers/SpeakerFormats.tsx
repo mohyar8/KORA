@@ -16,7 +16,7 @@ export function SpeakerFormats() {
         </h2>
         <ul className="mt-10 grid border-t border-paper/15 md:grid-cols-2">
           {SPEAKER_FORMATS.map((format) => (
-            <li key={format.slug} className="border-b border-s border-paper/15 p-6">
+            <li key={format.slug} className="kora-card border-b border-s border-paper/15 p-6 hover:bg-paper/5">
               <p className="font-bold">{format.title}</p>
               <p className="mt-2 text-pretty text-sm leading-relaxed text-paper/70">
                 {format.description}

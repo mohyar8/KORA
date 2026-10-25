@@ -1,17 +1,20 @@
-import { clsx } from "clsx";
+import type { CSSProperties } from "react";
 import { Container } from "@/components/ui/Container";
 import { Stagger, StaggerItem } from "@/components/motion/Stagger";
 import { SPEAKER_PROFILES } from "@/lib/content";
 
-const ACCENTS = ["bg-coral", "bg-fuchsia", "bg-green"] as const;
+const ACCENTS = ["var(--color-coral)", "var(--color-fuchsia)", "var(--color-green)"] as const;
 
 export function SpeakerProfiles() {
   return (
-    <section aria-labelledby="speaker-profiles-heading" className="bg-ink py-16 md:py-24">
+    <section
+      aria-labelledby="speaker-profiles-heading"
+      className="section-light kora-grid-light py-16 md:py-24"
+    >
       <Container>
         <h2
           id="speaker-profiles-heading"
-          className="text-balance text-3xl font-bold leading-[1.2] sm:text-4xl md:text-5xl"
+          className="text-balance text-3xl font-extrabold leading-[1.2] sm:text-4xl md:text-5xl"
         >
           من نبحث عنه؟
         </h2>
@@ -21,12 +24,10 @@ export function SpeakerProfiles() {
             <StaggerItem
               as="li"
               key={profile}
-              className="flex items-center gap-4 border border-paper/15 bg-navy-dark/60 p-6"
+              className="kora-card flex items-center gap-4 border border-navy/12 bg-white p-6"
+              style={{ "--accent": ACCENTS[index % ACCENTS.length] } as CSSProperties}
             >
-              <span
-                aria-hidden
-                className={clsx("kora-pentagon size-7 shrink-0", ACCENTS[index % ACCENTS.length])}
-              />
+              <span aria-hidden className="kora-pentagon kora-card-mark size-8 shrink-0" />
               <span className="text-lg font-bold">{profile}</span>
             </StaggerItem>
           ))}
