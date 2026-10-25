@@ -1,20 +1,7 @@
 import { Container } from "@/components/ui/Container";
 import { Reveal } from "@/components/motion/Reveal";
 import { AboutArt } from "@/components/sections/AboutArt";
-
-function Mark({
-  children,
-  tone = "green",
-}: {
-  children: string;
-  tone?: "green" | "coral";
-}) {
-  return (
-    <em className={tone === "coral" ? "word-mark word-mark-coral" : "word-mark"}>
-      {children}
-    </em>
-  );
-}
+import { Mark } from "@/components/ui/Mark";
 
 const ABOUT_COPY = [
   {
