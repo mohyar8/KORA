@@ -91,7 +91,7 @@
 2. **حماية من الإزعاج:** honeypot ممتلئ ← نُرجع نجاحًا وهميًا بلا حفظ. **Cloudflare Turnstile** (وضع managed/غير مزعج) يُتحقق من رمزه على الخادم قبل أي حفظ؛ فشل التحقق ← رسالة «تعذّر التحقق، أعد المحاولة». حد إرسال: 5 طلبات لكل IP (مخزّن كـ hash) خلال ساعة، عبر استعلام على الجدول نفسه.
 3. **الحفظ** في Neon Postgres (الجدول أدناه).
 4. **إيميل تنبيه** إلى `CONTACT_EMAIL` عبر Resend بكل التفاصيل (`reply-to` = بريد الشركة).
-5. **إيميل تأكيد** للشركة («استلمنا طلبك وسنتواصل معك قريبًا»). فشله لا يؤثر على النتيجة.
+5. ~~إيميل تأكيد للشركة~~ — **أُلغي بقرار المالك (2026-10-25):** لا يُرسل الموقع أي إيميل للشركات؛ التنبيه للفريق فقط، والفريق يتواصل يدويًا.
 6. **النتيجة:** الطلب يُعتبر مستلمًا إذا نجح **الحفظ أو** إيميل التنبيه. يُستبدل النموذج برسالة نجاح.
 7. **فشل الاثنين:** رسالة خطأ + زر «أرسل عبر البريد» يفتح `mailto:` إلى `CONTACT_EMAIL` بموضوع وجسم معبّأين من بيانات النموذج. كل خطأ يُسجَّل في سجلات الخادم (`console.error`) بلا بيانات حساسة.
 
@@ -122,7 +122,7 @@ create index on sponsor_requests (ip_hash, created_at);
 ### الإعداد والأسرار
 
 متغيرات بيئة على Vercel ومحليًا في `.env.local` (غير متتبَّع):
-`DATABASE_URL`، `RESEND_API_KEY`، `SPONSOR_FROM_EMAIL` (مثل `partners@korakfupm.com` بعد توثيق الدومين في Resend)، `IP_HASH_SALT`، `NEXT_PUBLIC_TURNSTILE_SITE_KEY`، `TURNSTILE_SECRET_KEY`.
+`DATABASE_URL`، `RESEND_API_KEY`، `SPONSOR_FROM_EMAIL` (مثل `partners@korakfupm.com` بعد توثيق الدومين في Resend)، `SPONSOR_NOTIFY_TO` (اختياري: مستلم التنبيه، الافتراضي `CONTACT_EMAIL`)، `IP_HASH_SALT`، `NEXT_PUBLIC_TURNSTILE_SITE_KEY`، `TURNSTILE_SECRET_KEY`.
 
 حزم جديدة: `@neondatabase/serverless`، `resend`، `zod`؛ وللتطوير: `vitest`.
 

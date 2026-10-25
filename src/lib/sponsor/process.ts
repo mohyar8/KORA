@@ -13,7 +13,6 @@ export interface SponsorDeps {
   save(req: SponsorRequest, ipHash: string | null): Promise<string>;
   markNotified(id: string): Promise<void>;
   notifyTeam(req: SponsorRequest): Promise<void>;
-  confirmToSender(req: SponsorRequest): Promise<void>;
   now(): Date;
   logError(scope: string, error: unknown): void;
   contactEmail: string;
@@ -80,12 +79,6 @@ export async function processSponsorRequest(
 
   if (!id && !notified) {
     return { status: "error-send", mailto: buildMailto(values, deps.contactEmail), values };
-  }
-
-  try {
-    await deps.confirmToSender(req);
-  } catch (error) {
-    deps.logError("confirm", error);
   }
   return { status: "success", email: req.email };
 }

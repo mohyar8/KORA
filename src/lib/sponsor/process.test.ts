@@ -17,7 +17,6 @@ function makeDeps(overrides: Partial<SponsorDeps> = {}): SponsorDeps {
     save: vi.fn(async () => "id-1"),
     markNotified: vi.fn(async () => {}),
     notifyTeam: vi.fn(async () => {}),
-    confirmToSender: vi.fn(async () => {}),
     now: () => new Date("2026-10-25T10:00:00Z"),
     logError: vi.fn(),
     contactEmail: "team@kora.sa",
@@ -48,12 +47,11 @@ test("rate limit reached: rate-limited, nothing saved", async () => {
   expect(deps.save).not.toHaveBeenCalled();
 });
 
-test("happy path: saved, team notified, marked, confirmed", async () => {
+test("happy path: saved, team notified, marked", async () => {
   const deps = makeDeps();
   const state = await processSponsorRequest(fd(valid), deps);
   expect(state).toEqual({ status: "success", email: "a@b.co" });
   expect(deps.markNotified).toHaveBeenCalledWith("id-1");
-  expect(deps.confirmToSender).toHaveBeenCalled();
 });
 
 test("one channel failing (e.g. missing RESEND key) still succeeds", async () => {
@@ -67,7 +65,7 @@ test("one channel failing (e.g. missing RESEND key) still succeeds", async () =>
   expect(deps.logError).toHaveBeenCalledWith("notify", expect.any(Error));
 });
 
-test("both channels failing: error-send with mailto, no confirmation", async () => {
+test("both channels failing: error-send with mailto", async () => {
   const fail = vi.fn(async () => {
     throw new Error("down");
   });
@@ -75,5 +73,4 @@ test("both channels failing: error-send with mailto, no confirmation", async () 
   const state = await processSponsorRequest(fd(valid), deps);
   expect(state.status).toBe("error-send");
   expect(state.status === "error-send" && decodeURIComponent(state.mailto)).toContain("شركة س");
-  expect(deps.confirmToSender).not.toHaveBeenCalled();
 });
