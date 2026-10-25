@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from "next";
+import { Analytics } from "@vercel/analytics/next";
 import { brandFont } from "@/lib/fonts";
 import { BRAND, EVENT, SITE_URL } from "@/lib/constants";
 import { Navbar } from "@/components/layout/Navbar";
@@ -7,7 +8,7 @@ import "./globals.css";
 
 const title = `${BRAND.name} | ${BRAND.nameAr} — ${BRAND.taglineAr}`;
 const description =
-  "كورة: الصناعة خلف اللعبة. حدث جامعي وطني في جامعة الملك فهد للبترول والمعادن يستكشف كرة القدم السعودية بوصفها صناعة متكاملة. انضم إلى فريق كورة وشارك في صناعة الحدث.";
+  "كورة: الصناعة خلف اللعبة. حدث وطني جامعي في جامعة الملك فهد للبترول والمعادن يستكشف كرة القدم السعودية بوصفها صناعة متكاملة، عبر تسعة مسارات من المتحف التاريخي إلى التقنية والاستثمار.";
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
@@ -58,6 +59,7 @@ export default function RootLayout({
         <Navbar />
         <main id="main-content">{children}</main>
         <Footer />
+        <Analytics />
       </body>
     </html>
   );
