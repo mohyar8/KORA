@@ -10,8 +10,16 @@ export function FinalCta() {
       aria-labelledby="final-cta-heading"
       className="kora-grid relative overflow-hidden border-t border-paper/15 bg-navy py-20 text-white md:py-32"
     >
-      <div aria-hidden className="absolute start-1/2 top-1/2 size-[70vw] max-h-[44rem] max-w-[44rem] -translate-x-1/2 -translate-y-1/2 rounded-full border border-paper/20" />
-      <div aria-hidden className="kora-pentagon absolute -end-16 top-20 size-48 bg-coral/60" />
+      <div aria-hidden className="absolute start-1/2 top-1/2 size-[70vw] max-h-[44rem] max-w-[44rem] -translate-x-1/2 -translate-y-1/2 animate-spin-slow rounded-full border border-dashed border-paper/25 [animation-duration:60s]" />
+      <div aria-hidden className="kora-pentagon kora-float absolute -end-16 top-20 size-48 bg-coral/60" />
+      <div
+        aria-hidden
+        className="kora-pentagon kora-float absolute -start-10 bottom-16 size-32 bg-fuchsia/55 [animation-delay:-2.5s]"
+      />
+      <div
+        aria-hidden
+        className="kora-pentagon kora-float absolute start-[18%] top-12 hidden size-14 bg-green/70 [animation-delay:-4s] md:block"
+      />
 
       <Container className="relative flex flex-col items-center text-center">
         <Reveal>

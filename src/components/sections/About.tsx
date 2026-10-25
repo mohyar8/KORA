@@ -2,6 +2,7 @@ import { Container } from "@/components/ui/Container";
 import { Reveal } from "@/components/motion/Reveal";
 import { AboutArt } from "@/components/sections/AboutArt";
 import { Mark } from "@/components/ui/Mark";
+import { ScrollWords } from "@/components/motion/ScrollWords";
 
 const ABOUT_COPY = [
   {
@@ -49,12 +50,13 @@ export function About() {
       <AboutArt />
       <Container className="about-shell px-0 md:px-10">
         <div className="about-copy">
-          <Reveal>
-            <h2 id="about-heading">
-              كرة القدم ليست لعبة فقط، بل{" "}
-              <span className="text-coral">صناعة متكاملة.</span>
-            </h2>
-          </Reveal>
+          <ScrollWords
+            id="about-heading"
+            parts={[
+              { text: "كرة القدم ليست لعبة فقط، بل" },
+              { text: "صناعة متكاملة.", className: "text-coral" },
+            ]}
+          />
           <div className="about-copy-body">
             {ABOUT_COPY.map((paragraph, index) => (
               <Reveal key={index} delay={index * 0.08}>

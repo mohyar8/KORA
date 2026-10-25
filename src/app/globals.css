@@ -424,8 +424,20 @@ body:has(.hero-field) .topbar { animation: topbar-in .7s 4.1s cubic-bezier(.16,1
 
 .manifesto {
   position: relative;
-  background: var(--color-ink);
-  color: var(--color-paper);
+  overflow: hidden;
+}
+/* Slowly turning pentagon outline behind the manifesto copy. */
+.manifesto-orbit {
+  position: absolute;
+  inset-inline-end: -6rem;
+  top: 50%;
+  width: clamp(16rem, 34vw, 30rem);
+  aspect-ratio: 1;
+  translate: 0 -50%;
+  background: linear-gradient(135deg, rgb(242 101 87 / 22%), rgb(148 67 153 / 18%));
+  animation: var(--animate-spin-slow);
+  animation-duration: 40s;
+  pointer-events: none;
 }
 .manifesto-stage {
   position: relative;
@@ -452,8 +464,8 @@ body:has(.hero-field) .topbar { animation: topbar-in .7s 4.1s cubic-bezier(.16,1
 .manifesto-body {
   max-width: 36rem;
   margin-top: clamp(18px, 2.2vw, 28px);
-  color: rgb(236 239 245 / 76%);
-  font-size: clamp(13px, 1.05vw, 16px);
+  color: rgb(14 20 53 / 74%);
+  font-size: clamp(14px, 1.1vw, 17px);
   line-height: 1.95;
   text-align: right;
 }
@@ -1133,11 +1145,8 @@ body:has(.hero-field) .topbar { animation: topbar-in .7s 4.1s cubic-bezier(.16,1
 }
 
 @media (max-width: 440px) {
-  /* Five links fit a phone only without the index numbers and the CTA;
-     the home page's "شارك في كورة" section takes over the CTA's job. */
+  /* Four links + the CTA fit a phone once the index numbers go. */
   .topbar-links span { display: none; }
-  .topbar-links { flex: 1; }
-  .topbar-apply { display: none !important; }
   .topbar-apply {
     flex: 1;
     height: 58px;
@@ -1291,3 +1300,148 @@ body:has(.hero-field) .topbar { animation: topbar-in .7s 4.1s cubic-bezier(.16,1
     --pattern-h: 96px;
   }
 }
+
+/* ── Light sections & interactive cards ─────────────────────────────── */
+.section-light {
+  background: var(--color-paper);
+  color: var(--color-ink);
+}
+.kora-grid-light {
+  background-image:
+    linear-gradient(rgb(45 59 112 / 7%) 1px, transparent 1px),
+    linear-gradient(90deg, rgb(45 59 112 / 7%) 1px, transparent 1px);
+  background-size: 56px 56px;
+}
+/* Lift + accent bar + spinning pentagon on hover or keyboard focus.
+   Each card sets its colour through the --accent custom property. */
+.kora-card {
+  position: relative;
+  --accent: var(--color-coral);
+  transition: transform .45s cubic-bezier(.16,1,.3,1), box-shadow .45s ease, border-color .45s ease;
+}
+.kora-card::before {
+  position: absolute;
+  inset-inline: 0;
+  top: 0;
+  height: 4px;
+  content: "";
+  background: var(--accent);
+  transform: scaleX(0);
+  transform-origin: right;
+  transition: transform .5s cubic-bezier(.16,1,.3,1);
+}
+.kora-card:hover,
+.kora-card:focus-within {
+  transform: translateY(-6px);
+  border-color: var(--accent);
+  box-shadow: 0 22px 44px -22px rgb(14 20 53 / 45%);
+}
+.kora-card:hover::before,
+.kora-card:focus-within::before { transform: scaleX(1); }
+.kora-card-mark {
+  background: var(--accent);
+  transition: transform .7s cubic-bezier(.16,1,.3,1);
+}
+.kora-card:hover .kora-card-mark,
+.kora-card:focus-within .kora-card-mark { transform: rotate(72deg) scale(1.12); }
+.kora-card-arrow { transition: transform .35s ease; }
+.kora-card:hover .kora-card-arrow { transform: translateX(-6px); }
+
+/* Social pentagons on a light background. */
+.socials-light .manifesto-social-fill { background: var(--color-paper); }
+.socials-light .manifesto-social:hover,
+.socials-light .manifesto-social:focus-visible { color: var(--color-paper); }
+
+/* Scrolling brand band. The track is LTR so the keyframes stay simple. */
+.kora-marquee {
+  /* LTR so the track anchors left; in RTL it anchors right and the
+     -50% loop would slide it fully off-screen. */
+  direction: ltr;
+  overflow: hidden;
+  background: var(--color-coral);
+  color: var(--color-ink);
+  border-block: 1px solid rgb(14 20 53 / 18%);
+}
+.kora-marquee-track {
+  display: flex;
+  width: max-content;
+  animation: var(--animate-marquee);
+}
+.kora-marquee:hover .kora-marquee-track { animation-play-state: paused; }
+.kora-marquee-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 22px;
+  padding: 14px 22px;
+  font-size: clamp(15px, 1.6vw, 22px);
+  font-weight: 800;
+  white-space: nowrap;
+}
+.kora-marquee-item i {
+  width: 14px;
+  height: 14px;
+  background: var(--color-ink);
+  clip-path: polygon(50% 0, 100% 38%, 82% 100%, 18% 100%, 0 38%);
+}
+@keyframes kora-float {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  50% { transform: translateY(-14px) rotate(10deg); }
+}
+.kora-float { animation: kora-float 7s ease-in-out infinite; }
+
+/* Event facts on a coral band. */
+.facts-band {
+  position: relative;
+  overflow: hidden;
+  padding-block: clamp(56px, 8vw, 104px);
+  background: var(--color-coral);
+  color: var(--color-ink);
+}
+.facts-shape {
+  position: absolute;
+  pointer-events: none;
+  background: rgb(255 255 255 / 18%);
+}
+.facts-shape-a { width: 22rem; aspect-ratio: 1; inset-inline-start: -7rem; top: -6rem; }
+.facts-shape-b { width: 12rem; aspect-ratio: 1; inset-inline-end: 6%; bottom: -3rem; animation-delay: -3s; }
+.facts-tile {
+  padding: 28px 26px;
+  background: rgb(255 255 255 / 88%);
+  border: 1px solid rgb(14 20 53 / 10%);
+  transition: transform .45s cubic-bezier(.16,1,.3,1), box-shadow .45s ease;
+}
+.facts-tile:hover { transform: translateY(-6px) rotate(-1deg); box-shadow: 0 22px 40px -24px rgb(14 20 53 / 55%); }
+.facts-tile p:first-child { color: var(--color-navy); }
+.facts-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 16px;
+  background: var(--color-ink);
+  color: var(--color-paper);
+  font-weight: 700;
+  font-size: 15px;
+  line-height: 1.6;
+}
+.facts-pill svg { color: var(--color-coral); flex-shrink: 0; }
+
+/* Participate cards: a coloured banner that deepens on hover. */
+.participate-banner {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 118px;
+  padding-inline: 28px;
+  overflow: hidden;
+  background: var(--accent);
+  transition: height .5s cubic-bezier(.16,1,.3,1);
+}
+.kora-card:hover .participate-banner,
+.kora-card:focus-within .participate-banner { height: 138px; }
+.participate-mark {
+  width: 64px;
+  aspect-ratio: 1;
+  background: rgb(255 255 255 / 30%);
+}
+.participate-socials.socials-light .manifesto-social-fill { background: #fff; }

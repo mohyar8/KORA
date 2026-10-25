@@ -323,7 +323,6 @@ export const LEADERSHIP = {
 
 export const NAV_LINKS = [
   { href: "/#about", label: "عن كورة" },
-  { href: "/#tracks", label: "المسارات" },
   { href: "/teams", label: "الفريق" },
   { href: "/partners", label: "الشركاء" },
   { href: "/speakers", label: "المتحدثون" },
