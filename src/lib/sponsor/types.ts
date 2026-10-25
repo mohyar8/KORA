@@ -14,14 +14,4 @@ export type SponsorFormValues = Partial<Record<Exclude<SponsorField, "interests"
   interests?: string[];
 };
 
-export type SponsorFormState =
-  | { status: "idle" }
-  | {
-      status: "invalid";
-      fieldErrors: Partial<Record<SponsorField, string>>;
-      values: SponsorFormValues;
-    }
-  | { status: "success"; email: string }
-  | { status: "error-verify"; mailto: string; values: SponsorFormValues }
-  | { status: "rate-limited"; values: SponsorFormValues }
-  | { status: "error-send"; mailto: string; values: SponsorFormValues };
+export type { SubmissionState as SponsorFormState } from "@/lib/submissions/types";

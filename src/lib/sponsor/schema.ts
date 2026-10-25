@@ -82,11 +82,6 @@ export function readSponsorValues(formData: FormData): SponsorFormValues {
   return values;
 }
 
-export function isHoneypotFilled(formData: FormData): boolean {
-  const value = formData.get("website");
-  return typeof value === "string" && value.trim() !== "";
-}
-
 export function parseSponsorForm(
   formData: FormData,
 ):
