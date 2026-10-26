@@ -3,14 +3,14 @@ import Link from "next/link";
 import type { CSSProperties } from "react";
 import { Container } from "@/components/ui/Container";
 import { HexField } from "@/components/motion/HexField";
-import { SocialPentagons } from "@/components/ui/SocialIcons";
+import { FollowButton } from "@/components/sections/FollowButton";
 import { Reveal } from "@/components/motion/Reveal";
 import { Stagger, StaggerItem } from "@/components/motion/Stagger";
-import { PARTICIPATE_PATHS } from "@/lib/content";
+import { HOME_COPY, PARTICIPATE_PATHS } from "@/lib/content";
 
 const ACCENTS = ["var(--color-coral)", "var(--color-fuchsia)", "var(--color-green)"] as const;
 
-/** One door per audience — sponsor, speaker, visitor — with equal weight. */
+/** One door per audience — sponsors, speakers, visitors — with equal weight. */
 export function Participate() {
   return (
     <section
@@ -21,15 +21,15 @@ export function Participate() {
       <HexField />
       <Container>
         <Reveal>
-          <p className="kora-label text-coral">شارك معنا</p>
+          <p className="kora-label text-coral">{HOME_COPY.participate.label}</p>
           <h2
             id="participate-heading"
             className="mt-3 max-w-2xl text-balance text-3xl font-extrabold leading-[1.2] sm:text-4xl md:text-5xl"
           >
-            شارك في كورة
+            {HOME_COPY.participate.heading}
           </h2>
-          <p className="mt-4 max-w-xl text-lg text-paper/70">
-            كورة تُصنع بمشاركة الجميع. اختر الطريقة الأقرب لك.
+          <p className="mt-4 max-w-2xl text-lg leading-relaxed text-paper/70">
+            {HOME_COPY.participate.description}
           </p>
         </Reveal>
 
@@ -50,7 +50,7 @@ export function Participate() {
                   <h3 className="text-2xl font-extrabold">{path.title}</h3>
                   <p className="text-pretty leading-relaxed text-paper/70">{path.description}</p>
                   <div className="mt-auto pt-4">
-                    {path.href && path.cta ? (
+                    {path.href ? (
                       <Link
                         href={path.href}
                         className="inline-flex items-center gap-2 font-bold text-paper underline-offset-4 hover:text-coral hover:underline"
@@ -59,7 +59,7 @@ export function Participate() {
                         <ArrowLeft aria-hidden className="kora-card-arrow size-4" />
                       </Link>
                     ) : (
-                      <SocialPentagons className="final-cta-socials participate-socials" />
+                      <FollowButton label={path.cta} />
                     )}
                   </div>
                 </div>

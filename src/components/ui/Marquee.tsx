@@ -1,6 +1,7 @@
-import { BRAND, EVENT } from "@/lib/constants";
+import { BRAND } from "@/lib/constants";
+import { HOME_COPY } from "@/lib/content";
 
-const ITEMS = [BRAND.taglineAr, BRAND.tagline, EVENT.dates, "9 مسارات", "KFUPM"];
+const ITEMS = [BRAND.taglineAr, BRAND.tagline, HOME_COPY.hero.tagline, "9 مسارات", "KFUPM"];
 
 /** Coral band of brand phrases scrolling endlessly; decorative, so hidden from AT. */
 export function Marquee() {

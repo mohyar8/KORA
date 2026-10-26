@@ -12,7 +12,17 @@ interface Part {
  * A heading whose words light up one after another as it scrolls through the
  * viewport. Reduced motion shows the finished heading straight away.
  */
-export function ScrollWords({ parts, className, id }: { parts: Part[]; className?: string; id?: string }) {
+export function ScrollWords({
+  parts,
+  className,
+  id,
+  as: Tag = "h2",
+}: {
+  parts: Part[];
+  className?: string;
+  id?: string;
+  as?: "h1" | "h2";
+}) {
   const ref = useRef<HTMLHeadingElement>(null);
   const reduced = useReducedMotion();
   const { scrollYProgress } = useScroll({ target: ref, offset: ["start 85%", "end 45%"] });
@@ -25,7 +35,7 @@ export function ScrollWords({ parts, className, id }: { parts: Part[]; className
   );
 
   return (
-    <h2 ref={ref} id={id} className={className}>
+    <Tag ref={ref} id={id} className={className}>
       {words.map((item, index) => (
         <Word
           key={index}
@@ -37,7 +47,7 @@ export function ScrollWords({ parts, className, id }: { parts: Part[]; className
           {item.word}
         </Word>
       ))}
-    </h2>
+    </Tag>
   );
 }
 

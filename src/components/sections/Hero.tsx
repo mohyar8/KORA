@@ -3,7 +3,8 @@
 import { motion, useReducedMotion } from "motion/react";
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/Button";
-import { EVENT } from "@/lib/constants";
+import { HeroIntro } from "@/components/sections/HeroIntro";
+import { HOME_COPY } from "@/lib/content";
 
 const PASS_TIMES = [0, 0.1, 0.2, 0.32, 0.44, 0.55, 0.66, 0.78, 0.88, 1];
 
@@ -36,104 +37,103 @@ export function Hero() {
   }, [reduced]);
 
   return (
-    <section id="top" aria-labelledby="hero-title" className="hero-field">
-      <div className="hero-stage">
-        <div aria-hidden className="field-columns" />
-        <div aria-hidden className="field-circle field-circle-center" />
-        <div aria-hidden className="field-halfway" />
-        <div aria-hidden className="field-box field-box-right" />
-        <div aria-hidden className="field-box field-box-left" />
-        <div aria-hidden className="field-goal field-goal-right" />
-        <div aria-hidden className="field-goal field-goal-left" />
-        <span aria-hidden className="field-spot field-spot-right" />
-        <span aria-hidden className="field-spot field-spot-left" />
+    <section id="top" aria-labelledby="hero-title">
+      <div className="hero-field">
+        <div className="hero-stage">
+          <div aria-hidden className="field-columns" />
+          <div aria-hidden className="field-circle field-circle-center" />
+          <div aria-hidden className="field-halfway" />
+          <div aria-hidden className="field-box field-box-right" />
+          <div aria-hidden className="field-box field-box-left" />
+          <div aria-hidden className="field-goal field-goal-right" />
+          <div aria-hidden className="field-goal field-goal-left" />
+          <span aria-hidden className="field-spot field-spot-right" />
+          <span aria-hidden className="field-spot field-spot-left" />
 
-        <motion.div
-          aria-hidden
-          className="hero-ball-anchor"
-          animate={reduced ? undefined : PASS_LAYER}
-          transition={{
-            duration: 16,
-            ease: [0.22, 0.8, 0.28, 1],
-            times: PASS_TIMES,
-            repeat: Infinity,
-          }}
-        >
-          {reduced ? (
-            <div className="hero-ball">
-              <BallMark />
-            </div>
-          ) : (
-            <motion.div
-              className="hero-ball-pass"
-              animate={PASS}
-              transition={{
-                duration: 16,
-                ease: [0.22, 0.8, 0.28, 1],
-                times: PASS_TIMES,
-                repeat: Infinity,
-              }}
-            >
+          <motion.div
+            aria-hidden
+            className="hero-ball-anchor"
+            animate={reduced ? undefined : PASS_LAYER}
+            transition={{
+              duration: 16,
+              ease: [0.22, 0.8, 0.28, 1],
+              times: PASS_TIMES,
+              repeat: Infinity,
+            }}
+          >
+            {reduced ? (
+              <div className="hero-ball">
+                <BallMark />
+              </div>
+            ) : (
               <motion.div
-                className="hero-ball"
-                animate={{ x: pointer.x * 0.35, y: pointer.y * 0.35 }}
-                transition={{ type: "spring", stiffness: 80, damping: 18, mass: 0.6 }}
+                className="hero-ball-pass"
+                animate={PASS}
+                transition={{
+                  duration: 16,
+                  ease: [0.22, 0.8, 0.28, 1],
+                  times: PASS_TIMES,
+                  repeat: Infinity,
+                }}
               >
                 <motion.div
-                  className="hero-ball-spin"
-                  animate={SPIN}
-                  transition={{
-                    duration: 16,
-                    ease: [0.22, 0.8, 0.28, 1],
-                    times: PASS_TIMES,
-                    repeat: Infinity,
-                  }}
+                  className="hero-ball"
+                  animate={{ x: pointer.x * 0.35, y: pointer.y * 0.35 }}
+                  transition={{ type: "spring", stiffness: 80, damping: 18, mass: 0.6 }}
                 >
-                  <BallMark />
+                  <motion.div
+                    className="hero-ball-spin"
+                    animate={SPIN}
+                    transition={{
+                      duration: 16,
+                      ease: [0.22, 0.8, 0.28, 1],
+                      times: PASS_TIMES,
+                      repeat: Infinity,
+                    }}
+                  >
+                    <BallMark />
+                  </motion.div>
                 </motion.div>
               </motion.div>
-            </motion.div>
-          )}
-        </motion.div>
+            )}
+          </motion.div>
 
-        <div className="hero-crest-anchor">
-          <div className="hero-wordmark hero-crest">
-            <h1 id="hero-title" className="sr-only">كورة</h1>
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              className="hero-crest-ball"
-              src="/assets/brand/kora-old-ball.png"
-              alt=""
-              width={604}
-              height={312}
-            />
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              className="hero-crest-word"
-              src="/assets/brand/kora-old-word.png"
-              alt=""
-              width={1062}
-              height={367}
-            />
+          <div className="hero-crest-anchor">
+            <div className="hero-wordmark hero-crest">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                className="hero-crest-ball"
+                src="/assets/brand/kora-old-ball.png"
+                alt=""
+                width={604}
+                height={312}
+              />
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                className="hero-crest-word"
+                src="/assets/brand/kora-old-word.png"
+                alt="كورة"
+                width={1062}
+                height={367}
+              />
+            </div>
           </div>
-        </div>
 
-        <div className="hero-info">
-          <ul className="hero-info-facts" aria-label="معلومات الحدث">
-            <li>{EVENT.dates}</li>
-            <li>{EVENT.venueShort}</li>
-            <li>9 مسارات</li>
-          </ul>
-          <div className="hero-info-actions">
-            <Button href="/#tracks" variant="secondary" showArrow={false}>
-              اكتشف المسارات
-            </Button>
-            <Button href="/#participate" variant="primary" showArrow={false}>
-              شارك معنا
-            </Button>
+          <div className="hero-info">
+            <p className="hero-info-tagline">{HOME_COPY.hero.tagline}</p>
+            <div className="hero-info-actions">
+              <Button href="/#event" variant="secondary" showArrow={false}>
+                {HOME_COPY.hero.discover}
+              </Button>
+              <Button href="/#participate" variant="primary" showArrow={false}>
+                {HOME_COPY.hero.participate}
+              </Button>
+            </div>
           </div>
         </div>
       </div>
+
+      <HeroIntro />
     </section>
   );
 }

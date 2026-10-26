@@ -322,10 +322,10 @@ export const LEADERSHIP = {
 } as const;
 
 export const NAV_LINKS = [
-  { href: "/#about", label: "عن كورة" },
-  { href: "/teams", label: "الفريق" },
+  { href: "/#event", label: "الحدث" },
   { href: "/partners", label: "الشركاء" },
   { href: "/speakers", label: "المتحدثون" },
+  { href: "/teams", label: "الفريق" },
 ] as const;
 
 export interface TitledItem {
@@ -431,33 +431,36 @@ export interface Partner {
 /** Confirmed partners only. The "شركاؤنا" section stays hidden while empty. */
 export const PARTNERS: readonly Partner[] = [];
 
-/** Home-page "شارك في كورة" doors. The visitor path has no link: it shows the social icons. */
+/** Home-page participation doors. The visitor door has no page: it opens the social accounts. */
 export const PARTICIPATE_PATHS: readonly {
   number: string;
   title: string;
   description: string;
+  cta: string;
   href?: string;
-  cta?: string;
 }[] = [
   {
     number: "01",
-    title: "راعٍ أو شريك",
+    title: "الرعاة والشركاء",
     description:
-      "اربط علامتك بحدث يقدّم كرة القدم السعودية بوصفها صناعة، أمام جمهور جامعي واسع.",
+      "كن شريكًا في صناعة تجربة تجمع المعرفة بالشغف، وتفتح آفاقًا جديدة لصناعة كرة القدم.",
+    cta: "استكشف فرص الشراكة",
     href: "/partners",
-    cta: "اعرف أكثر عن الشراكة",
   },
   {
     number: "02",
-    title: "متحدث",
-    description: "شارك تجربتك على مسرح كورة، أو رشّح من يستحق أن يُسمع صوته.",
+    title: "المتحدثون والخبراء",
+    description:
+      "شارك خبرتك، وانقل تجربتك، وكن صوتًا يلهم الجيل القادم من المهتمين بصناعة كرة القدم.",
+    cta: "شاركنا خبرتك",
     href: "/speakers",
-    cta: "قدّم أو رشّح متحدثًا",
   },
   {
     number: "03",
-    title: "زائر ومهتم",
-    description: "تابع كورة لتعرف كل جديد عن الحدث ومساراته وموعد التسجيل.",
+    title: "الزوار",
+    description:
+      "الحكاية ما انتهت، والقادم يستحق الانتظار! تابع كـورة وكن أول من يعرف جديد الحدث وتفاصيله.",
+    cta: "تابعنا",
   },
 ];
 
@@ -512,3 +515,36 @@ export const SPEAKER_STEPS: readonly TitledItem[] = [
     description: "نتفق معك أو مع المرشَّح على الموضوع والموعد وشكل المشاركة.",
   },
 ];
+
+/** Home page copy, verbatim from the approved content brief (2026-10-26). */
+export const HOME_COPY = {
+  hero: {
+    heading: ["في الملعب تبدأ الحكاية،", "وخارجه عالم يستحق الرواية."],
+    description: [
+      "وراء كل مباراة عقول تبتكر، ومواهب تبدع، وتخصصات تتكامل لتصنع كرة القدم التي نعرفها اليوم.",
+      "كـورة منصة إعلامية ومعرفية تأخذك في رحلة لاكتشاف صناعة كرة القدم السعودية، من تاريخها وإنجازاتها إلى علومها وابتكاراتها وفرصها المستقبلية.",
+    ],
+    tagline: "من شغفٍ يجمعنا، إلى عالمٍ يلهمنا.",
+    discover: "اكتشف كـورة",
+    participate: "شارك معنا",
+  },
+  event: {
+    heading: ["من الشغف", "إلى التجربة."],
+    description: [
+      "في حدث كـورة، تتحول المعرفة إلى تجربة تعيش تفاصيلها، من خلال معارض تفاعلية وأنشطة متنوعة وحوارات تجمع أصحاب الخبرة والشغف.",
+      "تتنقل بين مسارات مختلفة، تكتشف فيها التقنيات والابتكارات، وتتعرّف على تجارب المتخصصين، وتشارك في أنشطة تجمع بين المعرفة والمتعة.",
+    ],
+    closing: "هنا ما تكتفي بمعرفة اللعبة، بل تعيش عالمها.",
+  },
+  tracks: {
+    heading: "تسعة مسارات، وعالم من الاكتشافات.",
+    description:
+      "من تاريخ كرة القدم السعودية إلى مستقبلها، ومن الإعلام والاقتصاد إلى التقنية والهندسة، تأخذك مسارات كـورة في رحلة بين المجالات التي تصنع اللعبة.",
+  },
+  participate: {
+    label: "شارك معنا",
+    heading: "لكل شغف دور، ولكل دور أثر.",
+    description:
+      "سواء كنت تمثل جهة تطمح للمشاركة، أو تمتلك خبرة تستحق أن تُروى، أو ترغب في اكتشاف عالم كرة القدم من زاوية مختلفة، في كـورة نفتح لك أبواب المشاركة والمتابعة.",
+  },
+} as const;

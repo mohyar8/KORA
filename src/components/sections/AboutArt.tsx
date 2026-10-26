@@ -3,7 +3,8 @@
 import { useEffect, useRef } from "react";
 import { gsap, ScrollTrigger } from "@/lib/gsap";
 
-export function AboutArt() {
+/** Rotating coral pentagon tied to the scroll of the section matched by `trigger`. */
+export function AboutArt({ trigger }: { trigger: string }) {
   const pent = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -24,7 +25,7 @@ export function AboutArt() {
             rotate: 28,
             ease: "none",
             scrollTrigger: {
-              trigger: "#about",
+              trigger,
               start: "top 90%",
               end: "bottom top",
               scrub: 1.15,
@@ -43,7 +44,7 @@ export function AboutArt() {
           rotate: 22,
           ease: "none",
           scrollTrigger: {
-            trigger: "#about",
+            trigger,
             start: "top 85%",
             end: "bottom top",
             scrub: 1.1,
@@ -54,7 +55,7 @@ export function AboutArt() {
 
     ScrollTrigger.refresh();
     return () => ctx.revert();
-  }, []);
+  }, [trigger]);
 
   return (
     <div aria-hidden className="about-art">
