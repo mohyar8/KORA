@@ -1523,3 +1523,9 @@ body:has(.hero-field) .topbar { animation: topbar-in .7s 4.1s cubic-bezier(.16,1
 .event-aside-marks i:nth-child(1) { background: var(--color-coral); }
 .event-aside-marks i:nth-child(2) { background: var(--color-fuchsia); }
 .event-aside-marks i:nth-child(3) { background: var(--color-green); }
+@media (max-width: 820px) {
+  /* Stacked under the copy: size to content (flex-basis would set its height). */
+  .event-aside { flex: none; align-self: stretch; padding: 18px 20px; }
+  .event-aside .event-closing { font-size: 18px; }
+  .event-aside-marks { display: none; }
+}

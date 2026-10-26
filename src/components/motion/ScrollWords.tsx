@@ -9,8 +9,9 @@ interface Part {
 }
 
 /**
- * A heading whose words light up one after another as it scrolls through the
- * viewport. Reduced motion shows the finished heading straight away.
+ * A heading whose words light up one after another as it scrolls into view;
+ * it is fully lit by the time its top reaches the middle of the screen.
+ * Reduced motion shows the finished heading straight away.
  */
 export function ScrollWords({
   parts,
@@ -25,7 +26,7 @@ export function ScrollWords({
 }) {
   const ref = useRef<HTMLHeadingElement>(null);
   const reduced = useReducedMotion();
-  const { scrollYProgress } = useScroll({ target: ref, offset: ["start 85%", "end 45%"] });
+  const { scrollYProgress } = useScroll({ target: ref, offset: ["start 95%", "start 55%"] });
 
   const words = parts.flatMap((part) =>
     part.text
