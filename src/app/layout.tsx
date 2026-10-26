@@ -36,6 +36,7 @@ export const metadata: Metadata = {
     description,
   },
   other: {
+    "event:dates": EVENT.dates,
     "event:venue": EVENT.venueShort,
   },
 };

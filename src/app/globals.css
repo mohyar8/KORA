@@ -87,10 +87,10 @@ body::before {
 }
 
 .kora-label {
-  font-size: 0.63rem;
+  /* Arabic labels: letter-spacing would break the joined letters apart. */
+  font-size: 13px;
   font-weight: 700;
-  letter-spacing: 0.22em;
-  text-transform: uppercase;
+  letter-spacing: 0;
 }
 
 .kora-outline {
@@ -435,7 +435,7 @@ body:has(.hero-field) .topbar { animation: topbar-in .7s 4.1s cubic-bezier(.16,1
 }
 .manifesto h2 {
   max-width: 18ch;
-  font-size: clamp(26px, 3.8vw, 52px);
+  font-size: clamp(30px, 4vw, 56px);
   font-weight: 800;
   line-height: 1.28;
   text-align: right;
@@ -534,8 +534,8 @@ body:has(.hero-field) .topbar { animation: topbar-in .7s 4.1s cubic-bezier(.16,1
 }
 .about-copy :is(h1, h2) {
   max-width: 22ch;
-  font-size: clamp(26px, 3.6vw, 46px);
-  font-weight: 700;
+  font-size: clamp(32px, 4.2vw, 58px);
+  font-weight: 800;
   line-height: 1.4;
 }
 .about-copy-body {
@@ -616,7 +616,7 @@ body:has(.hero-field) .topbar { animation: topbar-in .7s 4.1s cubic-bezier(.16,1
 .track-panel:nth-child(3n+1) .track-art { background: var(--color-coral); }
 .track-panel:nth-child(3n+2) .track-art { background: var(--color-fuchsia); }
 .track-panel:nth-child(3n) .track-art { background: var(--color-green); }
-.track-panel[data-open="true"] .track-art { opacity: .9; transform: translate(14px,-14px) rotate(8deg); }
+.track-panel[data-open="true"] .track-art { opacity: .38; transform: translate(-20px, 20px) rotate(8deg); }
 
 .site-footer {
   padding: 28px clamp(20px, 4vw, 72px) 24px;
@@ -767,7 +767,7 @@ body:has(.hero-field) .topbar { animation: topbar-in .7s 4.1s cubic-bezier(.16,1
 .depts-leaders-people strong {
   display: block;
   margin-top: 6px;
-  font-size: clamp(20px, 2.2vw, 30px);
+  font-size: clamp(18px, 1.9vw, 26px);
   font-weight: 800;
   line-height: 1.3;
 }
@@ -1178,18 +1178,19 @@ body:has(.hero-field) .topbar { animation: topbar-in .7s 4.1s cubic-bezier(.16,1
 
   .manifesto-stage {
     flex-direction: column;
-    align-items: flex-start;
-    padding: 64px 20px 0;
+    align-items: stretch;
+    gap: 28px;
+    padding: 56px 20px 64px;
   }
   .manifesto h2 {
     max-width: none;
-    font-size: clamp(22px, 6.8vw, 28px);
+    font-size: clamp(28px, 7.5vw, 34px);
     line-height: 1.35;
   }
   .manifesto-body {
     max-width: none;
     margin-top: 18px;
-    font-size: 13.5px;
+    font-size: 15px;
     line-height: 1.85;
   }
   .manifesto-socials-band {
@@ -1220,14 +1221,15 @@ body:has(.hero-field) .topbar { animation: topbar-in .7s 4.1s cubic-bezier(.16,1
       linear-gradient(90deg, rgb(236 239 245 / 22%) 1px, transparent 1px);
     background-size: 40px 40px;
   }
+  /* Phones: tuck the pentagon low and dim so it never sits under the heading. */
   .about-pent {
     inset-inline-end: auto;
-    left: -3.5rem;
-    top: 42%;
-    bottom: auto;
-    width: 15rem;
-    background: rgb(242 101 87 / 80%);
-    transform: translateY(-50%) rotate(16deg);
+    left: -6rem;
+    top: auto;
+    bottom: -5rem;
+    width: 13rem;
+    background: rgb(242 101 87 / 35%);
+    transform: rotate(16deg);
   }
   .about-copy {
     position: relative;
@@ -1238,7 +1240,7 @@ body:has(.hero-field) .topbar { animation: topbar-in .7s 4.1s cubic-bezier(.16,1
   }
   .about-copy :is(h1, h2) {
     max-width: none;
-    font-size: clamp(20px, 6vw, 24px);
+    font-size: clamp(26px, 7vw, 32px);
     line-height: 1.5;
   }
   .about-copy-body {
@@ -1249,7 +1251,7 @@ body:has(.hero-field) .topbar { animation: topbar-in .7s 4.1s cubic-bezier(.16,1
   }
   .about-copy p,
   .about-copy p[data-lead="true"] {
-    font-size: 13.5px;
+    font-size: 15px;
     line-height: 1.85;
     font-weight: 400;
   }
@@ -1260,7 +1262,7 @@ body:has(.hero-field) .topbar { animation: topbar-in .7s 4.1s cubic-bezier(.16,1
   .track-rail { flex-direction: column; min-height: 0; }
   .track-panel { min-height: 90px; flex: none; }
   .track-panel[data-open="true"] { min-height: 300px; }
-  .track-title { white-space: normal; }
+  .track-title { white-space: normal; text-align: right; }
   .site-footer-apps { gap: 14px; }
   .site-footer-app { width: 56px; height: 56px; }
 }
@@ -1344,7 +1346,8 @@ body:has(.hero-field) .topbar { animation: topbar-in .7s 4.1s cubic-bezier(.16,1
 .kora-marquee-track {
   display: flex;
   width: max-content;
-  animation: var(--animate-marquee);
+  /* Reversed: the band slides rightward so Arabic phrases enter reading-first. */
+  animation: var(--animate-marquee) reverse;
 }
 .kora-marquee:hover .kora-marquee-track { animation-play-state: paused; }
 .kora-marquee-item {
@@ -1491,13 +1494,32 @@ body:has(.hero-field) .topbar { animation: topbar-in .7s 4.1s cubic-bezier(.16,1
 /* Tracks intro beside the pentagon picker. */
 .tracks-intro { max-width: 38rem; }
 .tracks-intro h2 {
-  font-size: clamp(26px, 3.4vw, 46px);
+  font-size: clamp(28px, 3.6vw, 48px);
   font-weight: 800;
   line-height: 1.3;
 }
 .tracks-intro p {
   margin-top: 12px;
   color: rgb(236 239 245 / 72%);
-  font-size: clamp(14px, 1.15vw, 17px);
+  font-size: clamp(15px, 1.15vw, 17px);
   line-height: 1.9;
 }
+
+/* Event: the closing line as a side card (stacks under the copy on phones). */
+.event-aside {
+  position: relative;
+  flex: 0 1 24rem;
+  align-self: center;
+  padding: clamp(24px, 3vw, 36px);
+  border: 1px solid rgb(236 239 245 / 14%);
+  border-inline-start: 4px solid var(--color-coral);
+  background: rgb(14 20 53 / 72%);
+  backdrop-filter: blur(8px);
+}
+.event-aside .event-closing { margin-top: 0; align-items: flex-start; }
+.event-aside .event-closing span { margin-top: .5em; }
+.event-aside-marks { display: flex; gap: 8px; margin-top: 22px; }
+.event-aside-marks i { width: 14px; aspect-ratio: 1; clip-path: polygon(50% 0, 100% 38%, 82% 100%, 18% 100%, 0 38%); }
+.event-aside-marks i:nth-child(1) { background: var(--color-coral); }
+.event-aside-marks i:nth-child(2) { background: var(--color-fuchsia); }
+.event-aside-marks i:nth-child(3) { background: var(--color-green); }

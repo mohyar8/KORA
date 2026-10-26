@@ -36,14 +36,19 @@ export function Event() {
               <p className="manifesto-body">{paragraph}</p>
             </Reveal>
           ))}
-
-          <Reveal delay={0.5}>
-            <p className="event-closing">
-              <span aria-hidden className="kora-pentagon" />
-              {closing}
-            </p>
-          </Reveal>
         </div>
+
+        <Reveal delay={0.45} className="event-aside">
+          <p className="event-closing">
+            <span aria-hidden className="kora-pentagon" />
+            {closing}
+          </p>
+          <div aria-hidden className="event-aside-marks">
+            <i />
+            <i />
+            <i />
+          </div>
+        </Reveal>
       </div>
     </section>
   );

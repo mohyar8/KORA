@@ -52,7 +52,7 @@ export function PageHero({
             {ctaLabel}
           </Button>
           <p className="text-sm font-medium text-paper/55">
-            {EVENT.venueShort}
+            {EVENT.dates} · {EVENT.venueShort}
           </p>
         </Reveal>
       </Container>

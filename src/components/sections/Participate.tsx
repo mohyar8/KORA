@@ -28,7 +28,7 @@ export function Participate() {
           >
             {HOME_COPY.participate.heading}
           </h2>
-          <p className="mt-4 max-w-2xl text-lg leading-relaxed text-paper/70">
+          <p className="mt-4 max-w-2xl text-base leading-relaxed text-paper/70 md:text-lg">
             {HOME_COPY.participate.description}
           </p>
         </Reveal>
@@ -43,7 +43,7 @@ export function Participate() {
             >
               <div className="flex h-full flex-col">
                 <div className="participate-banner">
-                  <span className="text-5xl font-extrabold text-white/90">{path.number}</span>
+                  <span className="text-3xl font-extrabold text-white/90 md:text-4xl">{path.number}</span>
                   <span aria-hidden className="kora-pentagon kora-card-mark participate-mark" />
                 </div>
                 <div className="flex flex-1 flex-col gap-3 p-7">

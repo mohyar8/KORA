@@ -8,8 +8,9 @@ export const BRAND = {
   concept: "BEYOND THE VISIBLE GAME",
 } as const;
 
-/** No event date is published until the new one is officially confirmed. */
+/** Confirmed by the owner on 2026-10-26. */
 export const EVENT = {
+  dates: "20–22 يناير 2027",
   venueShort: "جامعة الملك فهد للبترول والمعادن، الظهران",
   venueLong: "الظهران، جامعة الملك فهد للبترول والمعادن، ساحة مبنى 57",
 } as const;
