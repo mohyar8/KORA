@@ -568,10 +568,10 @@ body:has(.hero-field) .topbar { animation: topbar-in .7s 4.1s cubic-bezier(.16,1
   position: absolute;
   inset: 0 auto 0 0;
   z-index: 0;
-  width: min(34%, 560px);
+  width: min(36%, 580px);
   pointer-events: none;
-  -webkit-mask-image: linear-gradient(90deg, #000 60%, transparent);
-  mask-image: linear-gradient(90deg, #000 60%, transparent);
+  -webkit-mask-image: linear-gradient(90deg, #000 82%, transparent);
+  mask-image: linear-gradient(90deg, #000 82%, transparent);
 }
 .tactics-board { width: 100%; height: 100%; }
 .tactics-goal { fill: none; stroke: rgb(236 239 245 / 22%); stroke-width: 1.5; }
@@ -594,7 +594,7 @@ body:has(.hero-field) .topbar { animation: topbar-in .7s 4.1s cubic-bezier(.16,1
   animation: tactics-flow 3s linear infinite;
 }
 .tactics-shot { stroke: rgb(242 101 87 / 55%); }
-.tactics-ball { fill: var(--color-coral); opacity: 0; transition: opacity 1s ease 2.4s; }
+.tactics-ball { fill: var(--color-coral); opacity: 0; transition: opacity .6s ease 2.7s; }
 .tactics-art[data-drawn="true"] :is(.tactics-player, .tactics-run, .tactics-ball) { opacity: 1; }
 @keyframes tactics-flow { to { stroke-dashoffset: -18; } }
 @media (prefers-reduced-motion: reduce) {

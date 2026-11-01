@@ -3,32 +3,46 @@
 import { useReducedMotion } from "motion/react";
 import { useEffect, useRef, useState } from "react";
 
+/** A 4-3-3 attacking towards the goal on the left. */
 const PLAYERS = [
-  [560, 90],
-  [560, 210],
-  [560, 330],
-  [400, 120],
-  [400, 300],
-  [250, 210],
+  [618, 210],
+  [540, 70],
+  [540, 160],
+  [540, 260],
+  [540, 350],
+  [420, 110],
+  [430, 210],
+  [420, 310],
+  [270, 80],
+  [240, 210],
+  [270, 340],
 ] as const;
 
 const OPPONENTS = [
-  [470, 160],
-  [470, 268],
-  [320, 168],
-  [320, 256],
+  [480, 120],
+  [485, 300],
+  [350, 165],
+  [345, 265],
+  [190, 140],
+  [180, 275],
 ] as const;
 
-/** Passing runs, drawn in order; the last one is the shot. */
-const RUNS = [
-  "M546 96 Q480 88 414 114",
-  "M546 324 Q480 332 414 306",
-  "M390 130 Q322 160 262 200",
-  "M390 290 Q322 262 262 220",
-  "M236 210 Q160 200 92 210",
-];
+/** The move, pass by pass: keeper → centre-back → midfield → wing → striker → goal. */
+const STOPS = [
+  [618, 210],
+  [540, 260],
+  [430, 210],
+  [420, 110],
+  [270, 80],
+  [240, 210],
+  [92, 210],
+] as const;
 
-const BALL_PATH = "M546 210 C470 212 340 206 262 210 Q160 200 92 210";
+const RUNS = STOPS.slice(1).map(([x, y], index) => `M${STOPS[index][0]} ${STOPS[index][1]}L${x} ${y}`);
+const BALL_PATH = `M${STOPS.map(([x, y]) => `${x} ${y}`).join("L")}`;
+/** Where the ball is (share of the path) and when: it pauses at each player's feet. */
+const BALL_POINTS = "0;0;0.124;0.124;0.285;0.285;0.42;0.42;0.624;0.624;0.802;0.802;1;1";
+const BALL_TIMES = "0;0.05;0.122;0.172;0.265;0.315;0.393;0.443;0.562;0.612;0.715;0.765;0.88;1";
 
 /**
  * A coach's tactics board behind the hero's story: players, dashed runs that
@@ -71,7 +85,7 @@ export function TacticsArt() {
             key={d}
             d={d}
             className={index === RUNS.length - 1 ? "tactics-run tactics-shot" : "tactics-run"}
-            style={{ transitionDelay: `${0.4 + index * 0.45}s` }}
+            style={{ transitionDelay: `${0.4 + index * 0.35}s` }}
           />
         ))}
         {PLAYERS.map(([x, y], index) => (
@@ -79,20 +93,20 @@ export function TacticsArt() {
             key={index}
             cx={x}
             cy={y}
-            r="9"
+            r="8"
             className="tactics-player"
-            style={{ transitionDelay: `${index * 0.08}s` }}
+            style={{ transitionDelay: `${index * 0.05}s` }}
           />
         ))}
-        <circle r="6" cx={still ? 92 : 0} cy={still ? 210 : 0} className="tactics-ball">
+        <circle r="6" cx={still ? 240 : 0} cy={still ? 210 : 0} className="tactics-ball">
           {!still && drawn ? (
             <animateMotion
               path={BALL_PATH}
-              dur="10s"
+              dur="14s"
               begin="2.6s"
               repeatCount="indefinite"
-              keyPoints="0;0;1;1"
-              keyTimes="0;0.15;0.75;1"
+              keyPoints={BALL_POINTS}
+              keyTimes={BALL_TIMES}
               calcMode="linear"
             />
           ) : null}
