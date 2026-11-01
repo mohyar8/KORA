@@ -2,7 +2,7 @@ import { Container } from "@/components/ui/Container";
 import { Mark } from "@/components/ui/Mark";
 import { Reveal } from "@/components/motion/Reveal";
 import { ScrollWords } from "@/components/motion/ScrollWords";
-import { PitchArt } from "@/components/sections/PitchArt";
+import { TacticsArt } from "@/components/sections/TacticsArt";
 import { HOME_COPY } from "@/lib/content";
 
 const { heading, description } = HOME_COPY.hero;
@@ -11,7 +11,7 @@ const { heading, description } = HOME_COPY.hero;
 export function HeroIntro() {
   return (
     <div id="hero-intro" className="about-section relative overflow-hidden border-t border-paper/10 text-paper">
-      <PitchArt />
+      <TacticsArt />
       <Container className="about-shell px-0 md:px-10">
         <div className="about-copy">
           <ScrollWords

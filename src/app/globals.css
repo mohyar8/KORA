@@ -558,67 +558,48 @@ body:has(.hero-field) .topbar { animation: topbar-in .7s 4.1s cubic-bezier(.16,1
   font-size: 16px;
   font-weight: 500;
 }
-/* Hero story: a quiet night pitch (deliberately unlike the hexagon sections). */
+/* Hero story: a coach's tactics board (deliberately unlike the hexagon sections). */
 .about-section {
   background:
     radial-gradient(120% 90% at 18% -10%, rgb(78 166 73 / 10%), transparent 55%),
     linear-gradient(180deg, #24305f 0%, var(--color-ink) 100%);
 }
-.pitch-art {
+.tactics-art {
   position: absolute;
-  inset: 0;
+  inset: 0 auto 0 0;
   z-index: 0;
+  width: min(34%, 560px);
   pointer-events: none;
-  /* Fade the markings out under the copy, which sits on the right. */
-  -webkit-mask-image: linear-gradient(270deg, rgb(0 0 0 / 22%) 0%, rgb(0 0 0 / 50%) 40%, #000 75%);
-  mask-image: linear-gradient(270deg, rgb(0 0 0 / 22%) 0%, rgb(0 0 0 / 50%) 40%, #000 75%);
+  -webkit-mask-image: linear-gradient(90deg, #000 60%, transparent);
+  mask-image: linear-gradient(90deg, #000 60%, transparent);
 }
-.pitch-glow {
-  position: absolute;
-  inset: -20% 0 auto -10%;
-  height: 90%;
-  background: radial-gradient(closest-side, rgb(236 239 245 / 9%), transparent);
-  animation: pitch-floodlight 9s ease-in-out infinite alternate;
-}
-.pitch-lines { position: absolute; inset: 0; width: 100%; height: 100%; }
-/* Wide screens: slide the centre circle left, clear of the right-aligned heading. */
-@media (min-width: 821px) {
-  .pitch-lines { inset: 0 auto 0 -55%; width: 150%; }
-}
-.pitch-lines g > * {
-  stroke: rgb(236 239 245 / 24%);
+.tactics-board { width: 100%; height: 100%; }
+.tactics-goal { fill: none; stroke: rgb(236 239 245 / 22%); stroke-width: 1.5; }
+.tactics-opponent { stroke: rgb(236 239 245 / 16%); stroke-width: 1.5; stroke-linecap: round; }
+.tactics-player {
+  fill: var(--color-ink);
+  stroke: rgb(236 239 245 / 45%);
   stroke-width: 1.5;
-  vector-effect: non-scaling-stroke;
-  stroke-dasharray: 1;
-  stroke-dashoffset: 1;
-  transition: stroke-dashoffset 2.6s cubic-bezier(.65, 0, .35, 1);
-}
-.pitch-lines g > :nth-child(2) { transition-delay: .5s; }
-.pitch-lines g > :nth-child(3) { transition-delay: .9s; }
-.pitch-lines g > :nth-child(n + 4) { transition-delay: 1.3s; }
-.pitch-art[data-drawn="true"] .pitch-lines g > * { stroke-dashoffset: 0; }
-.pitch-spot { fill: rgb(236 239 245 / 30%); }
-.pitch-ball { fill: var(--color-coral); opacity: 0; transition: opacity 1s ease 2.2s; }
-.pitch-halo {
-  fill: rgb(242 101 87 / 18%);
   opacity: 0;
-  transform-box: fill-box;
-  transform-origin: center;
-  transition: opacity 1s ease 2.2s;
-  animation: pitch-breathe 4.5s ease-in-out infinite;
+  transition: opacity .8s ease;
 }
-.pitch-art[data-drawn="true"] :is(.pitch-ball, .pitch-halo) { opacity: 1; }
-@keyframes pitch-floodlight {
-  from { opacity: .55; translate: 0 0; }
-  to { opacity: 1; translate: 6% 4%; }
+.tactics-run {
+  fill: none;
+  stroke: rgb(236 239 245 / 30%);
+  stroke-width: 1.5;
+  stroke-dasharray: 2 7;
+  stroke-linecap: round;
+  opacity: 0;
+  transition: opacity 1.2s ease;
+  animation: tactics-flow 3s linear infinite;
 }
-@keyframes pitch-breathe {
-  0%, 100% { scale: .7; }
-  50% { scale: 1.25; }
-}
+.tactics-shot { stroke: rgb(242 101 87 / 55%); }
+.tactics-ball { fill: var(--color-coral); opacity: 0; transition: opacity 1s ease 2.4s; }
+.tactics-art[data-drawn="true"] :is(.tactics-player, .tactics-run, .tactics-ball) { opacity: 1; }
+@keyframes tactics-flow { to { stroke-dashoffset: -18; } }
 @media (prefers-reduced-motion: reduce) {
-  .pitch-glow, .pitch-halo { animation: none; }
-  .pitch-lines g > *, .pitch-ball, .pitch-halo { transition: none; }
+  .tactics-run { animation: none; }
+  .tactics-player, .tactics-run, .tactics-ball { transition: none; }
 }
 
 .section-mast { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: end; gap: 20px; padding: clamp(34px, 5vw, 72px) clamp(16px, 3vw, 56px) clamp(22px, 3vw, 38px); }
@@ -685,6 +666,23 @@ body:has(.hero-field) .topbar { animation: topbar-in .7s 4.1s cubic-bezier(.16,1
 .site-footer-app[data-accent="fuchsia"]:hover { color: var(--color-paper); background: var(--color-fuchsia); }
 .site-footer-app[data-accent="green"]:hover { color: var(--color-paper); background: var(--color-green); }
 .site-footer-app:hover { transform: translateY(-3px); }
+.site-footer-mail { position: relative; display: inline-flex; }
+.site-footer-mail-note {
+  position: absolute;
+  bottom: calc(100% + 10px);
+  inset-inline-start: 0;
+  translate: 0 4px;
+  padding: 6px 12px;
+  border-radius: 6px;
+  background: var(--color-paper);
+  color: var(--color-ink);
+  font-size: 13px;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .2s ease, translate .2s ease;
+}
+.site-footer-mail-note[data-show="true"] { opacity: 1; translate: 0 0; }
 
 .depts-page {
   position: relative;
@@ -1242,13 +1240,15 @@ body:has(.hero-field) .topbar { animation: topbar-in .7s 4.1s cubic-bezier(.16,1
   }
 
   .about-shell { display: block; }
-  /* Phones: the pitch stays faint behind the full-width copy. */
-  .pitch-art :is(.pitch-ball, .pitch-halo) { display: none; }
-  .pitch-art {
-    opacity: .5;
-    -webkit-mask-image: linear-gradient(180deg, rgb(0 0 0 / 35%), #000 70%);
-    mask-image: linear-gradient(180deg, rgb(0 0 0 / 35%), #000 70%);
+  /* Phones: the board gets its own strip under the copy instead of behind it. */
+  .tactics-art {
+    inset: auto 0 12px;
+    width: 100%;
+    height: 190px;
+    -webkit-mask-image: linear-gradient(90deg, #000 70%, transparent);
+    mask-image: linear-gradient(90deg, #000 70%, transparent);
   }
+  .about-section .about-copy { padding-bottom: 210px; }
   .about-copy {
     position: relative;
     z-index: 1;
