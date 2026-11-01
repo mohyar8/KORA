@@ -1,7 +1,7 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useState } from "react";
-import { APPLY_URL } from "@/lib/constants";
 import { DEPARTMENTS, LEADERSHIP, type TeamAudience } from "@/lib/content";
 
 const AUDIENCE_LABEL: Record<TeamAudience, string> = {
@@ -16,6 +16,9 @@ export function Departments() {
   useEffect(() => {
     const hash = window.location.hash.replace("#", "");
     if (hash && DEPARTMENTS.some((item) => item.slug === hash)) {
+      // The URL hash is only readable after mount (the page is prerendered),
+      // so syncing it into state here is intentional.
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setActive(hash);
     }
   }, []);
@@ -35,8 +38,8 @@ export function Departments() {
       <header className="depts-mast">
         <h1 id="depts-heading">الإدارات والفرق</h1>
         <p className="depts-lead">
-          اختر إدارة، ثم اقرأ فرقها. كل فريق يمسك جزءًا واضحًا من كورة: المكان،
-          التسويق، التخطيط، التشغيل، العلاقات والموارد، أو التقنية.
+          تعرّف على الفريق الطلابي الذي يصنع كورة: إدارات وفرق تمسك المكان
+          والتسويق والتخطيط والتشغيل والعلاقات والتقنية.
         </p>
       </header>
 
@@ -120,7 +123,7 @@ export function Departments() {
                   <i className="kora-pentagon" />
                 </div>
                 <h3>{team.title}</h3>
-                {team.leader ? (
+                {team.leader && team.leader.name.trim() !== "" ? (
                   <p className="depts-person">
                     <span>{team.leader.role}</span>
                     <strong>{team.leader.name}</strong>
@@ -139,10 +142,8 @@ export function Departments() {
       </div>
 
       <div className="depts-cta">
-        <p>لقِيت الفريق الأقرب لك؟</p>
-        <a href={APPLY_URL} target="_blank" rel="noreferrer">
-          انضم للفريق
-        </a>
+        <p>تريد أن تكون علامتك جزءًا من كورة؟</p>
+        <Link href="/partners">كن شريكًا</Link>
       </div>
     </section>
   );

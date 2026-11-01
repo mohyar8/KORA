@@ -1,21 +1,32 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
-import { APPLY_URL } from "@/lib/constants";
+import { useEffect, useRef } from "react";
 import { NAV_LINKS } from "@/lib/content";
 
 export function Navbar() {
-  const [progress, setProgress] = useState(0);
+  const bar = useRef<HTMLSpanElement>(null);
 
   useEffect(() => {
+    // Written straight to the DOM inside a frame so scrolling never
+    // re-renders the navbar.
+    let frame = 0;
     const update = () => {
+      frame = 0;
       const max = document.documentElement.scrollHeight - window.innerHeight;
-      setProgress(max > 0 ? (window.scrollY / max) * 100 : 0);
+      if (bar.current) {
+        bar.current.style.width = `${max > 0 ? (window.scrollY / max) * 100 : 0}%`;
+      }
+    };
+    const schedule = () => {
+      if (!frame) frame = requestAnimationFrame(update);
     };
     update();
-    window.addEventListener("scroll", update, { passive: true });
-    return () => window.removeEventListener("scroll", update);
+    window.addEventListener("scroll", schedule, { passive: true });
+    return () => {
+      window.removeEventListener("scroll", schedule);
+      cancelAnimationFrame(frame);
+    };
   }, []);
 
   return (
@@ -31,9 +42,9 @@ export function Navbar() {
             </li>
           ))}
         </ul>
-        <a className="topbar-apply" href={APPLY_URL} target="_blank" rel="noreferrer">انضم للفريق</a>
+        <Link className="topbar-apply" href="/#participate">شارك معنا</Link>
       </nav>
-      <div className="scroll-progress"><span style={{ width: `${progress}%` }} /></div>
+      <div className="scroll-progress"><span ref={bar} style={{ width: "0%" }} /></div>
     </header>
   );
 }

@@ -1,7 +1,7 @@
 "use client";
 
 import { motion, useReducedMotion, type Variants } from "motion/react";
-import type { ReactNode } from "react";
+import type { CSSProperties, ReactNode } from "react";
 
 interface StaggerProps {
   children: ReactNode;
@@ -63,15 +63,18 @@ export function StaggerItem({
   children,
   className,
   as = "div",
+  style,
 }: {
   children: ReactNode;
   className?: string;
   as?: "div" | "li";
+  /** Plain CSS (e.g. custom properties such as --accent). */
+  style?: CSSProperties;
 }) {
   const reduced = useReducedMotion();
   const MotionTag = motion[as];
   return (
-    <MotionTag className={className} variants={reduced ? itemReduced : item}>
+    <MotionTag className={className} style={style} variants={reduced ? itemReduced : item}>
       {children}
     </MotionTag>
   );

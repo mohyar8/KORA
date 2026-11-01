@@ -1,21 +1,18 @@
 import { Hero } from "@/components/sections/Hero";
-import { Manifesto } from "@/components/sections/Manifesto";
-import { EventFacts } from "@/components/sections/EventFacts";
-import { About } from "@/components/sections/About";
+import { Marquee } from "@/components/ui/Marquee";
+import { Event } from "@/components/sections/Event";
 import { Tracks } from "@/components/sections/Tracks";
-import { WhyJoin } from "@/components/sections/WhyJoin";
-import { FinalCta } from "@/components/sections/FinalCta";
+import { Participate } from "@/components/sections/Participate";
 
+/** Home: Hero → Event → Tracks → Participate (content brief, 2026-10-26). */
 export default function Home() {
   return (
     <>
       <Hero />
-      <Manifesto />
-      <About />
+      <Marquee />
+      <Event />
       <Tracks />
-      <EventFacts />
-      <WhyJoin />
-      <FinalCta />
+      <Participate />
     </>
   );
 }

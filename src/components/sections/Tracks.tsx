@@ -1,7 +1,7 @@
 "use client";
 
 import { useId, useState } from "react";
-import { TRACKS } from "@/lib/content";
+import { HOME_COPY, TRACKS } from "@/lib/content";
 
 const SHORT_TRACK_TITLES = [
   "المتحف",
@@ -22,6 +22,10 @@ export function Tracks() {
   return (
     <section id="tracks" aria-labelledby="tracks-heading" className="tracks-section">
       <header className="section-mast">
+        <div className="tracks-intro">
+          <h2 id="tracks-heading">{HOME_COPY.tracks.heading}</h2>
+          <p>{HOME_COPY.tracks.description}</p>
+        </div>
         <div className="pent-nav" aria-label="اختيار مسار">
           {TRACKS.map((track, index) => (
             <button
@@ -37,7 +41,6 @@ export function Tracks() {
           ))}
         </div>
       </header>
-      <h2 id="tracks-heading" className="sr-only">مسارات الحدث وأركانه</h2>
 
       <div className="track-rail">
         {TRACKS.map((track, index) => {
