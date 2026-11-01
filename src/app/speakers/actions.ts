@@ -21,6 +21,8 @@ export async function submitSpeakerRequest(
   return processSubmission(formData, speakerForm, {
     ...createSpeakerDbDeps(process.env.DATABASE_URL),
     ...createSpeakerEmailDeps({
+      gmailUser: process.env.GMAIL_USER,
+      gmailAppPassword: process.env.GMAIL_APP_PASSWORD,
       apiKey: process.env.RESEND_API_KEY,
       from: process.env.SPONSOR_FROM_EMAIL,
       // The programme team's inboxes, falling back to the partners' list.

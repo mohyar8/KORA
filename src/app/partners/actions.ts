@@ -20,6 +20,8 @@ export async function submitSponsorRequest(
   return processSponsorRequest(formData, {
     ...createDbDeps(process.env.DATABASE_URL),
     ...createEmailDeps({
+      gmailUser: process.env.GMAIL_USER,
+      gmailAppPassword: process.env.GMAIL_APP_PASSWORD,
       apiKey: process.env.RESEND_API_KEY,
       from: process.env.SPONSOR_FROM_EMAIL,
       // Comma-separated list; defaults to the official inbox. While sending from
