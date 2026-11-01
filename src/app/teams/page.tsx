@@ -4,6 +4,7 @@ import { BRAND } from "@/lib/constants";
 
 export const metadata: Metadata = {
   title: `الإدارات والفرق | ${BRAND.nameAr}`,
+  alternates: { canonical: "/teams" },
   description:
     "تعرّف على إدارات وفرق كورة: التصميم، التسويق، إدارة المشاريع، العمليات، العلاقات، الشراكات والمالية، والتقنية.",
 };

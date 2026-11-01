@@ -1,7 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Analytics } from "@vercel/analytics/next";
 import { brandFont } from "@/lib/fonts";
-import { BRAND, EVENT, SITE_URL } from "@/lib/constants";
+import { BRAND, EVENT, SITE_URL, SOCIAL_LINKS } from "@/lib/constants";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
 import "./globals.css";
@@ -12,6 +12,7 @@ const description =
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
+  alternates: { canonical: "/" },
   title,
   description,
   keywords: [
@@ -41,6 +42,16 @@ export const metadata: Metadata = {
   },
 };
 
+/** Tells Google which logo and site name belong to KORA. */
+const organizationJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "Organization",
+  name: `${BRAND.name} | ${BRAND.nameAr}`,
+  url: SITE_URL,
+  logo: `${SITE_URL}/assets/brand/kora-logo-card.png`,
+  sameAs: Object.values(SOCIAL_LINKS),
+};
+
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
@@ -60,6 +71,10 @@ export default function RootLayout({
         <main id="main-content">{children}</main>
         <Footer />
         <Analytics />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationJsonLd) }}
+        />
       </body>
     </html>
   );

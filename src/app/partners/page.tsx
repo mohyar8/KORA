@@ -12,6 +12,7 @@ import { PARTNERSHIP_STEPS } from "@/lib/content";
 
 export const metadata: Metadata = {
   title: `الشراكات والرعاية | ${BRAND.nameAr}`,
+  alternates: { canonical: "/partners" },
   description:
     "كن شريكًا في كورة: حدث وطني جامعي في جامعة الملك فهد للبترول والمعادن يقدّم كرة القدم السعودية بوصفها صناعة. قدّم طلب شراكة وسيتواصل معك فريقنا.",
 };

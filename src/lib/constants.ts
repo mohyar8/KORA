@@ -1,4 +1,5 @@
-export const SITE_URL = "https://korakfupm.com";
+/** Canonical address: the bare domain and the old kora-apply.vercel.app are not it. */
+export const SITE_URL = "https://www.korakfupm.com";
 
 export const BRAND = {
   name: "KORA",

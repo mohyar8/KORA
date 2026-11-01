@@ -11,6 +11,7 @@ import { SPEAKER_STEPS } from "@/lib/content";
 
 export const metadata: Metadata = {
   title: `المتحدثون | ${BRAND.nameAr}`,
+  alternates: { canonical: "/speakers" },
   description:
     "شارك متحدثًا في كورة أو رشّح من تعرفه: حدث وطني جامعي في جامعة الملك فهد للبترول والمعادن يقدّم كرة القدم السعودية بوصفها صناعة.",
 };
