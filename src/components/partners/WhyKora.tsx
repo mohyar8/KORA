@@ -18,7 +18,7 @@ export function WhyKora() {
         <Reveal>
           <h2
             id="why-kora-heading"
-            className="text-balance text-3xl font-extrabold leading-[1.2] sm:text-4xl md:text-5xl"
+            className="text-balance text-3xl font-extrabold leading-[1.5] sm:text-4xl md:text-5xl"
           >
             لماذا كورة؟
           </h2>

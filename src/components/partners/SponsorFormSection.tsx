@@ -11,7 +11,7 @@ export function SponsorFormSection() {
       <Container className="max-w-4xl">
         <h2
           id="request-heading"
-          className="text-balance text-3xl font-bold leading-[1.2] sm:text-4xl md:text-5xl"
+          className="text-balance text-3xl font-bold leading-[1.5] sm:text-4xl md:text-5xl"
         >
           قدّم طلب شراكة
         </h2>

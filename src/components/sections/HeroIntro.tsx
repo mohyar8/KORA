@@ -2,7 +2,7 @@ import { Container } from "@/components/ui/Container";
 import { Mark } from "@/components/ui/Mark";
 import { Reveal } from "@/components/motion/Reveal";
 import { ScrollWords } from "@/components/motion/ScrollWords";
-import { AboutArt } from "@/components/sections/AboutArt";
+import { PitchArt } from "@/components/sections/PitchArt";
 import { HOME_COPY } from "@/lib/content";
 
 const { heading, description } = HOME_COPY.hero;
@@ -10,8 +10,8 @@ const { heading, description } = HOME_COPY.hero;
 /** The hero's story: its heading lights up word by word under the crest. */
 export function HeroIntro() {
   return (
-    <div id="hero-intro" className="about-section relative overflow-hidden border-t border-paper/15 bg-navy text-paper">
-      <AboutArt trigger="#hero-intro" />
+    <div id="hero-intro" className="about-section relative overflow-hidden border-t border-paper/10 text-paper">
+      <PitchArt />
       <Container className="about-shell px-0 md:px-10">
         <div className="about-copy">
           <ScrollWords

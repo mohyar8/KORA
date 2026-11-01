@@ -37,7 +37,7 @@ export function PageHero({
           <p className="kora-label text-coral">{label}</p>
           <h1
             id={id}
-            className="mt-4 max-w-3xl text-balance text-4xl font-extrabold leading-[1.2] sm:text-5xl md:text-6xl"
+            className="mt-4 max-w-3xl text-balance text-4xl font-extrabold leading-[1.5] sm:text-5xl md:text-6xl"
           >
             {title}
           </h1>

@@ -10,7 +10,7 @@ export function SpeakerFormats() {
       <Container>
         <h2
           id="speaker-formats-heading"
-          className="text-balance text-3xl font-bold leading-[1.2] sm:text-4xl md:text-5xl"
+          className="text-balance text-3xl font-bold leading-[1.5] sm:text-4xl md:text-5xl"
         >
           أشكال المشاركة
         </h2>

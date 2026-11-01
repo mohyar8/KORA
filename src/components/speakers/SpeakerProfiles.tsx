@@ -16,7 +16,7 @@ export function SpeakerProfiles() {
       <Container>
         <h2
           id="speaker-profiles-heading"
-          className="text-balance text-3xl font-extrabold leading-[1.2] sm:text-4xl md:text-5xl"
+          className="text-balance text-3xl font-extrabold leading-[1.5] sm:text-4xl md:text-5xl"
         >
           من نبحث عنه؟
         </h2>

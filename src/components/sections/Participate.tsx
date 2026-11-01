@@ -24,7 +24,7 @@ export function Participate() {
           <p className="kora-label text-coral">{HOME_COPY.participate.label}</p>
           <h2
             id="participate-heading"
-            className="mt-3 max-w-2xl text-balance text-3xl font-extrabold leading-[1.2] sm:text-4xl md:text-5xl"
+            className="mt-3 max-w-2xl text-balance text-3xl font-extrabold leading-[1.5] sm:text-4xl md:text-5xl"
           >
             {HOME_COPY.participate.heading}
           </h2>

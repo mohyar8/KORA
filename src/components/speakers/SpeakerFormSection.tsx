@@ -11,7 +11,7 @@ export function SpeakerFormSection() {
       <Container className="max-w-4xl">
         <h2
           id="speaker-request-heading"
-          className="text-balance text-3xl font-bold leading-[1.2] sm:text-4xl md:text-5xl"
+          className="text-balance text-3xl font-bold leading-[1.5] sm:text-4xl md:text-5xl"
         >
           قدّم أو رشّح متحدثًا
         </h2>
